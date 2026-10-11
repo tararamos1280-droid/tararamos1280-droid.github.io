@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Movie Theater Shift Challenge</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --muted: #5c6b7a;
+    --paper: #f4f1ea;
+    --card: #fffdf8;
+    --red: #c23b3b;
+    --gold: #e2a325;
+    --green: #2f7d4a;
+    --blue: #245c8a;
+    --shadow: 0 10px 30px rgba(28, 36, 48, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at top left, #ffe7b8 0, transparent 28%),
+      radial-gradient(circle at bottom right, #d7ebf7 0, transparent 32%),
+      var(--paper);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 48px; }
+  header.top {
+    display: flex; justify-content: space-between; gap: 12px; align-items: center;
+    margin-bottom: 16px;
+  }
+  .brand { font-weight: 800; letter-spacing: 0.04em; color: var(--blue); }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    background: var(--card); border-radius: 999px; padding: 6px 12px;
+    box-shadow: var(--shadow); font-size: 14px;
+  }
+  .screen {
+    background: var(--card); border-radius: 22px; padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  h1 { margin: 0 0 8px; font-size: 34px; line-height: 1.1; }
+  h2 { margin: 0 0 8px; font-size: 26px; }
+  p.lead { color: var(--muted); font-size: 18px; line-height: 1.45; }
+  .marquee {
+    display: flex; gap: 8px; margin: 16px 0 8px; flex-wrap: wrap;
+  }
+  .ticket {
+    background: #1c2430; color: #fff; border-radius: 8px; padding: 8px 10px;
+    font-size: 13px; letter-spacing: 0.06em;
+  }
+  button, .choice {
+    font: inherit; cursor: pointer; border: 0;
+  }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .btn {
+    background: var(--blue); color: white; border-radius: 14px;
+    padding: 12px 16px; font-weight: 700;
+  }
+  .btn.alt { background: #efe8da; color: var(--ink); }
+  .btn.gold { background: var(--gold); color: #2b2110; }
+  .scene {
+    background: linear-gradient(135deg, #245c8a, #1c2430);
+    color: white; border-radius: 16px; padding: 14px 16px; margin-bottom: 14px;
+  }
+  .scene small { opacity: 0.8; letter-spacing: 0.08em; text-transform: uppercase; }
+  .choices { display: grid; gap: 10px; margin-top: 14px; }
+  .choice {
+    text-align: left; background: #fff; border: 2px solid #efe6d6;
+    border-radius: 14px; padding: 14px; color: var(--ink);
+  }
+  .choice:hover { border-color: var(--blue); }
+  .feedback {
+    margin-top: 14px; border-radius: 14px; padding: 14px; background: #f7f3ea;
+  }
+  .feedback.good { background: #e7f6ec; }
+  .feedback.mid { background: #fff4d8; }
+  .feedback.low { background: #fde8e8; }
+  .bar {
+    height: 10px; background: #efe6d6; border-radius: 999px; overflow: hidden; margin-top: 8px;
+  }
+  .bar span { display: block; height: 100%; background: var(--green); width: 0; }
+  .sort-list { display: grid; gap: 8px; margin-top: 12px; }
+  .sort-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #fff; border: 2px solid #efe6d6; border-radius: 12px; padding: 10px 12px;
+  }
+  .mini { display: flex; gap: 6px; }
+  .mini button {
+    width: 44px; height: 44px; flex: none; border-radius: 10px; background: #efe8da; font-weight: 800;
+  }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .badge {
+    background: #fff7df; border-radius: 999px; padding: 6px 10px; font-size: 14px;
+  }
+  .hidden { display: none; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .practice { margin: 12px 0 0; padding-left: 22px; line-height: 1.5; }
+  footer { margin-top: 14px; color: var(--muted); font-size: 13px; }
+a:focus-visible,button:focus-visible{outline:3px solid #e69500;outline-offset:3px}</style>
+</head>
+<body><nav style="max-width:900px;margin:16px auto;padding:0 20px"><a href='/' style='color:inherit;font:700 16px system-ui'>← Back to game hub</a></nav>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">SHIFT CHALLENGE</div>
+    <div class="pills">
+      <div class="pill">Score <b id="score">0</b></div>
+      <div class="pill">Shift <b id="step">0</b>/8</div>
+    </div>
+  </header>
+
+  <section class="screen" id="home">
+    <div class="marquee">
+      <div class="ticket">AMC CREW</div>
+      <div class="ticket">JANITORIAL</div>
+      <div class="ticket">NIGHT SHIFT</div>
+    </div>
+    <h1 id="homeh" tabindex="-1">Movie Theater Shift Challenge</h1>
+    <p class="lead">A short game for getting through a movie-theater shift. Pick the stronger move, put closing tasks in order, and see what kind of crew member the shift brings out.</p>
+    <div class="badge-row">
+      <span class="badge">Approachable</span>
+      <span class="badge">Extra tasks</span>
+      <span class="badge">Hard-day resets</span>
+      <span class="badge">Ask when stuck</span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="start">Start the shift</button>
+    </div>
+    <footer>Made for practice. Not a real employer test.</footer>
+  </section>
+
+  <section class="screen hidden" id="play"></section>
+  <section class="screen hidden" id="end"></section>
+  <div id="live" class="sr-only" aria-live="polite"></div>
+</div>
+<script>
+const rounds = [
+  {
+    type: "choice",
+    where: "Lobby, 8:10 PM",
+    title: "A guest looks lost",
+    skill: "Helping a guest: give a quick, clear direction, then get back to your area",
+    text: "Someone is standing by the trash can, looking at the hallway signs. Your job is floors and trash, not tickets. What do you do?",
+    options: [
+      { t: "Point toward the box office and say you can show them the sign.", pts: 2, why: "Friendly and useful, without leaving your area for long." },
+      { t: "Ignore them. Trash is the only job.", pts: 0, why: "Staying on task matters, but a short helpful cue is part of being approachable." },
+      { t: "Walk them all the way through the ticket line and skip your area.", pts: 1, why: "Kind, but the better move is a clear direction, then back to the floor." }
+    ]
+  },
+  {
+    type: "choice",
+    where: "Hallway, 8:40 PM",
+    title: "A harder night",
+    skill: "Hard night: take a short reset or say yes, then keep the task order clear",
+    text: "The theater is busy and you feel wound up. A supervisor asks if you can take theater 4 after you finish the lobby cans.",
+    options: [
+      { t: "Say yes, finish the cans first, then do theater 4.", pts: 2, why: "You took the extra task and kept the order clear." },
+      { t: "Say no and walk off the shift.", pts: 0, why: "Leaving makes the night harder for everyone. A short reset works better." },
+      { t: "Ask for one minute, take a breath, then confirm the order.", pts: 2, why: "A reset plus a clear plan is a strong move on a hard night." }
+    ]
+  },
+  {
+    type: "choice",
+    where: "Restroom hall, 9:05 PM",
+    title: "You are not sure",
+    skill: "Chemicals: ask a coworker or supervisor before using an unlabeled bottle",
+    text: "A cleaner bottle label is worn off. You think it is the floor cleaner, but you are not certain.",
+    options: [
+      { t: "Ask a coworker or supervisor before using it.", pts: 2, why: "Asking is the safe move. Guessing with chemicals is not." },
+      { t: "Use it on the floor anyway so you stay fast.", pts: 0, why: "Speed is not worth a wrong chemical." },
+      { t: "Set the bottle aside and skip that area.", pts: 1, why: "Skipping is safer than guessing, but asking keeps the task moving." }
+    ]
+  },
+  {
+    type: "choice",
+    where: "Theater 6, 9:30 PM",
+    title: "A guest is still seated",
+    skill: "Guests still seated: work around them without rushing them",
+    text: "Credits are rolling. One guest is still in a seat while you start the aisle.",
+    options: [
+      { t: "Work the other aisle and give them a minute to leave.", pts: 2, why: "You stayed on the job without rushing the guest." },
+      { t: "Ask them loudly to get out now.", pts: 0, why: "That can escalate a normal end-of-movie moment." },
+      { t: "Stop the whole theater and wait in the hallway until it is empty.", pts: 1, why: "Waiting can be fine, but you can still work the open area." }
+    ]
+  },
+  {
+    type: "choice",
+    where: "Break corner, 10:00 PM",
+    title: "Break is ending",
+    skill: "Ending a conversation: say a quick line, then get back on time",
+    text: "Break is over in two minutes. A coworker starts a long story.",
+    options: [
+      { t: "Say you have to clock back in, then go.", pts: 2, why: "Clear and on time. You can talk later." },
+      { t: "Stay until the story ends.", pts: 0, why: "Late returns stack up on a short crew." },
+      { t: "Walk off without a word.", pts: 1, why: "You got back, but a one-line heads-up is more approachable." }
+    ]
+  },
+  {
+    type: "choice",
+    where: "Lobby, 10:40 PM",
+    title: "Spill by the soda machine",
+    skill: "Spills: protect the area first, then follow the spill steps",
+    text: "A drink hits the floor. Guests are walking toward it.",
+    options: [
+      { t: "Stand by the spill so no one walks through it. Put out a wet-floor sign and follow the spill steps. No sign? Stay there and ask a coworker or supervisor to bring one.", pts: 2, why: "Protect the area first, then follow your workplace spill procedure. If there is no wet-floor sign, do not leave the spill alone: stand by it and get help." },
+      { t: "Leave it until closing so you do not get behind.", pts: 0, why: "A fresh spill is a slip risk. It jumps the line." },
+      { t: "Tell a guest to walk around it and keep going.", pts: 1, why: "A warning helps, but the next guest may not hear it. Stay by the spill, block it, and get it cleaned up." }
+    ]
+  },
+  {
+    type: "sort",
+    where: "Closing, 11:20 PM",
+    title: "Put the close in order",
+    skill: "Closing order: clean first, and tell the supervisor only when the area is really done",
+    text: "Drag is not required. Use the arrows so the first task is on top.",
+    items: [
+      "Pick up large trash and spills in the lobby",
+      "Empty the lobby cans and replace liners",
+      "Check restrooms and wipe what you can reach",
+      "Tell the supervisor the area is done"
+    ]
+  },
+  {
+    type: "choice",
+    where: "End of shift, 12:05 AM",
+    title: "Clocking out",
+    skill: "End of shift: check your list, then tell the supervisor before you leave",
+    text: "Your area looks done. The supervisor is counting drawers.",
+    options: [
+      { t: "Check the list once more, then tell them you are finished.", pts: 2, why: "A last look plus a clear handoff closes the shift." },
+      { t: "Leave as soon as the time hits.", pts: 0, why: "They need to know the area is done." },
+      { t: "Redo the whole lobby because it might not be perfect.", pts: 1, why: "Care is good. A focused check is enough unless you see a real miss." }
+    ]
+  }
+];
+
+let index = 0;
+let score = 0;
+let sortOrder = [];
+let misses = [];
+const live = document.getElementById("live");
+function announce(msg) { live.textContent = ""; setTimeout(() => { live.textContent = msg; }, 30); }
+function focusHeading() { const h = play.querySelector("h2"); if (h) { h.setAttribute("tabindex", "-1"); h.focus(); } }
+
+const home = document.getElementById("home");
+const play = document.getElementById("play");
+const end = document.getElementById("end");
+const scoreEl = document.getElementById("score");
+const stepEl = document.getElementById("step");
+
+document.getElementById("start").onclick = () => {
+  index = 0;
+  score = 0;
+  misses = [];
+  updateHud();
+  home.classList.add("hidden");
+  end.classList.add("hidden");
+  play.classList.remove("hidden");
+  render();
+};
+
+function updateHud() {
+  scoreEl.textContent = score;
+  stepEl.textContent = Math.min(index + 1, rounds.length);
+}
+
+function render() {
+  updateHud();
+  const round = rounds[index];
+  if (round.type === "choice") renderChoice(round);
+  else renderSort(round);
+  live.textContent = "";
+  focusHeading();
+}
+
+function renderChoice(round) {
+  play.innerHTML = `
+    <div class="scene"><small>${round.where}</small><div>${round.title}</div></div>
+    <h2>${round.title}</h2>
+    <p class="lead">${round.text}</p>
+    <div class="choices">
+      ${round.options.map((o, i) => `<button class="choice" data-i="${i}">${o.t}</button>`).join("")}
+    </div>
+    <div id="feedback"></div>
+  `;
+  play.querySelectorAll(".choice").forEach(btn => {
+    btn.onclick = () => choose(round, Number(btn.dataset.i));
+  });
+}
+
+function choose(round, i) {
+  const pick = round.options[i];
+  score += pick.pts;
+  scoreEl.textContent = score;
+  const tone = pick.pts === 2 ? "good" : pick.pts === 1 ? "mid" : "low";
+  const label = pick.pts === 2 ? "Strong move" : pick.pts === 1 ? "Okay move" : "Not the best move";
+  if (pick.pts < 2) misses.push(round.skill);
+  const best = round.options.filter(o => o.pts === 2).map(o => o.t).join(" Or: ");
+  play.querySelectorAll(".choice").forEach(b => b.disabled = true);
+  document.getElementById("feedback").innerHTML = `
+    <div class="feedback ${tone}">
+      <b>${label} · +${pick.pts}</b>
+      <div>${pick.why}</div>
+      ${pick.pts < 2 ? `<div><b>Stronger move:</b> ${best}</div>` : ""}
+      <div class="actions"><button class="btn" id="next">${index === rounds.length - 1 ? "See the shift score" : "Next spot"}</button></div>
+    </div>
+  `;
+  announce(`${label}, plus ${pick.pts}. ${pick.why}${pick.pts < 2 ? " Stronger move: " + best : ""}`);
+  document.getElementById("next").onclick = next;
+}
+
+function renderSort(round) {
+  sortOrder = round.items.map((_, i) => i).reverse();
+  drawSort(round);
+}
+
+function drawSort(round) {
+  play.innerHTML = `
+    <div class="scene"><small>${round.where}</small><div>${round.title}</div></div>
+    <h2>${round.title}</h2>
+    <p class="lead">${round.text}</p>
+    <div class="sort-list">
+      ${sortOrder.map((itemIndex, pos) => `
+        <div class="sort-item">
+          <span>${pos + 1}. ${round.items[itemIndex]}</span>
+          <span class="mini">
+            <button type="button" data-move="up" data-pos="${pos}" aria-label="Move '${round.items[itemIndex]}' up">↑</button>
+            <button type="button" data-move="down" data-pos="${pos}" aria-label="Move '${round.items[itemIndex]}' down">↓</button>
+          </span>
+        </div>
+      `).join("")}
+    </div>
+    <div class="actions"><button class="btn gold" id="check">Check the order</button></div>
+    <div id="feedback"></div>
+  `;
+  play.querySelectorAll(".mini button").forEach(btn => {
+    btn.onclick = () => move(round, Number(btn.dataset.pos), btn.dataset.move);
+  });
+  document.getElementById("check").onclick = () => gradeSort(round);
+}
+
+function move(round, pos, dir) {
+  const nextPos = dir === "up" ? pos - 1 : pos + 1;
+  if (nextPos < 0 || nextPos >= sortOrder.length) {
+    announce(`'${round.items[sortOrder[pos]]}' is already ${dir === "up" ? "first" : "last"}.`);
+    return;
+  }
+  const copy = sortOrder.slice();
+  [copy[pos], copy[nextPos]] = [copy[nextPos], copy[pos]];
+  sortOrder = copy;
+  drawSort(round);
+  const again = play.querySelector(`.mini button[data-move="${dir}"][data-pos="${nextPos}"]`);
+  if (again) again.focus();
+  announce(`'${round.items[sortOrder[nextPos]]}' moved to number ${nextPos + 1} of ${sortOrder.length}.`);
+}
+
+function gradeSort(round) {
+  if (document.getElementById("check").disabled) return;
+  document.getElementById("check").disabled = true;
+  play.querySelectorAll(".mini button").forEach(btn => btn.disabled = true);
+  const correct = sortOrder.every((itemIndex, pos) => itemIndex === pos);
+  const reportLast = sortOrder[sortOrder.length - 1] === round.items.length - 1;
+  const pts = correct ? 2 : reportLast ? 1 : 0;
+  score += pts;
+  scoreEl.textContent = score;
+  if (pts < 2) misses.push(round.skill);
+  const head = correct ? "Order locked in · +2" : reportLast ? "Close · +1" : "Not yet · +0";
+  const msg = correct
+    ? "Big mess first, cans next, restrooms, then tell the supervisor."
+    : reportLast
+      ? "You saved the report for last. That part is right. Best order: big trash and spills, empty cans, restrooms, then tell the supervisor."
+      : "Telling the supervisor the area is done comes last, only after the cleaning is finished. If you report it first, they think the area is ready when it is not. Best order: big trash and spills, empty cans, restrooms, then tell the supervisor.";
+  document.getElementById("feedback").innerHTML = `
+    <div class="feedback ${correct ? "good" : reportLast ? "mid" : "low"}">
+      <b>${head}</b>
+      <div>${msg}</div>
+      <div class="actions"><button class="btn" id="next">Next spot</button></div>
+    </div>
+  `;
+  announce(`${head.replace("·", ",")}. ${msg}`);
+  document.getElementById("next").onclick = next;
+}
+
+function next() {
+  index += 1;
+  if (index >= rounds.length) return finish();
+  render();
+}
+
+function finish() {
+  play.classList.add("hidden");
+  end.classList.remove("hidden");
+  const max = 16;
+  let title = "Shift complete";
+  let line = "You got through the night. The next real shift can use the same moves: be clear, ask when stuck, handle spills now, and hand off when you are done.";
+  if (score >= 14) {
+    title = "Crew lead energy";
+    line = "You picked the stronger move almost every time. That is approachable, safe, and easy for a supervisor to trust.";
+  } else if (score >= 10) {
+    title = "Solid close";
+    line = "Most of the shift worked. The list below shows the spots to practice.";
+  }
+  if (misses.length === 0) line = "You picked the strongest move every time. That is approachable, safe, and easy for a supervisor to trust.";
+  const practice = misses.length
+    ? `<h2>What to practice next</h2><ul class="practice">${misses.map(m => `<li>${m}</li>`).join("")}</ul>`
+    : `<p><b>No misses this shift.</b> Try it again and explain why each move works.</p>`;
+  end.innerHTML = `
+    <div class="marquee"><div class="ticket">SHIFT CLOSED</div></div>
+    <h1 id="endh" tabindex="-1">${title}</h1>
+    <p class="lead">${line}</p>
+    <div class="pill">Final score <b>${score}</b> / ${max}</div>
+    <div class="bar" aria-hidden="true"><span style="width:${Math.round(score / max * 100)}%"></span></div>
+    ${practice}
+    <div class="badge-row">
+      <span class="badge">Ask before chemicals</span>
+      <span class="badge">Spill jumps the line</span>
+      <span class="badge">Extra task, same order</span>
+      <span class="badge">Handoff before you go</span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="again">Run the shift again</button>
+    </div>
+  `;
+  document.getElementById("again").onclick = () => {
+    end.classList.add("hidden");
+    home.classList.remove("hidden");
+    stepEl.textContent = "0";
+    scoreEl.textContent = "0";
+    document.getElementById("homeh").focus();
+  };
+  live.textContent = "";
+  document.getElementById("endh").focus();
+}
+</script>
+</body>
+</html>

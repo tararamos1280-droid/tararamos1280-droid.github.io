@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>Money Moves</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#f3f5f9; --card:#fff; --ink:#1c2533; --muted:#4a5565; --line:#dfe5ec;
+  --pri:#0f766e; --pri-d:#0a5550; --pri-l:#e3f3f1;
+  --good:#146c35; --good-l:#e6f5eb; --bad:#a3221a; --bad-l:#fdecea; --warn:#7a3d00; --warn-l:#fff4dc; --blue:#1d4ed8; --blue-l:#e8efff;
+  --r:20px; --sh:0 4px 16px rgba(20,30,50,.08), 0 1px 3px rgba(20,30,50,.06);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Helvetica,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus{outline:none}
+:focus-visible{outline:4px solid #f59e0b !important;outline-offset:3px}
+h1{font-size:28px;line-height:1.2;margin:4px 0 8px}
+h1:focus{outline:none}
+h2{font-size:22px;line-height:1.25;margin:0 0 10px}
+p{margin:0 0 10px}
+.hidden{display:none !important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:8px;z-index:200;background:#fff;padding:12px 18px;border-radius:12px;font-weight:800}
+.skip:focus{left:8px}
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 14px;padding-top:calc(6px + env(safe-area-inset-top));background:rgba(255,255,255,.97);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--pri-d);min-width:0}
+.brand-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-av{width:40px;height:40px;flex:0 0 40px}
+.hdr-av svg{width:40px;height:40px;display:block}
+.top-actions{display:flex;gap:8px;align-items:center}
+.tbtn{min-height:52px;min-width:52px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:700;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.tbtn.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.gear{width:52px;height:52px;border:none;background:transparent;font-size:24px;color:#6b7684;border-radius:12px;padding:0}
+.progress{display:flex;gap:6px;padding:10px 16px 0;max-width:900px;margin:0 auto}
+.pstep{flex:1;text-align:center;font-size:14px;color:#5b6676;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pstep .pb{height:7px;border-radius:7px;background:#d9e0e8;margin-bottom:4px}
+.pstep.done .pb{background:#8ccbc3}
+.pstep.cur .pb{background:var(--pri)}
+.pstep.cur{color:var(--pri-d)}
+.screen{max-width:900px;margin:0 auto;padding:8px 16px 20px}
+.anim{animation:fadeUp .25s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes glow{0%{box-shadow:0 0 0 0 rgba(15,118,110,.45)}100%{box-shadow:0 0 0 12px rgba(15,118,110,0)}}
+.eyebrow{font-size:15px;font-weight:800;color:var(--pri);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 0}
+.lead{font-size:19px;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:16px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin:12px 0}
+.center{text-align:center}
+.actions{position:sticky;bottom:0;z-index:10;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0 calc(12px + env(safe-area-inset-bottom));margin-top:6px;background:linear-gradient(rgba(243,245,249,0),var(--bg) 30%)}
+.actions .sp{flex:1}
+.btn{min-height:58px;padding:0 24px;border-radius:16px;border:2px solid transparent;font-weight:800;font-size:19px;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--sh);text-align:center;line-height:1.2}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--pri);color:#fff}
+.btn.secondary{background:#fff;border-color:#c9d3de;color:var(--ink)}
+.btn.good{background:var(--good);color:#fff}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.big{min-height:68px;font-size:22px;padding:0 30px}
+.btn.link{background:none;box-shadow:none;color:var(--pri-d);text-decoration:underline;min-height:52px;padding:0 10px;font-size:17px}
+.btn[disabled]{background:#e4e8ee;color:#5f6a7a;box-shadow:none;cursor:not-allowed;transform:none;border-color:transparent}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.label{display:block;font-size:21px;font-weight:800;margin-bottom:6px}
+.input{width:100%;min-height:58px;font-size:22px;padding:8px 16px;border-radius:14px;border:2px solid #b9c5d3;background:#fbfcfe}
+.input:focus{border-color:var(--pri)}
+/* choices */
+.choices{display:grid;gap:12px;margin:14px 0;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.choices.one{grid-template-columns:1fr}
+.choice{position:relative;display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:3px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:14px 16px;min-height:64px;width:100%;font-weight:700}
+.choice .ci{font-size:34px;line-height:1;flex:0 0 auto}
+.choice .ct{flex:1;min-width:0}
+.choice .ct b{display:block;font-size:20px}
+.choice .ct span{display:block;font-size:16px;font-weight:600;color:var(--muted)}
+.choice .cm{font-size:20px;font-weight:800;color:var(--pri-d);white-space:nowrap}
+.choice.sel{border-color:var(--pri);background:var(--pri-l)}
+.choice.sel::after{content:"✓";position:absolute;top:-12px;right:12px;background:var(--pri);color:#fff;font-weight:800;border-radius:999px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.choice[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none}
+.feedback{border-radius:16px;padding:14px 16px;font-size:18px;margin:10px 0;display:flex;gap:12px;align-items:flex-start}
+.feedback .fi{font-size:26px;line-height:1}
+.feedback.good{background:var(--good-l);color:#0e4d27}
+.feedback.tip{background:var(--blue-l);color:#1b3a8a}
+.feedback.warn{background:var(--warn-l);color:var(--warn)}
+/* avatars */
+.avatars{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px}
+.av{border-radius:20px;border:3px solid var(--line);background:#fff;padding:6px;aspect-ratio:1/1}
+.av svg{width:100%;height:100%;display:block}
+.av.sel{border-color:var(--pri);background:var(--pri-l);box-shadow:0 0 0 4px rgba(15,118,110,.18)}
+/* jobs */
+.jobs{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin:14px 0}
+.job{display:flex;flex-direction:column;gap:6px;text-align:left;background:#fff;border:3px solid var(--line);border-radius:20px;box-shadow:var(--sh);padding:14px 16px;width:100%;position:relative}
+.job.sel{border-color:var(--pri);background:var(--pri-l)}
+.job.sel::after{content:"✓ Chosen";position:absolute;top:-13px;right:14px;background:var(--pri);color:#fff;font-weight:800;font-size:15px;padding:3px 12px;border-radius:999px}
+.job .jh{display:flex;gap:12px;align-items:center}
+.job .ji{width:64px;height:64px;flex:0 0 64px}
+.job .ji svg{width:64px;height:64px;display:block}
+.job .jt{display:block;font-size:20px;font-weight:800;line-height:1.2;text-transform:uppercase;letter-spacing:.01em}
+.job .jd{display:block;font-size:16px;color:var(--muted);font-weight:600}
+.job .jp{display:block;font-size:24px;font-weight:800;color:var(--pri-d)}
+.job .jp small{font-size:16px;color:var(--muted)}
+.job .jf{display:block;font-size:17px;font-weight:600}
+.job .jf span{display:block;padding:1px 0}
+/* money strip */
+.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.mt{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:8px 10px;min-width:0}
+.mt .l{display:block;font-size:14px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.mt .v{display:block;font-size:21px;font-weight:800;white-space:nowrap}
+.mt.ck{border-top:5px solid var(--pri)}.mt.sv{border-top:5px solid #16a34a}.mt.bl{border-top:5px solid #d97706}
+.mt.hl{animation:glow .9s ease-out}
+.change{background:#fff;border:3px solid #9fd5ce;border-radius:16px;padding:12px 16px;margin:10px 0;font-size:19px;font-weight:700}
+.change .amt{font-size:24px;font-weight:800}
+.change .row{display:block;margin-top:2px}
+.amt-in{color:var(--good)} .amt-out{color:var(--bad)}
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 4px}
+.wk{border-radius:16px;background:#fff;border:3px solid var(--line);padding:8px 6px;text-align:center;min-height:96px;position:relative}
+.wk b{display:block;font-size:17px}
+.wk .wi{display:block;font-size:15px;font-weight:700;color:var(--muted);line-height:1.3}
+.wk.cur{border-color:var(--pri);background:var(--pri-l);box-shadow:0 0 0 3px rgba(15,118,110,.2)}
+.wk.done{background:#eef7f5}
+.wk .tick{position:absolute;top:-12px;right:-6px;width:36px;height:36px;border-radius:50%;background:var(--good);color:#fff;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.wk.done .wi{opacity:.65}
+/* lists */
+.lines{margin:6px 0 0;padding:0;list-style:none}
+.lines li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:18px}
+.lines li:last-child{border-bottom:none}
+.lines li.total{font-weight:800;border-top:2px solid var(--ink);border-bottom:none}
+.lines li.paid{color:var(--good)}
+.big-money{font-size:34px;font-weight:800;line-height:1.15}
+.stub{border:3px dashed #9fcfbf;border-radius:18px;background:#fbfffd;padding:14px 16px}
+.stub .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:18px;border-bottom:1px dotted #cfe3da}
+.stub .row > :last-child{white-space:nowrap;text-align:right}
+.stub .row:last-child{border-bottom:none}
+.stub .net{font-size:28px;font-weight:800;color:var(--good)}
+.plan h2{font-size:18px;text-transform:uppercase;letter-spacing:.03em;color:var(--pri-d);margin:0 0 4px}
+.planleft{text-align:center;border-radius:18px;padding:14px;background:var(--good-l);color:var(--good)}
+.planleft.no{background:var(--bad-l);color:var(--bad)}
+.event{border:3px solid #f2c46d;background:#fffaf0}
+.event.goodev{border-color:#8fd3aa;background:#f6fcf8}
+.event .eh{display:flex;gap:14px;align-items:center}
+.event .ei{font-size:48px;line-height:1}
+.tag{display:inline-block;font-size:14px;font-weight:800;padding:2px 10px;border-radius:999px;background:#f9dd9f;color:#6b3a00}
+.goodev .tag{background:#c9ecd6;color:#0e4d27}
+.glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.stat{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:12px;text-align:center}
+.stat .sl{font-size:16px;font-weight:700;color:var(--muted)}
+.stat .sv{font-size:24px;font-weight:800}
+.tips{list-style:none;padding:0;margin:0}
+.tips li{padding:8px 0;font-size:18px;border-bottom:1px solid var(--line)}
+.tips li:last-child{border-bottom:none}
+.hero-av{width:110px;height:110px;margin:0 auto}
+.hero-av svg{width:110px;height:110px}
+/* modal & coach */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(15,23,35,.5);display:flex;align-items:center;justify-content:center;padding:14px}
+.modal-card{background:#fff;border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:20px;max-width:560px;width:100%;max-height:calc(100vh - 28px);overflow:auto}
+.modal-card.wide{max-width:860px}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+.coach h3{border-top:1px solid var(--line);padding-top:14px;font-size:20px}
+.coach details{border:1px solid var(--line);border-radius:14px;padding:4px 12px;margin:8px 0}
+.coach summary{min-height:52px;display:flex;align-items:center;font-weight:800;font-size:18px;cursor:pointer}
+.crow{display:flex;align-items:center;gap:12px;min-height:52px;font-size:17px;padding:4px 0}
+.crow input{width:28px;height:28px;accent-color:var(--pri);flex:0 0 28px}
+.cgrid{display:grid;align-items:end;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px;padding-bottom:8px}
+.cfield label{display:block;font-size:15px;font-weight:700;color:var(--muted)}
+.cfield input,.cfield select{width:100%;min-height:50px;font-size:18px;padding:6px 10px;border:2px solid #b9c5d3;border-radius:12px;background:#fff}
+.txt{width:100%;border-collapse:collapse;font-size:17px}
+.txt th,.txt td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+.txt td.n{text-align:right;white-space:nowrap;font-weight:800}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1f2a37;color:#fff;font-size:18px;font-weight:600;padding:12px 20px;border-radius:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:160;text-align:center}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+@media (max-width:600px){
+  body{font-size:18px}
+  h1{font-size:24px}
+  .tbtn span{display:none}
+  .tbtn{padding:0 10px}
+  .brand{font-size:17px;gap:8px}
+  .top-actions{gap:4px}
+  .pstep{font-size:0}
+  .screen{padding:6px 12px 16px}
+  .card{padding:14px}
+  .btn{font-size:18px;padding:0 16px}
+  .actions .btn{flex:1 1 auto}
+  .jobs,.choices{grid-template-columns:1fr}
+  .mt .v{font-size:18px}
+  .mt .l{font-size:12px}
+  .wk{min-height:88px;padding:6px 3px}
+  .wk b{font-size:15px}
+  .wk .wi{font-size:12px}
+  .avatars{grid-template-columns:repeat(4,1fr);gap:8px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#screen">Skip to main content</a>
+<header class="top">
+  <a href="/" class="hub-link" style="font-weight:700;color:inherit;text-decoration:underline;white-space:nowrap;padding:10px 6px;min-height:44px;display:inline-flex;align-items:center;font-size:15px" aria-label="Back to Game hub">&larr; Hub</a>
+  <div class="brand"><span id="hdrAvatar" class="hdr-av" aria-hidden="true"></span><span class="brand-t">Money Moves</span></div>
+  <div class="top-actions">
+    <button id="btnSpeak" class="tbtn hidden" data-act="speak" aria-label="Read this screen out loud" aria-pressed="false">🔊 <span>Read aloud</span></button>
+    <button class="tbtn" data-act="askRestart" aria-label="Start again">↺ <span>Start again</span></button>
+    <button class="gear" data-act="openCoach" aria-label="Job coach settings" title="Job coach settings">⚙︎</button>
+  </div>
+</header>
+<nav id="progress" class="progress" aria-label="Game progress"></nav>
+<main id="screen" class="screen" tabindex="-1"></main>
+<div id="modal" class="modal hidden"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var LS_STATE = 'crbMoneyMonth.state.v3', LS_SET = 'crbMoneyMonth.settings.v3';
+var STD_BIWEEKLY = Math.round(1610000 / 26); // 2026 standard deduction / 26 paychecks (simple federal estimate)
+var DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+/* ---------- Jobs: exact days and start times. End time = start + weekly hours / number of days. ---------- */
+var JOBS = [
+  {id:'stocker', title:'Grocery stocker', duties:'Stock shelves and organize products', rate:16.25, hours:20, days:[0,1,2,3,4], start:6, dist:{city:4, rural:9}, carpool:true,
+   attire:'clean work clothes and closed-toe shoes'},
+  {id:'package', title:'Package handler', duties:'Load, unload, and sort boxes', rate:18.50, hours:25, days:[0,1,2,3,4], start:4, dist:{city:7, rural:16}, carpool:true,
+   attire:'clean jeans or work pants, a plain shirt, and sturdy shoes'},
+  {id:'dietary', title:'Dietary aide', duties:'Set up meal trays and serve residents at a nursing home', rate:15.75, hours:24, days:[0,2,4,5], start:6, dist:{city:3, rural:11}, carpool:true,
+   attire:'clean, neat clothes and non-slip shoes'},
+  {id:'dish', title:'Dishwasher', duties:'Wash dishes and keep the restaurant kitchen clean', rate:14.00, hours:24, days:[3,4,5,6], start:16, dist:{city:2, rural:8}, carpool:false,
+   attire:'clean, neat clothes and non-slip shoes'},
+  {id:'retail', title:'Retail associate', duties:'Fold clothes, stock racks, and help customers', rate:13.50, hours:20, days:[1,2,5,6], start:12, dist:{city:2.5, rural:12}, carpool:false,
+   attire:'neat, clean clothes, like a polo shirt or blouse and pants'},
+  {id:'fastfood', title:'Fast-food crew member', duties:'Take orders and prepare food', rate:12.00, hours:16, days:[0,1,4,5], start:11, dist:{city:1, rural:3}, carpool:false,
+   attire:'clean, simple clothes and non-slip shoes'},
+  {id:'janitor', title:'Janitorial worker', duties:'Clean offices, empty trash, and mop floors', rate:14.50, hours:20, days:[0,1,2,3,4], start:17, dist:{city:1.5, rural:10}, carpool:true,
+   attire:'clean, comfortable work clothes and sturdy shoes'},
+  {id:'cashier', title:'Cashier', duties:'Ring up sales and stock coolers at a convenience store', rate:13.75, hours:30, days:[2,3,4,5,6], start:14, dist:{city:0.8, rural:1}, carpool:false,
+   attire:'neat, clean clothes'}
+];
+var DEFAULT_SETTINGS = {
+  mode:'standard', events:'normal', startChecking:100, startSavings:100,
+  transit:{city:{bus:true, evenings:false, weekends:true, shared:true}, rural:{bus:false, evenings:false, weekends:false, shared:true}},
+  other:{ssi:0, ssdi:0, other:0, family:0},
+  jobs: JOBS.map(function(j){ return {id:j.id, rate:j.rate, hours:j.hours}; }),
+  costs:{famCity:200, famRural:200, roomCity:400, roomRural:325, ownCity:700, ownRural:575, elecRoom:50, elecOwn:80, phone:45, groceries:300, personal:20,
+    dogCare:60, catCare:45, petRent:25, meds:10, bus:55, rides:40, carpool:50, sharedCity:60, sharedRural:80,
+    carPay:250, carIns:120, carInsOld:100, gasCity:100, gasRural:150, upkeep:40}
+};
+var COST_LABELS = [
+  ['🏠 Housing', [['famCity','Live with family, city or town'],['famRural','Live with family, rural'],['roomCity','Roommate rent, city or town'],['roomRural','Roommate rent, rural'],['ownCity','Own apartment rent, city or town'],['ownRural','Own apartment rent, rural'],['elecRoom','Electric, roommate share'],['elecOwn','Electric, own apartment']]],
+  ['📱 Phone, food, and medicine', [['phone','Phone bill (if the player has a phone plan)'],['groceries','Groceries for the month'],['personal','Personal and household items (Standard mode)'],['meds','Medicine copay (if the player has one)']]],
+  ['🐾 Pets', [['dogCare','Dog food and care'],['catCare','Cat food and care'],['petRent','Pet rent (when renting)']]],
+  ['🚌 Transportation', [['bus','Bus pass'],['rides','Gas money for rides'],['carpool','Carpool share'],['sharedCity','Shared-ride service, city or town'],['sharedRural','Shared-ride service, rural'],['carPay','Car payment (car loan)'],['carIns','Car insurance (newer car)'],['carInsOld','Car insurance (older car)'],['gasCity','Gas, city or town'],['gasRural','Gas, rural'],['upkeep','Car maintenance']]]
+];
+
+/* ---------- Helpers ---------- */
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function load(k){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+function store(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+var FMT = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', minimumFractionDigits:2, maximumFractionDigits:2});
+function C(d){ return Math.round(Number(d) * 100) || 0; }
+function money(c){ c = Math.round(c) || 0; return FMT.format(c / 100); }
+function sum(a, f){ var s = 0; a.forEach(function(x){ s += f ? f(x) : x; }); return s; }
+function find(a, f){ for (var i = 0; i < a.length; i++) if (f(a[i])) return a[i]; return null; }
+function num(n){ return String(Math.round(n * 100) / 100); }
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function urlParam(k){ try{ var m = new RegExp('[?&]' + k + '=([^&#]*)').exec(location.search); return m ? decodeURIComponent(m[1]) : null; }catch(e){ return null; } }
+var rng = Math.random;
+function rand(){ return rng(); }
+function pick(a){ return a[Math.floor(rand() * a.length)]; }
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(rand() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function timeStr(h){ var hr = Math.floor(h + 1e-9), m = Math.round((h - hr) * 60); if (m === 60){ hr++; m = 0; } hr = hr % 24; var ap = hr >= 12 ? 'PM' : 'AM', h12 = hr % 12 === 0 ? 12 : hr % 12; return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ap; }
+function hoursWord(h){ return num(h) + (h === 1 ? ' hour' : ' hours'); }
+function daysStr(days){
+  var d = days.slice().sort(function(a, b){ return a - b; }), consecutive = d.length > 2 && d[d.length - 1] - d[0] === d.length - 1;
+  if (consecutive) return DAY_NAMES[d[0]] + '–' + DAY_NAMES[d[d.length - 1]];
+  var n = d.map(function(i){ return DAY_NAMES[i]; });
+  return n.length <= 2 ? n.join(' and ') : n.slice(0, -1).join(', ') + ', and ' + n[n.length - 1];
+}
+function milesStr(m){ return (m === 1 ? '1 mile' : num(m) + ' miles') + ' from home'; }
+
+/* ---------- Settings (job coach) ---------- */
+function okNum(v, lo, hi){ return typeof v === 'number' && isFinite(v) && v >= lo && v <= hi; }
+// Weekly hours must split evenly into the job's days, in half-hour steps, 2 to 10 hours a shift.
+function snapHours(h, nDays){ var shift = Math.round((h / nDays) * 2) / 2; shift = Math.max(2, Math.min(10, shift)); return shift * nDays; }
+function mergeSettings(s){
+  var d = clone(DEFAULT_SETTINGS); if (!s) return d;
+  if (s.mode === 'easy' || s.mode === 'standard') d.mode = s.mode;
+  if (['none','fewer','normal','more'].indexOf(s.events) >= 0) d.events = s.events;
+  if (okNum(s.startChecking, 0, 5000)) d.startChecking = Math.round(s.startChecking * 100) / 100;
+  if (okNum(s.startSavings, 0, 5000)) d.startSavings = Math.round(s.startSavings * 100) / 100;
+  ['city','rural'].forEach(function(a){ if (s.transit && s.transit[a]) ['bus','evenings','weekends','shared'].forEach(function(k){ if (typeof s.transit[a][k] === 'boolean') d.transit[a][k] = s.transit[a][k]; }); });
+  if (s.other) ['ssi','ssdi','other','family'].forEach(function(k){ if (okNum(s.other[k], 0, 5000)) d.other[k] = Math.round(s.other[k] * 100) / 100; });
+  if (s.jobs && s.jobs.forEach) d.jobs.forEach(function(j){
+    var o = find(s.jobs, function(x){ return x && x.id === j.id; }), base = find(JOBS, function(x){ return x.id === j.id; });
+    if (o){ if (okNum(o.rate, 1, 100)) j.rate = Math.round(o.rate * 100) / 100; if (okNum(o.hours, 1, 70)) j.hours = snapHours(o.hours, base.days.length); }
+  });
+  if (s.costs) Object.keys(d.costs).forEach(function(k){ if (okNum(s.costs[k], 0, 5000)) d.costs[k] = Math.round(s.costs[k] * 100) / 100; });
+  return d;
+}
+var settings = mergeSettings(load(LS_SET));
+function easy(){ return settings.mode === 'easy'; }
+function cost(k){ return C(settings.costs[k]); }
+
+/* ---------- Game state ---------- */
+function freshState(keep){
+  return {v:3, screen: keep ? 'area' : 'welcome', name: keep ? keep.name : '', avatar: keep ? keep.avatar : null,
+    area:null, home:null, pets:null, phone:null, license:null, ownsCar:null, carPaid:null, meds:null,
+    jobId:null, tried:[], prep:{}, iq:0, ians:{}, transport:null, other:clone(settings.other), saveGoal:2500, sim:null,
+    monthNo: keep ? (keep.monthNo || 1) + 1 : 1};
+}
+var state = load(LS_STATE);
+if (!state || state.v !== 3) state = freshState();
+function save(){ store(LS_STATE, state); }
+
+/* ---------- Jobs and pay ---------- */
+function getJob(id){
+  var base = find(JOBS, function(j){ return j.id === id; }); if (!base) return null;
+  var o = clone(base), s = find(settings.jobs, function(j){ return j.id === id; });
+  if (s){ o.rate = s.rate; o.hours = s.hours; }
+  o.shift = o.hours / o.days.length; o.end = o.start + o.shift;
+  o.daysText = daysStr(o.days); o.timeText = timeStr(o.start) + '–' + timeStr(o.end);
+  return o;
+}
+function allJobs(){ return JOBS.map(function(j){ return getJob(j.id); }); }
+function currentJob(){ return state.jobId ? getJob(state.jobId) : null; }
+function paycheckFor(job, hours){
+  hours = Math.max(0, hours);
+  var gross = Math.round(job.rate * 100 * hours), lines;
+  if (easy()){
+    lines = [{label:'Taxes and deductions (about 12%)', c:Math.round(gross * 0.12)}];
+  } else {
+    lines = [
+      {label:'Federal income tax (estimate)', c:Math.max(0, Math.round((gross - STD_BIWEEKLY) * 0.10))},
+      {label:'Social Security and Medicare (7.65%)', c:Math.round(gross * 0.0765)},
+      {label:'Pennsylvania income tax (3.07%)', c:Math.round(gross * 0.0307)},
+      {label:'Local earned income tax (1%)', c:Math.round(gross * 0.01)}
+    ];
+  }
+  var taxes = sum(lines, function(l){ return l.c; });
+  return {hours:hours, rate:job.rate, gross:gross, lines:lines, taxes:taxes, net:gross - taxes};
+}
+function stdPay(job){ return paycheckFor(job, job.hours * 2); }
+
+/* ---------- Art: avatars and job icons (inline SVG, no files needed) ---------- */
+var SKIN = ['#F6D7BE', '#E9BC94', '#CF9A6E', '#A56C45', '#784A2B', '#4C2D1A'];
+var AVATARS = [
+  {id:'a1', skin:0, hair:'long', hc:'#D9A94E', shirt:'#2A9D8F', label:'Person with long blond hair'},
+  {id:'a2', skin:5, hair:'buzz', hc:'#1B120C', shirt:'#E76F51', beard:true, label:'Man with short hair and a beard'},
+  {id:'a3', skin:2, hair:'bun', hc:'#1E1612', shirt:'#8E5CC2', label:'Woman with hair in a bun'},
+  {id:'a4', skin:4, hair:'afro', hc:'#2A1A10', shirt:'#F4A261', label:'Person with an afro'},
+  {id:'a5', skin:1, hair:'short', hc:'#16120F', shirt:'#3A86FF', glasses:true, label:'Man with short black hair and glasses'},
+  {id:'a6', skin:3, hair:'hijab', hc:'#6D4C9F', shirt:'#6D4C9F', label:'Woman wearing a hijab'},
+  {id:'a7', skin:0, hair:'bald', hc:'#BDBDBD', shirt:'#5C7A99', beard:true, beardC:'#CFCFCF', label:'Older man with a gray beard'},
+  {id:'a8', skin:4, hair:'locs', hc:'#24160D', shirt:'#2E7D32', label:'Person with locs'},
+  {id:'a9', skin:2, hair:'bob', hc:'#5A3620', shirt:'#D6457A', label:'Woman with a wavy bob'},
+  {id:'a10', skin:5, hair:'curly', hc:'#CFCFCF', shirt:'#C0392B', glasses:true, label:'Older woman with gray curly hair and glasses'},
+  {id:'a11', skin:1, hair:'ponytail', hc:'#B5532A', shirt:'#00897B', label:'Person with a red ponytail'},
+  {id:'a12', skin:3, hair:'curly', hc:'#2B1B10', shirt:'#455A9C', label:'Man with short curly hair'},
+  {id:'cat', kind:'cat', label:'Cat'}, {id:'dog', kind:'dog', label:'Dog'}, {id:'flower', kind:'flower', label:'Sunflower'},
+  {id:'sun', kind:'sun', label:'Smiling sunshine'}
+];
+function hairBack(a){
+  var c = a.hc;
+  switch (a.hair){
+    case 'long': return '<path d="M27 46 Q26 17 50 17 Q74 17 73 46 L76 78 L24 78 Z" fill="' + c + '"/>';
+    case 'afro': return '<circle cx="50" cy="38" r="29" fill="' + c + '"/>';
+    case 'locs': return '<g fill="' + c + '"><rect x="25" y="30" width="8" height="44" rx="4"/><rect x="34" y="30" width="7" height="46" rx="3.5"/><rect x="59" y="30" width="7" height="46" rx="3.5"/><rect x="67" y="30" width="8" height="44" rx="4"/></g>';
+    case 'bob': return '<path d="M27 48 Q25 18 50 18 Q75 18 73 48 Q76 60 66 62 L34 62 Q24 60 27 48 Z" fill="' + c + '"/>';
+    case 'ponytail': return '<ellipse cx="73" cy="52" rx="7" ry="16" fill="' + c + '"/>';
+    case 'bun': return '<circle cx="50" cy="16" r="9" fill="' + c + '"/>';
+    case 'hijab': return '<path d="M22 100 Q20 70 28 56 Q24 18 50 18 Q76 18 72 56 Q80 70 78 100 Z" fill="' + c + '"/>';
+  }
+  return '';
+}
+function hairFront(a){
+  var c = a.hc;
+  switch (a.hair){
+    case 'long': case 'bob': case 'ponytail': case 'bun': return '<path d="M30 42 Q30 21 50 21 Q70 21 70 42 Q64 30 50 31 Q38 31 30 42 Z" fill="' + c + '"/>';
+    case 'short': return '<path d="M30 42 Q29 20 50 20 Q71 20 70 42 Q68 31 58 29 Q46 33 32 34 Z" fill="' + c + '"/>';
+    case 'buzz': return '<path d="M31 40 Q31 23 50 23 Q69 23 69 40 Q62 30 50 30 Q38 30 31 40 Z" fill="' + c + '"/>';
+    case 'afro': return '<path d="M31 40 Q34 26 50 27 Q66 26 69 40 Q66 33 50 33 Q36 33 31 40 Z" fill="' + c + '"/>';
+    case 'locs': return '<path d="M29 42 Q29 20 50 20 Q71 20 71 42 Q66 30 50 30 Q34 30 29 42 Z" fill="' + c + '"/>';
+    case 'curly': return '<g fill="' + c + '"><circle cx="34" cy="32" r="7"/><circle cx="42" cy="25" r="7"/><circle cx="50" cy="23" r="7"/><circle cx="58" cy="25" r="7"/><circle cx="66" cy="32" r="7"/></g>';
+  }
+  return '';
+}
+function avatarSVG(id, size){
+  var a = find(AVATARS, function(x){ return x.id === id; }) || AVATARS[0], s = size || 72;
+  var o = '<svg viewBox="0 0 100 100" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="50" fill="#E8F1F8"/>';
+  if (a.kind === 'cat') o += '<path d="M28 34 L33 12 L46 28 Z M72 34 L67 12 L54 28 Z" fill="#E59A3C"/><circle cx="50" cy="48" r="26" fill="#F0A848"/><path d="M26 100 Q26 72 50 70 Q74 72 74 100 Z" fill="#F0A848"/><circle cx="41" cy="45" r="3" fill="#222"/><circle cx="59" cy="45" r="3" fill="#222"/><path d="M47 54 L53 54 L50 57 Z" fill="#C0566B"/><path d="M50 57 Q46 61 43 59 M50 57 Q54 61 57 59" stroke="#222" stroke-width="1.6" fill="none"/><path d="M30 52 H40 M30 56 H40 M60 52 H70 M60 56 H70" stroke="#7A4A16" stroke-width="1.2"/>';
+  else if (a.kind === 'dog') o += '<ellipse cx="27" cy="44" rx="9" ry="17" fill="#6B4423"/><ellipse cx="73" cy="44" rx="9" ry="17" fill="#6B4423"/><circle cx="50" cy="46" r="24" fill="#B98552"/><path d="M26 100 Q26 72 50 70 Q74 72 74 100 Z" fill="#B98552"/><ellipse cx="50" cy="56" rx="11" ry="8" fill="#E8C9A0"/><circle cx="42" cy="42" r="3" fill="#222"/><circle cx="58" cy="42" r="3" fill="#222"/><ellipse cx="50" cy="52" rx="4" ry="3" fill="#222"/><path d="M50 55 Q50 60 46 60 M50 55 Q50 60 54 60" stroke="#222" stroke-width="1.6" fill="none"/>';
+  else if (a.kind === 'flower'){
+    o += '<rect x="47" y="58" width="6" height="42" fill="#3E8E41"/><path d="M53 80 Q68 70 72 78 Q62 86 53 84 Z" fill="#4CAF50"/>';
+    for (var i = 0; i < 12; i++) o += '<ellipse cx="50" cy="22" rx="6" ry="13" fill="#F9C80E" transform="rotate(' + (i * 30) + ' 50 40)"/>';
+    o += '<circle cx="50" cy="40" r="13" fill="#7A4B1E"/><circle cx="45" cy="38" r="2" fill="#222"/><circle cx="55" cy="38" r="2" fill="#222"/><path d="M45 44 Q50 48 55 44" stroke="#222" stroke-width="1.6" fill="none"/>';
+  } else if (a.kind === 'sun'){
+    o += '<g stroke="#F59E0B" stroke-width="5" stroke-linecap="round">';
+    for (var r = 0; r < 12; r++) o += '<path d="M50 9 V20" transform="rotate(' + (r * 30) + ' 50 50)"/>';
+    o += '</g><circle cx="50" cy="50" r="25" fill="#FFD23F" stroke="#F59E0B" stroke-width="2.5"/><circle cx="41" cy="45" r="3" fill="#222"/><circle cx="59" cy="45" r="3" fill="#222"/><circle cx="36" cy="55" r="4" fill="#F7A072" opacity=".75"/><circle cx="64" cy="55" r="4" fill="#F7A072" opacity=".75"/><path d="M40 55 Q50 65 60 55" stroke="#222" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+  } else {
+    var skin = SKIN[a.skin];
+    o += hairBack(a);
+    o += '<path d="M20 100 Q20 72 50 70 Q80 72 80 100 Z" fill="' + a.shirt + '"/><rect x="44" y="58" width="12" height="14" rx="5" fill="' + skin + '"/>';
+    o += '<circle cx="50" cy="44" r="' + (a.hair === 'hijab' ? 17 : 20) + '" fill="' + skin + '"/>';
+    o += hairFront(a);
+    if (a.beard) o += '<path d="M31 46 Q32 66 50 67 Q68 66 69 46 Q66 58 50 58 Q34 58 31 46 Z" fill="' + (a.beardC || a.hc) + '"/>';
+    o += '<circle cx="43" cy="45" r="2.2" fill="#1d1d1d"/><circle cx="57" cy="45" r="2.2" fill="#1d1d1d"/><path d="M44 53 Q50 57.5 56 53" stroke="#1d1d1d" stroke-width="2" fill="none" stroke-linecap="round"/>';
+    if (a.glasses) o += '<g fill="none" stroke="#222" stroke-width="1.8"><circle cx="43" cy="45" r="5.5"/><circle cx="57" cy="45" r="5.5"/><path d="M48.5 45 H51.5"/></g>';
+  }
+  return o + '</svg>';
+}
+var JOB_ICONS = {
+  stocker:['#2A9D8F', '<rect x="12" y="14" width="40" height="5" rx="1" fill="#fff"/><rect x="12" y="34" width="40" height="5" rx="1" fill="#fff"/><rect x="16" y="22" width="8" height="12" rx="1" fill="#F4D35E"/><rect x="26" y="25" width="8" height="9" rx="1" fill="#EE964B"/><rect x="36" y="21" width="9" height="13" rx="1" fill="#F95738"/><rect x="20" y="42" width="24" height="14" rx="1.5" fill="#C9A06A"/><path d="M20 47 H44" stroke="#8A6A3E" stroke-width="2"/>'],
+  package:['#E76F51', '<path d="M18 12 V50 H46" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="22" cy="53" r="5" fill="#333" stroke="#fff" stroke-width="2"/><rect x="24" y="22" width="22" height="25" rx="1.5" fill="#C9A06A"/><path d="M24 30 H46 M35 22 V30" stroke="#8A6A3E" stroke-width="2"/>'],
+  dietary:['#3A86FF', '<rect x="8" y="38" width="48" height="6" rx="3" fill="#fff"/><circle cx="24" cy="30" r="9" fill="#fff"/><circle cx="24" cy="30" r="5" fill="#9BC53D"/><rect x="38" y="22" width="9" height="16" rx="2" fill="#fff"/><rect x="40" y="25" width="5" height="10" fill="#FFD166"/><path d="M14 50 H50" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'],
+  dish:['#00A6A6', '<path d="M10 44 H54 V52 H10 Z" fill="#fff"/><g fill="#E6F7F7" stroke="#fff" stroke-width="2"><circle cx="22" cy="30" r="12"/><circle cx="38" cy="30" r="12"/></g><circle cx="22" cy="30" r="5" fill="#BFE8E8"/><circle cx="38" cy="30" r="5" fill="#BFE8E8"/><circle cx="50" cy="16" r="3" fill="#fff"/><circle cx="44" cy="10" r="2" fill="#fff"/>'],
+  retail:['#8E5CC2', '<rect x="10" y="40" width="34" height="8" rx="2" fill="#F4A261"/><rect x="12" y="32" width="30" height="8" rx="2" fill="#E9C46A"/><rect x="14" y="24" width="26" height="8" rx="2" fill="#2A9D8F"/><path d="M40 12 L54 12 L56 26 L47 34 L36 23 Z" fill="#fff"/><circle cx="50" cy="17" r="2.5" fill="#8E5CC2"/>'],
+  fastfood:['#F4A261', '<rect x="6" y="46" width="52" height="6" rx="3" fill="#fff"/><path d="M10 32 Q10 20 24 20 Q38 20 38 32 Z" fill="#C97B2A"/><rect x="10" y="33" width="28" height="4" fill="#6A994E"/><rect x="10" y="37" width="28" height="5" rx="2" fill="#8C4A2F"/><path d="M42 24 L56 24 L53 46 L45 46 Z" fill="#E63946"/><path d="M49 24 L51 12" stroke="#fff" stroke-width="2.5"/>'],
+  janitor:['#5C7A99', '<path d="M14 30 H38 L35 54 H17 Z" fill="#FFD166"/><rect x="12" y="27" width="28" height="5" rx="2" fill="#fff"/><path d="M47 8 L43 46" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M36 46 Q43 42 50 46 L52 56 L34 56 Z" fill="#fff"/>'],
+  cashier:['#2E7D32', '<rect x="10" y="30" width="44" height="22" rx="3" fill="#fff"/><rect x="16" y="14" width="30" height="13" rx="2" fill="#fff"/><rect x="19" y="17" width="24" height="7" rx="1" fill="#9BE7A0"/><g fill="#2E7D32"><rect x="16" y="35" width="6" height="4"/><rect x="25" y="35" width="6" height="4"/><rect x="34" y="35" width="6" height="4"/><rect x="16" y="42" width="6" height="4"/><rect x="25" y="42" width="6" height="4"/><rect x="34" y="42" width="6" height="4"/></g><rect x="44" y="34" width="6" height="13" rx="1" fill="#2E7D32"/>']
+};
+function jobIcon(id, size){ var x = JOB_ICONS[id] || JOB_ICONS.stocker, s = size || 64;
+  return '<svg viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14" fill="' + x[0] + '"/>' + x[1] + '</svg>'; }
+
+/* ---------- Transportation ---------- */
+var REL = {high:{icon:'✅', word:'Dependable'}, ok:{icon:'👍', word:'Usually works'}, low:{icon:'⚠️', word:'Can be hard'}};
+function L(label, c, due){ return {label:label, c:c, due:due}; }
+function halves(c){ var a = Math.floor(c / 2); return [a, c - a]; }
+function transportInfo(job, area){
+  area = area || state.area || 'city';
+  var t = settings.transit[area], dist = job.dist[area], early = job.start < 6, late = job.end > 21, dark = job.start < 6 || job.end > 20;
+  var weekend = job.days.some(function(d){ return d >= 5; }), opts = [], notes = [];
+  var R = area === 'rural' ? 'Rural' : 'City';
+  if (dist <= 1.5) opts.push({id:'walk', icon:'🚶', name:'Walk', why: dark ? 'Close by, but you walk in the dark.' : 'Close by.', rel: dark ? 'ok' : 'high', lines:[]});
+  else notes.push('Walking: the job is ' + num(dist) + ' miles away.');
+  var busEnd = t.evenings ? 23 : 19;
+  if (!t.bus) notes.push('Bus: there is no public bus where you live.');
+  else if (job.start < 6) notes.push('Bus: buses do not run before 6:00 AM.');
+  else if (job.end > busEnd) notes.push('Bus: the last bus leaves before ' + timeStr(job.end) + '.');
+  else if (weekend && !t.weekends) notes.push('Bus: buses do not run on weekends.');
+  else opts.push({id:'bus', icon:'🚌', name:'Public bus', why: job.end > 19 ? 'Evening buses come less often.' : 'A bus stops near the job.', rel: job.end > 19 ? 'ok' : 'high', lines:[L('Bus pass', cost('bus'), 1)]});
+  opts.push({id:'rides', icon:'🚙', name:'Rides from family or friends', why: early || late ? 'Hard to find a ride that early or late every time.' : 'Works when their schedule matches yours.', rel: early || late ? 'low' : 'ok', lines:[L('Gas money for rides', cost('rides'), 1)]});
+  if (job.carpool) opts.push({id:'carpool', icon:'🧑‍🤝‍🧑', name:'Carpool with a coworker', why:'A coworker drives. You help pay for gas.', rel:'ok', lines:[L('Carpool share', cost('carpool'), 1)]});
+  if (t.shared){
+    if (job.start >= 6 && job.end <= 21) opts.push({id:'shared', icon:'🚐', name:'Shared-ride van', why:'You must book each ride a day ahead.', rel:'ok', lines:[L('Shared-ride trips', cost('shared' + R), 1)]});
+    else notes.push('Shared-ride van: it does not run that early or late.');
+  }
+  if (!state.license) notes.push('Driving: you need a driver\u2019s license to drive.');
+  else if (!state.ownsCar) notes.push('Driving: you have a license but no car right now. Some people save up to buy a car.');
+  else {
+    var gas = halves(cost('gas' + R));
+    if (state.carPaid) opts.push({id:'carOld', icon:'🚗', name:'Drive my car (paid off)', why:'No car payment. Older cars can need repairs.', rel:'ok',
+      lines:[L('Car insurance', cost('carInsOld'), 1), L('Gas', gas[0], 1), L('Gas', gas[1], 3), L('Car maintenance', cost('upkeep'), 3)]});
+    else opts.push({id:'carLoan', icon:'🚘', name:'Drive my car (with car payments)', why:'Newer car. You make a monthly car payment.', rel:'high',
+      lines:[L('Car insurance', cost('carIns'), 1), L('Gas', gas[0], 1), L('Car payment', cost('carPay'), 3), L('Gas', gas[1], 3), L('Car maintenance', cost('upkeep'), 3)]});
+  }
+  opts.forEach(function(o){ o.cost = sum(o.lines, function(l){ return l.c; }); });
+  return {opts:opts, notes:notes};
+}
+function transportOpt(){ var j = currentJob(); if (!j || !state.transport) return null; return find(transportInfo(j).opts, function(o){ return o.id === state.transport; }); }
+function usesCar(){ return state.transport === 'carOld' || state.transport === 'carLoan'; }
+
+/* ---------- Monthly bills and the plan ---------- */
+function renting(){ return state.home === 'roommate' || state.home === 'own'; }
+function monthBills(){
+  var R = state.area === 'rural' ? 'Rural' : 'City', b = [];
+  function rent(label, c){ if (state.rentSplit){ var h = halves(c); b.push({icon:'🏠', label:label + ' (part 1)', c:h[0], due:1, rent:true}); b.push({icon:'🏠', label:label + ' (part 2)', c:h[1], due:3, rent:true}); } else b.push({icon:'🏠', label:label, c:c, due:1, rent:true}); }
+  if (state.home === 'family') rent('Help with family bills', cost('fam' + R));
+  if (state.home === 'roommate'){ rent('Rent (your share)', cost('room' + R)); b.push({icon:'💡', label:'Electric (your share)', c:cost('elecRoom'), due:3}); }
+  if (state.home === 'own'){ rent('Rent', cost('own' + R)); b.push({icon:'💡', label:'Electric', c:cost('elecOwn'), due:3}); }
+  if (state.phone !== false) b.push({icon:'📱', label:'Phone', c:cost('phone'), due:3}); // no phone plan = no phone bill (older saves without this answer keep the phone bill)
+  if (state.meds) b.push({icon:'💊', label:'Medicine copay', c:cost('meds'), due:1});
+  if (state.pets === 'dog') b.push({icon:'🐶', label:'Dog food and care', c:cost('dogCare'), due:1});
+  if (state.pets === 'cat') b.push({icon:'🐱', label:'Cat food and care', c:cost('catCare'), due:1});
+  if (state.pets && state.pets !== 'none' && renting()) b.push({icon:'🐾', label:'Pet rent', c:cost('petRent'), due:1});
+  if (!easy()) b.push({icon:'🧴', label:'Personal and household items', c:cost('personal'), due:3});
+  var t = transportOpt(); if (t) t.lines.forEach(function(l){ b.push({icon: usesCar() ? '🚗' : (t.icon || '🚌'), label:l.label, c:l.c, due:l.due}); });
+  return b.filter(function(x){ return x.c > 0; }).map(function(x){ var li = lateInfo(x.label); x.late = li[0]; x.lateFee = C(li[1] || 0); x.feeText = li[2] || ''; x.prio = li[3]; return x; });
+}
+// What happens if a bill is late (kept from v2): fee | family | carry | pause | risk
+var LATE_TEXT = {
+  family: 'No fee, but your family or friend was counting on it.',
+  carry: 'You still owe it. It carries forward.',
+  pause: 'The service is paused until you pay.',
+  risk: 'Your insurance could be canceled. Driving without insurance is not legal.'
+};
+function lateInfo(label){
+  if (/^Help with family/.test(label)) return ['family', 0, '', 1];
+  if (/^Rent/.test(label)) return ['fee', 25, '', 1];
+  if (/^Medicine/.test(label)) return ['carry', 0, '', 2];
+  if (/^Car insurance/.test(label)) return ['risk', 0, '', 3];
+  if (/^Bus pass/.test(label)) return ['fee', 12, 'You paid single bus fares without a pass', 4];
+  if (/^Gas$/.test(label)) return ['fee', 10, 'You ran out of gas money and paid for a last-minute ride', 4];
+  if (/^Gas money|^Carpool/.test(label)) return ['family', 0, '', 4];
+  if (/^Car payment/.test(label)) return ['fee', 15, '', 5];
+  if (/food and care/.test(label)) return ['fee', 5, 'You bought a small, pricier bag of pet food to get by', 5];
+  if (/^Pet rent/.test(label)) return ['fee', 10, '', 6];
+  if (/^Phone/.test(label)) return ['pause', 0, '', 7];
+  return ['carry', 0, '', 8];
+}
+// Other income arrives in the same weeks as in v2: SSI Week 1, SSDI Week 2, other Week 3, family help Week 1.
+var OTHER = [{k:'ssi', label:'SSI', week:1, kind:'benefit'}, {k:'ssdi', label:'SSDI', week:2, kind:'benefit'}, {k:'other', label:'Other money', week:3, kind:'other'}, {k:'family', label:'Help from family', week:1, kind:'family'}];
+function otherIncome(){ var o = state.other || {}; return OTHER.map(function(x){ return {k:x.k, label:x.label, week:x.week, kind:x.kind, c: easy() ? C(Math.round(Number(o[x.k]) || 0)) : C(o[x.k] || 0)}; }).filter(function(x){ return x.c > 0; }); }
+function plan(){
+  var j = currentJob(), pc = stdPay(j), bills = monthBills(), other = otherIncome();
+  var p = {pay:pc.net, wages:pc.net * 2, other:other, otherTotal:sum(other, function(x){ return x.c; }), bills:bills, billsTotal:sum(bills, function(x){ return x.c; }),
+    groceries:cost('groceries'), save:state.saveGoal * 2};
+  p.income = p.wages + p.otherTotal; p.needs = p.billsTotal + p.groceries; p.left = p.income - p.needs - p.save;
+  return p;
+}
+
+/* =====================================================================
+   The month (v2 engine, kept and simplified on screen).
+   Every money change goes through txn() and is written to the ledger.
+   ===================================================================== */
+function S_(){ return state.sim; }
+function txn(from, to, c, kind, label, ref){
+  var s = S_(); c = Math.round(c);
+  if (!(c > 0)) return false;
+  if (from !== 'world' && s[from] < c) return false;
+  if (from !== 'world') s[from] -= c;
+  if (to !== 'world') s[to] += c;
+  s.ledger.push({n:s.ledger.length + 1, w:s.week, from:from, to:to, c:c, kind:kind, label:label, ref:ref || null});
+  return true;
+}
+function addNote(kind, text){ var a = S_().notes[kind]; if (a.indexOf(text) < 0) a.push(text); }
+function trackLow(){ var s = S_(); if (s.low == null || s.checking < s.low) s.low = s.checking; }
+// Pay from checking first, then savings for the rest (only when needed).
+function spend(c, kind, label, ref){
+  var s = S_(); if (c <= 0) return true; if (s.checking + s.savings < c) return false;
+  var a = Math.min(s.checking, c), b = c - a;
+  if (a) txn('checking', 'world', a, kind, label, ref);
+  if (b){ txn('savings', 'world', b, kind, label + ' (from savings)', ref); s.usedSavings += b; }
+  return true;
+}
+// Group money moves so the screen can show "Checking $A → $B".
+function op(text, fn){
+  var s = S_(), c0 = s.checking, s0 = s.savings, ok = fn();
+  if (ok === false) return false;
+  s.fx = {key: stepKey(), text: typeof text === 'function' ? text() : text, ck:[c0, s.checking], sv:[s0, s.savings]};
+  trackLow();
+  return true;
+}
+function stepKey(){ var s = S_(); return s.week + '.' + s.step; }
+function curStep(){ var s = S_(); return s.steps[s.week][s.step]; }
+function owed(b){ return b.c + b.fee - b.paidAmt; }
+function billsLeft(){ return sum(S_().bills.filter(function(b){ return b.due <= 4; }), owed); }
+function billsDueNow(){ var s = S_(); return s.bills.filter(function(b){ return owed(b) > 0 && b.due <= s.week; }).sort(function(a, b){ return a.prio - b.prio; }); }
+function otherFor(w){ return otherIncome().filter(function(x){ return x.week === w; }); }
+
+function startMonth(){
+  var seed = Number(urlParam('seed')) || (Date.now() % 2147483647);
+  rng = mulberry32(seed);
+  var j = currentJob(), p = plan();
+  var s = {seed:seed, week:1, step:0, checking:C(settings.startChecking), savings:C(settings.startSavings), ledger:[], fx:null, done:{}, evRes:{},
+    hoursLost:0, hoursExtra:0, schedVar:0, hourNotes:[], grocDiscount:0, usedSavings:0, paidBack:0, lateNotes:[], notes:{good:[], hard:[]}, finished:false,
+    saveGoal:state.saveGoal, groc:p.groceries, low:null, owe:0};
+  s.payHoursBase = j.hours; s.rate = j.rate; s.startChecking = s.checking; s.startSavings = s.savings;
+  s.bills = monthBills().map(function(b, i){ return {id:'b' + (i + 1), icon:b.icon, label:b.label, c:b.c, due:b.due, origDue:b.due, rent:!!b.rent, late:b.late, lateFee:b.lateFee, feeText:b.feeText, prio:b.prio, paidAmt:0, fee:0, lateApplied:false, arranged:false, paidWeek:0}; });
+  state.sim = s;
+  var pool = shuffle(WANTS.map(function(w){ return w.id; }));
+  s.wants = {2:pool[0], 4:pool[1]};
+  // Standard mode: the posted schedule can change a little (kept from v2). It changes the Week 3 paycheck.
+  if (!easy()){ var v = shuffle([-3, 0, 0, 2])[0]; if (v){ var b0 = paycheckFor({rate:s.rate}, s.payHoursBase * 2).net; s.schedVar = v; s.hourNotes.push({k:'sched', h:v, d:Math.abs(b0 - paycheckFor({rate:s.rate}, s.payHoursBase * 2 + v).net)}); } }
+  s.events = genEvents();
+  var ev = function(w){ return s.events.filter(function(e){ return e.w === w; }).map(function(e){ return {t:'event', k:e.k}; }); };
+  var oth = function(w){ return otherFor(w).length ? [{t:'other', w:w}] : []; };
+  s.steps = {1:[{t:'payday', n:1}].concat(oth(1), [{t:'bills'}, {t:'save'}]),
+    2:oth(2).concat([{t:'groc', n:1}, {t:'want'}], ev(2)),
+    3:[{t:'payday', n:2}].concat(oth(3), [{t:'bills'}, {t:'save'}]),
+    4:[{t:'groc', n:2}, {t:'want'}].concat(ev(4), [{t:'finish'}])};
+  trackLow();
+}
+function stepReady(st){
+  var s = S_();
+  if (st.t === 'payday') return !!s.done['pay' + st.n];
+  if (st.t === 'other') return !!s.done['other' + st.w];
+  if (st.t === 'bills') return !!s.done['bills' + s.week] || !billsDueNow().length;
+  if (st.t === 'save') return !!s.done['save' + s.week];
+  if (st.t === 'groc') return !!s.done['groc' + st.n];
+  if (st.t === 'want') return !!s.done['want' + s.week];
+  if (st.t === 'event') return !!s.evRes[st.k];
+  if (st.t === 'finish') return !!s.done.finish;
+  return true;
+}
+
+/* ---------- Paychecks ---------- */
+function payHours(n){ var s = S_(); return n === 1 ? s.payHoursBase * 2 : Math.max(0, s.payHoursBase * 2 + s.schedVar - s.hoursLost + s.hoursExtra); }
+function payFor(n){ return paycheckFor({rate:S_().rate}, payHours(n)); }
+function depositPay(n){
+  var s = S_(); if (s.done['pay' + n]) return false;
+  var pc = payFor(n);
+  return op('+' + money(pc.net), function(){ s.done['pay' + n] = pc; return txn('world', 'checking', pc.net, 'pay', 'Paycheck ' + n, 'pay' + n); });
+}
+function depositOther(w){
+  var s = S_(); w = Number(w); if (s.done['other' + w]) return false; var xs = otherFor(w); if (!xs.length) return false;
+  return op('+' + money(sum(xs, function(x){ return x.c; })), function(){ s.done['other' + w] = true; xs.forEach(function(x){ txn('world', 'checking', x.c, 'other', x.label, 'other_' + x.k); }); return true; });
+}
+
+/* ---------- Bills ---------- */
+function payOne(b, amt, fromSavingsOk){
+  var s = S_(); if (amt <= 0) return false;
+  if (fromSavingsOk){ if (!spend(amt, 'bill', b.label, b.id)) return false; }
+  else if (!txn('checking', 'world', amt, 'bill', b.label, b.id)) return false;
+  b.paidAmt += amt; b.paidWeek = s.week; return true;
+}
+// mode: 'all' (checking covers it) | 'savings' (use savings for the rest) | 'plan' (pay what I can + payment plan for one bill) | 'cando'
+function payBillsNow(mode){
+  var s = S_(), due = billsDueNow(), key = 'bills' + s.week; if (s.done[key] || !due.length) return false;
+  var total = sum(due, owed);
+  if (mode === 'all' && s.checking < total) return false;
+  if (mode === 'savings' && s.checking + s.savings < total) return false;
+  var c0 = s.checking + s.savings, arranged = null;
+  var ok = op('', function(){
+    due.forEach(function(b){
+      var amt = owed(b);
+      if (mode === 'all' || mode === 'savings'){ payOne(b, amt, mode === 'savings'); return; }
+      if (s.checking >= amt){ payOne(b, amt, false); return; }
+      if (mode === 'plan' && !arranged && b.late !== 'risk'){ var half = Math.round(amt / 2); if (s.checking >= half && half > 0){ payOne(b, half, false); b.arranged = true; b.due = s.week < 3 ? 3 : 5; arranged = b;
+        addNote('good', 'You called about ' + b.label.toLowerCase() + ' and set up a payment plan instead of skipping it.'); } }
+    });
+    s.done[key] = {mode:mode, arranged: arranged ? arranged.id : null}; return true;
+  });
+  if (ok) s.fx.text = 'You paid ' + money(c0 - s.checking - s.savings) + '.';
+  return ok;
+}
+function canArrange(){ var s = S_(); var due = billsDueNow(), left = s.checking; for (var i = 0; i < due.length; i++){ var a = owed(due[i]); if (left >= a){ left -= a; continue; } return due[i].late !== 'risk' && left >= Math.round(a / 2) && Math.round(a / 2) > 0 ? due[i] : null; } return null; }
+function lateMsg(b){
+  if (b.late === 'fee') return b.label + ' was late. ' + (b.feeText ? b.feeText + ': +' + money(b.lateFee) + '.' : 'A ' + money(b.lateFee) + ' late fee was added.');
+  return b.label + ' was late. ' + LATE_TEXT[b.late];
+}
+function endWeek(w){
+  var s = S_(); if (s.done['end' + w]) return; s.done['end' + w] = true;
+  s.bills.forEach(function(b){
+    if (owed(b) > 0 && b.due <= w && !b.lateApplied){
+      b.lateApplied = true; if (b.late === 'fee') b.fee += b.lateFee;
+      s.lateNotes.push(lateMsg(b));
+      if (w < 3) b.due = 3;
+    }
+  });
+  if (w === 4) s.bills.forEach(function(b){ if (owed(b) > 0 && b.due <= 4) s.lateNotes.push(b.label + ': ' + money(owed(b)) + ' is still not paid.'); });
+}
+
+/* ---------- Savings, groceries, wants, finish ---------- */
+function saveAmount(c){
+  var s = S_(), key = 'save' + s.week; if (s.done[key]) return false; c = Number(c);
+  if (c === 0){ s.done[key] = {c:0}; s.fx = {key:stepKey(), text:'You saved $0.00.', ck:[s.checking, s.checking], sv:[s.savings, s.savings]}; return true; }
+  if (s.checking < c) return false;
+  return op('You saved ' + money(c) + '.', function(){ s.done[key] = {c:c}; return txn('checking', 'savings', c, 'save', 'Moved to savings', key); });
+}
+// Put back money that was used from savings (kept from v2 "replace savings").
+function payBackSavings(){
+  var s = S_(), key = 'save' + s.week, c = Math.min(s.usedSavings - s.paidBack, s.checking); if (s.done[key] || c <= 0) return false;
+  return op('You put ' + money(c) + ' back in savings.', function(){ s.done[key] = {c:c, back:true}; s.paidBack += c; addNote('good', 'You put money back into savings after using it.'); return txn('checking', 'savings', c, 'save', 'Put back in savings', key); });
+}
+function grocPlan(n){ var s = S_(), half = Math.floor(s.groc / 2), base = n === 1 ? half : s.groc - half; return Math.max(0, base - (n === 2 ? s.grocDiscount : 0)); }
+function grocOptions(n){
+  var p = grocPlan(n);
+  return [{id:'list', icon:'📝', label:'Stick to my list', c:p}, {id:'coupons', icon:'🏷️', label:'Store brands and coupons', c:Math.round(p * 0.85)}, {id:'extras', icon:'🍿', label:'Add snacks and extras', c:Math.round(p * 1.2)}];
+}
+function buyGroceries(n, id){
+  var s = S_(), key = 'groc' + n; if (s.done[key]) return false;
+  if (id === 'pantry') return op('You got food from a food pantry. You spent $0.00.', function(){ s.done[key] = {id:id, c:0, plan:grocPlan(n)}; return true; });
+  var o = find(grocOptions(n), function(x){ return x.id === id; }); if (!o) return false;
+  return op('You spent ' + money(o.c) + '.', function(){ if (!spend(o.c, 'groc', 'Groceries', key)) return false; s.done[key] = {id:id, c:o.c, plan:grocPlan(n)}; return true; });
+}
+var WANTS = [
+  {id:'coffee', icon:'☕', q:'Do you want coffee this week?', opts:[['No, thanks', 0], ['One coffee', 500], ['Coffee every workday', 2000]]},
+  {id:'snacks', icon:'🥤', q:'Do you want soda or snacks this week?', opts:[['No, thanks', 0], ['A few', 600], ['Every day', 1500]]},
+  {id:'fastfood', icon:'🍔', q:'Do you want to buy fast food this week?', opts:[['No, thanks', 0], ['One meal', 1000], ['Three meals', 2500]]},
+  {id:'game', icon:'🎮', q:'A video game you like is out. Do you want it?', opts:[['No, thanks', 0], ['Buy a used copy', 1500], ['Buy it new', 6000]]},
+  {id:'stream', icon:'📺', q:'Do you want a streaming service this month?', opts:[['No, thanks', 0], ['One service', 1200], ['Three services', 4000]]},
+  {id:'smoke', icon:'🚬', q:'Do you want to buy cigarettes or vape supplies this week?', opts:[['No, thanks', 0], ['A little', 1000], ['A lot', 2500]]},
+  {id:'movie', icon:'🎬', q:'A friend asks you to see a movie. Do you want to go?', opts:[['No, thanks', 0], ['Go to the movie', 1500], ['Movie and snacks', 2500]]},
+  {id:'headphones', icon:'🎧', q:'Your headphones are old. Do you want new ones?', opts:[['No, thanks', 0], ['Basic headphones', 1500], ['Nice headphones', 4500]]}
+];
+function wantNow(){ var s = S_(); return find(WANTS, function(w){ return w.id === s.wants[s.week]; }); }
+function buyWant(i){
+  var s = S_(), key = 'want' + s.week, w = wantNow(); if (s.done[key] || !w) return false;
+  var o = w.opts[Number(i)]; if (!o) return false;
+  if (!o[1]) { s.done[key] = {id:w.id, label:o[0], c:0}; s.fx = {key:stepKey(), text:'You spent $0.00.', ck:[s.checking, s.checking], sv:[s.savings, s.savings]}; return true; }
+  return op('You spent ' + money(o[1]) + '.', function(){ if (!spend(o[1], 'want', w.icon + ' ' + o[0], key)) return false; s.done[key] = {id:w.id, label:o[0], c:o[1]}; return true; });
+}
+// Finish: move leftover checking money to savings (kept from v2 "leftover" step).
+function finishMove(c){
+  var s = S_(); if (s.done.finish) return false; c = c === 'half' ? Math.floor(s.checking / 2) : Number(c);
+  if (!c){ s.done.finish = {c:0}; s.fx = {key:stepKey(), text:'You kept your money in checking.', ck:[s.checking, s.checking], sv:[s.savings, s.savings]}; return true; }
+  if (s.checking < c) return false;
+  return op('You saved ' + money(c) + '.', function(){ s.done.finish = {c:c}; return txn('checking', 'savings', c, 'save', 'Moved leftover money to savings', 'finish'); });
+}
+
+/* ---------- Invariants (used by automated tests) ---------- */
+function invariants(){
+  var s = S_(), e = []; if (!s) return e;
+  function chk(c, m){ if (!c) e.push(m); }
+  var ck = s.startChecking, sv = s.startSavings;
+  s.ledger.forEach(function(t){
+    chk(Number.isInteger(t.c) && t.c > 0, 'bad amount #' + t.n); chk(t.from !== t.to, 'self transfer #' + t.n);
+    if (t.from === 'checking') ck -= t.c; if (t.to === 'checking') ck += t.c; if (t.from === 'savings') sv -= t.c; if (t.to === 'savings') sv += t.c;
+  });
+  chk(ck === s.checking, 'checking ' + s.checking + ' != ledger ' + ck); chk(sv === s.savings, 'savings ' + s.savings + ' != ledger ' + sv);
+  chk(s.checking >= 0 && s.savings >= 0, 'negative balance');
+  s.bills.forEach(function(b){ var p = sum(s.ledger.filter(function(t){ return t.kind === 'bill' && t.ref === b.id; }), function(t){ return t.c; }); chk(p === b.paidAmt, 'bill ' + b.id + ' paid mismatch'); chk(owed(b) >= 0, 'bill ' + b.id + ' overpaid'); });
+  ['pay1','pay2','other_ssi','other_ssdi','other_other','other_family','groc1','groc2','save1','save3','want2','want4','finish'].forEach(function(r){ var n = s.ledger.filter(function(t){ return t.ref === r && (t.from === 'world' || /^(save|finish)/.test(r)); }).length; chk(n <= 1, 'duplicate ' + r); });
+  Object.keys(s.evRes).forEach(function(k){ chk(s.ledger.filter(function(t){ return t.ref === 'ev_' + k && t.from === 'world'; }).length <= 1, 'event income duplicated ' + k); });
+  var inn = sum(s.ledger.filter(function(t){ return t.from === 'world'; }), function(t){ return t.c; }), out = sum(s.ledger.filter(function(t){ return t.to === 'world'; }), function(t){ return t.c; });
+  chk(s.startChecking + s.startSavings + inn - out === s.checking + s.savings, 'money in/out does not add up');
+  [1,2].forEach(function(n){ var d = s.done['pay' + n]; if (d){ var t = find(s.ledger, function(x){ return x.ref === 'pay' + n; }); chk(t && t.c === d.net, 'pay' + n + ' amount'); } });
+  if (s.done.pay2) chk(s.done.pay2.hours === s.payHoursBase * 2 + s.schedVar - s.hoursLost + s.hoursExtra, 'pay2 hours');
+  return e;
+}
+
+/* ---------- Life Happens (one event per screen) ----------
+   The v2 event pool is kept (adapted to one short screen each) plus the v3 events from the spec.
+   opt: {label, c (cost, cents), gain, toSavings, kind:'want'|'need', plan (payment plan allowed), note:{good|hard}, after, lose/add (hours), sale, owe} */
+function EV(){
+  var j = currentJob(), area = state.area, t = settings.transit[area], rural = area === 'rural', tm = state.transport;
+  var hasDog = state.pets === 'dog', hasCat = state.pets === 'cat';
+  return {
+    bingo:{icon:'🎱', title:'Bingo night', text:'Your friends invite you to bingo night.', opts:[
+      {label:'Stay home', c:0, after:'You stayed home and spent $0.00.'},
+      {label:'Play bingo', c:2500, kind:'want', after:'You had fun at bingo.'},
+      {label:'Play bingo and buy lottery tickets', c:5000, kind:'want', after:'You had fun. You did not win the lottery this time.'}]},
+    callOff:{w:[2], hours:true, icon:'🤒', title:'You don\u2019t feel well today', text:function(e){ return 'You wake up sick on ' + DAY_NAMES[e.day] + '. You work ' + timeStr(j.start) + '–' + timeStr(j.end) + ' that day.'; }, opts:[
+      {label:'Go to work', c:0, after:'You went to work. Rest when you get home.'},
+      {label:'Call off work', c:0, lose:'shift', after:function(e, d){ return 'You stayed home to rest. You will miss ' + hoursWord(e.hours) + ' of work. Your next paycheck will be about ' + money(d) + ' smaller.'; }}]},
+    sentHome:{w:[2], hours:true, icon:'🕒', title:'Work is slow today', text:function(e){ return 'On ' + DAY_NAMES[e.day] + ', work is slow. Your manager sends you home 3 hours early.'; }, opts:[
+      {label:'OK', c:0, lose:3, after:function(e, d){ return 'You worked 3 fewer hours. Your next paycheck will be about ' + money(d) + ' smaller.'; }}]},
+    lostShift:{w:[2], hours:true, icon:'📉', title:'A shift was canceled', text:function(e){ return 'Work is slow. Your manager canceled your ' + DAY_NAMES[e.day] + ' shift (' + hoursWord(e.hours) + ').'; }, opts:[
+      {label:'Ask to pick up hours on another day', c:0, lose:'askback', note:{good:'When hours were cut, you asked to pick up another shift.'}, after:function(e, d){ return 'Your manager found 3 hours for you on another day. Your next paycheck will be about ' + money(d) + ' smaller.'; }},
+      {label:'Accept it', c:0, lose:'shift', after:function(e, d){ return 'Your next paycheck will be about ' + money(d) + ' smaller.'; }}]},
+    extraShift:{w:[2], hours:true, good:true, icon:'⏰', title:'Extra shift', text:function(e){ return 'A coworker is out. Your manager asks you to work an extra shift on ' + DAY_NAMES[e.day] + ', ' + timeStr(j.start) + '–' + timeStr(j.end) + '.'; }, opts:[
+      {label:'Yes, I can work the extra shift', c:0, add:'shift', after:function(e, d){ return 'You will work ' + hoursWord(e.hours) + ' more. Your next paycheck will be about ' + money(d) + ' bigger.'; }},
+      {label:'No, thank you', c:0, after:'Your manager said, \u201cNo problem. Thanks for telling me.\u201d'}]},
+    friendsFood:{icon:'🍕', title:'Friends want food', text:'Your friends want to go out to eat.', opts:[
+      {label:'Stay home and eat at home', c:0, after:'You ate at home and spent $0.00.'},
+      {label:'Go out with friends', c:2000, kind:'want', after:'You had a good time with your friends.'}]},
+    charger:{icon:'🔌', title:'Phone charger broke', text:'Your phone charger stopped working.', opts:[
+      {label:'Buy a new charger', c:2000, kind:'need', after:'Your phone works again.'},
+      {label:'Borrow one for now', c:0, after:'You borrowed a charger. You may need to buy one later.'}]},
+    rideCancels:{icon:'📵', tr:true, title:'Your ride canceled', text:'Your ride to work canceled today.', when:function(){ return ['rides','carpool','shared'].indexOf(tm) >= 0; }, opts:function(){
+      var o = [];
+      if (t.bus && j.start >= 6 && j.end <= (t.evenings ? 23 : 19)) o.push({label:'Take the bus today', c:300, kind:'need', after:'You took the bus and got to work.'});
+      o.push({label:'Take a taxi', c: rural ? 3500 : 1800, kind:'need', after:'You took a taxi and got to work on time.'});
+      o.push({label:'Call your manager and ask to come in later', c:0, note:{good:'When a ride fell through, you called your manager right away.'}, after:'Your manager said you can come in an hour later.'});
+      return o; }},
+    missedBus:{icon:'🚏', tr:true, title:'You missed the bus', text:'The bus pulled away just as you got to the stop. Your shift starts soon.', when:function(){ return tm === 'bus'; }, opts:[
+      {label:'Call your manager, then take the next bus', c:0, note:{good:'You called your manager when you were running late.'}, after:'Your manager thanked you for calling.'},
+      {label:'Take a taxi', c:1800, kind:'need', after:'You made it on time.'},
+      {label:'Text a coworker who drives nearby', c:500, kind:'need', after:'Your coworker picked you up. You gave $5.00 for gas.'}]},
+    transportChange:{w:[4], icon:'🔁', tr:true, title:'A change to how you get to work', when:function(){ return tm !== 'walk'; },
+      text:function(){ return usesCar() ? 'Gas prices went up this week. Filling up costs more.' : tm === 'bus' ? 'The bus schedule changed. Your bus now gets you to work 15 minutes late.' : 'Your ride can\u2019t drive you one day each week for the rest of the month.'; },
+      opts:function(){ return usesCar() ? [
+        {label:'Pay the extra for gas', c:1500, kind:'need', plan:true, after:'You paid more for gas this month.'},
+        {label:'Combine errands to drive less', c:700, kind:'need', plan:true, note:{good:'You combined errands to save gas.'}, after:'Planning your trips saved money.'}] : [
+        {label:'Ask your manager to change your start time', c:0, note:{good:'You asked your manager to adjust your schedule.'}, after:'Your manager moved your start time. Problem solved.'},
+        {label:'Ask a coworker to drive you those days', c:1000, kind:'need', after:'Your coworker will drive you. You help pay for gas.'}]; }},
+    carRepair:{icon:'🔧', tr:true, title:'Your car needs a repair', text:function(){ return 'The check-engine light came on. The repair costs ' + money(rural ? 22000 : 18000) + '.'; }, when:usesCar, opts:function(){ var c = rural ? 22000 : 18000; return [
+      {label:'Pay for the repair now', c:c, kind:'need', after:'Your car is fixed.'},
+      {label:'Get a second quote with a used part', c:Math.round(c * 0.7), kind:'need', plan:true, note:{good:'You got a second quote on a car repair.'}, after:'The second shop fixed it for less.'},
+      {label:'Ask for a payment plan: pay ' + money(6000) + ' now', c:6000, kind:'need', owe:c - 6000, after:'Your car is fixed. You will pay ' + money(c - 6000) + ' more next month.'},
+      {label:'Wait to fix it. Get rides for now', c:0, note:{hard:'Your car needed a repair you could not pay for yet.'}, after:'Friends gave you rides this week. Your car still needs to be fixed.'}]; }},
+    dogSick:{icon:'🐶', title:'Your dog isn\u2019t feeling well', text:'Your dog isn\u2019t eating and seems tired. Your dog needs to see the vet.', when:function(){ return hasDog; }, pet:true, opts:[
+      {label:'Low-cost animal clinic', c:5500, kind:'need', plan:true, note:{good:'You found a low-cost clinic for your pet.'}, after:'The clinic helped. Your dog feels better!'},
+      {label:'Regular vet today', c:8500, kind:'need', plan:true, after:'The vet gave medicine. Your dog feels better!'}]},
+    catVet:{icon:'🐱', title:'Your cat needs a vet visit', text:'It is time for your cat\u2019s yearly checkup and shots.', when:function(){ return hasCat; }, pet:true, opts:[
+      {label:'Low-cost vaccine clinic', c:4000, kind:'need', plan:true, note:{good:'You used a low-cost clinic for your cat.'}, after:'Your cat got shots at a lower cost.'},
+      {label:'Your regular vet', c:7000, kind:'need', plan:true, after:'Your cat is healthy and up to date.'}]},
+    petFood:{icon:'🦴', title:'Running low on pet food', text:'Your pet food is almost gone.', when:function(){ return hasDog || hasCat; }, pet:true, opts:[
+      {label:'Visit a pet food bank', c:0, note:{good:'You used a pet food bank to keep your pet fed.'}, after:'You got free pet food.'},
+      {label:'Buy a small bag', c:1500, kind:'need', after:'Your pet is fed for now.'},
+      {label:'Buy a large bag', c:3000, kind:'need', after:'Your pet is fed for weeks.'}]},
+    phoneBreak:{icon:'📱', title:'Your phone screen cracked', text:'You dropped your phone. The screen cracked.', opts:[
+      {label:'Put on a screen protector for now', c:500, kind:'need', plan:true, after:'It works for now.'},
+      {label:'Buy a basic used phone', c:3500, kind:'need', plan:true, after:'Your basic phone works for calls and texts.'},
+      {label:'Get the screen repaired', c:6000, kind:'need', plan:true, after:'Your phone is fixed.'}]},
+    lowGroceries:{icon:'🥫', title:'Running low on food', text:'Your fridge is almost empty.', opts:[
+      {label:'Visit a food pantry', c:0, note:{good:'You used a food pantry when food ran low.'}, after:'You picked up bread, canned food, and fruit.'},
+      {label:'Small store trip for basics', c:2500, kind:'need', after:'You bought eggs, bread, milk, and rice.'},
+      {label:'Get takeout for a few meals', c:3500, kind:'want', after:'You ate takeout. It cost more than cooking.'}]},
+    copay:{icon:'🩺', title:'Doctor visit', text:'You have a sore throat and need to see a doctor.', opts:[
+      {label:'Community health center', c:1500, kind:'need', plan:true, note:{good:'You found a lower-cost health center.'}, after:'The health center helped you.'},
+      {label:'Your doctor (copay)', c:3000, kind:'need', plan:true, after:'The doctor helped you feel better.'}]},
+    friendLoan:{icon:'🤲', title:'A friend asks to borrow money', text:'Your friend asks to borrow $40.00. They say they will pay you back next month.', opts:[
+      {label:'Say no kindly', c:0, after:'Your friend understood.'},
+      {label:'Lend $20.00', c:2000, kind:'want', after:'You helped a little.'},
+      {label:'Lend $40.00', c:4000, kind:'want', after:'You helped your friend. That money is gone for this month.'}]},
+    dinnerInvite:{icon:'🌮', title:'Dinner invite', text:'Friends invite you to a restaurant on Saturday.', opts:[
+      {label:'Say \u201cnot this time\u201d', c:0, after:'Maybe next month!'},
+      {label:'Invite them for a potluck at home', c:800, kind:'want', after:'You made a dish and had fun at home.'},
+      {label:'Go to the restaurant', c:2500, kind:'want', after:'You had a great time.'}]},
+    jacketSale:{icon:'🧥', title:'Big sale at the store', text:'There is a jacket you like on sale for $30.00.', opts:[
+      {label:'Wait and think about it', c:0, note:{good:'You waited instead of buying right away.'}, after:'You kept your money.'},
+      {label:'Buy a hat instead', c:1200, kind:'want', after:'You got a hat.'},
+      {label:'Buy the jacket', c:3000, kind:'want', after:'You bought the jacket.'}]},
+    shoes:{icon:'👟', title:'Your work shoes wore out', text:'Your job needs non-slip shoes. Yours have a hole and are not safe now.', when:function(){ return /non-slip|sturdy/.test(j.attire); }, opts:[
+      {label:'Ask your manager about a shoe program', c:2200, kind:'need', plan:true, note:{good:'You asked your employer about help with work shoes.'}, after:'Your job paid half. Asking paid off!'},
+      {label:'Buy a pair at a discount store', c:2800, kind:'need', plan:true, after:'You have safe shoes for now.'},
+      {label:'Buy new work shoes', c:4500, kind:'need', plan:true, after:'You have safe shoes for work.'}]},
+    coldWeek:{icon:'🥶', title:'A very cold week', text:'It is freezing outside. Your electric bill will be higher.', when:renting, opts:[
+      {label:'Call the electric company about budget billing', c:0, note:{good:'You called the electric company to ask for help.'}, after:'They will spread the extra cost over the next few months.'},
+      {label:'Use blankets and close off rooms', c:800, kind:'need', after:'You stayed warm and used less electricity.'},
+      {label:'Pay the extra electric now', c:2000, kind:'need', after:'You stayed warm.'}]},
+    coworkerGift:{icon:'🎁', title:'Collection for a coworker', text:'A coworker is having a baby. The team is collecting money for a gift.', opts:[
+      {label:'Sign the card and write a kind note', c:0, after:'Your coworker loved your note.'},
+      {label:'Give $5.00', c:500, kind:'want', after:'You were part of the team gift.'},
+      {label:'Give $10.00', c:1000, kind:'want', after:'You were part of the team gift.'}]},
+    birthday:{good:true, icon:'🎂', title:'Birthday money', text:'A family member sends you $25.00 for your birthday!', opts:[
+      {label:'Keep it in checking', gain:2500, after:'You got $25.00.'},
+      {label:'Put it in savings', gain:2500, toSavings:true, note:{good:'You saved a gift instead of spending it.'}, after:'You got $25.00 and saved it.'}]},
+    giftCard:{good:true, icon:'💌', title:'A small gift!', text:'Your aunt sent you a card with $20.00 inside.', opts:[
+      {label:'Keep it in checking', gain:2000, after:'You have $20.00 more in checking.'},
+      {label:'Put it in savings', gain:2000, toSavings:true, note:{good:'You saved a gift instead of spending it.'}, after:'Your savings grew by $20.00.'}]},
+    refund:{good:true, icon:'🧾', title:'You got a refund', text:'You returned something you didn\u2019t need. The store gave you $10.00 back.', opts:[
+      {label:'Keep it in checking', gain:1000, after:'Checking +$10.00.'},
+      {label:'Put it in savings', gain:1000, toSavings:true, after:'Savings +$10.00.'}]},
+    sale:{w:[2], good:true, icon:'🏷️', title:'Sale on groceries', text:'Food you need is on sale. Your next grocery trip will cost $15.00 less.', opts:[
+      {label:'Great!', c:0, sale:1500, after:'Your Week 4 groceries will cost less.'}]},
+    dinner:{good:true, icon:'🍽️', title:'Someone buys dinner', text:'A friend buys you dinner tonight.', opts:[
+      {label:'Say thank you', c:0, after:'You had a free dinner. You spent $0.00.'}]}
+  };
+}
+function evDef(k){ return EV()[k]; }
+function evOpts(d){ var o = typeof d.opts === 'function' ? d.opts() : d.opts; return easy() ? o.slice(0, 3) : o; }
+function evText(d, e){ return typeof d.text === 'function' ? d.text(e) : d.text; }
+function eventCount(){
+  var f = settings.events, n = {none:0, fewer:1, normal:2, more:3}[f]; if (n == null) n = 2;
+  if (easy() && (f === 'normal' || f === 'more')) n -= 1;
+  return n;
+}
+function evData(k){
+  var j = currentJob(), e = {k:k};
+  if (k === 'callOff' || k === 'lostShift'){ e.day = pick(j.days); e.hours = j.shift; }
+  if (k === 'sentHome'){ e.day = pick(j.days); e.hours = 3; }
+  if (k === 'extraShift'){ var off = [0,1,2,3,4,5,6].filter(function(d){ return j.days.indexOf(d) < 0; }); e.day = pick(off); e.hours = j.shift; }
+  return e;
+}
+function evOK(k, used){
+  var d = evDef(k), j = currentJob(); if (!d) return false;
+  if (d.when && !d.when()) return false;
+  if (k === 'sentHome' && j.shift <= 3) return false;
+  if (k === 'lostShift' && j.shift <= 3) return false;
+  if (k === 'extraShift' && j.days.length >= 7) return false;
+  if (d.hours && used.some(function(u){ return evDef(u).hours; })) return false;
+  if (d.pet && used.some(function(u){ return evDef(u).pet; })) return false;
+  return used.indexOf(k) < 0;
+}
+function genEvents(){
+  var forced = (urlParam('events') || '').split(',').filter(Boolean), out = [], used = [];
+  function place(k){ var d = evDef(k), w2 = out.filter(function(e){ return e.w === 2; }).length, w4 = out.filter(function(e){ return e.w === 4; }).length;
+    var w = d.w ? d.w[0] : (w2 <= w4 ? 2 : 4); var e = evData(k); e.w = w; out.push(e); used.push(k); }
+  if (forced.length){ forced.forEach(function(k){ if (evOK(k, used)) place(k); }); }
+  else {
+    var n = eventCount(), keys = Object.keys(EV()), tries = 0, t = transportOpt();
+    // Less dependable transportation makes a transportation problem more likely (kept from v2).
+    if (n && t && t.rel !== 'high' && rand() < 0.7){ var tr = shuffle(keys.filter(function(k){ return evDef(k).tr && evOK(k, used); })); if (tr.length) place(tr[0]); }
+    while (out.length < n && tries++ < 300){ var k = pick(keys); if (evOK(k, used)) place(k); }
+  }
+  return out.sort(function(a, b){ return a.w - b.w; });
+}
+function eventFor(k){ return find(S_().events, function(e){ return e.k === k; }); }
+function canPay(c){ var s = S_(); return s.checking + s.savings >= c; }
+function usePlan(o){ return !!o.c && !canPay(o.c) && !!o.plan; }
+function resolveEvent(k, i){
+  var s = S_(), e = eventFor(k), d = evDef(k); if (!e || s.evRes[k]) return false;
+  var o = evOpts(d)[Number(i)]; if (!o) return false;
+  var viaPlan = usePlan(o);
+  if (o.c && !canPay(o.c) && !viaPlan) return false;
+  var text = o.gain ? 'You got ' + money(o.gain) + '.' : viaPlan ? 'You set up a payment plan. You spent $0.00 today.' : (o.c ? 'You spent ' + money(o.c) + '.' : 'You spent $0.00.');
+  return op(text, function(){
+    var before = payFor(2).net;
+    if (viaPlan){ s.bills.push({id:'e' + (s.bills.length + 1), icon:d.icon, label:d.title + ' (payment plan)', c:o.c, due: s.week < 3 ? 3 : 5, origDue: s.week < 3 ? 3 : 5, late:'carry', lateFee:0, feeText:'', prio:9, paidAmt:0, fee:0, lateApplied:false, arranged:true, paidWeek:0});
+      addNote('good', 'You set up a payment plan for: ' + d.title.toLowerCase() + '.'); }
+    else if (o.c && !spend(o.c, o.kind === 'want' ? 'want' : 'need', d.icon + ' ' + d.title, 'ev_' + k)) return false;
+    if (o.gain){ txn('world', o.toSavings ? 'savings' : 'checking', o.gain, 'gift', d.icon + ' ' + d.title, 'ev_' + k); }
+    if (o.lose){ var h = o.lose === 'shift' ? e.hours : o.lose === 'askback' ? Math.max(0, e.hours - 3) : o.lose; s.hoursLost += h; s.hourNotes.push({k:k, h:-h}); }
+    if (o.add){ s.hoursExtra += e.hours; s.hourNotes.push({k:k, h:e.hours}); }
+    var pd = Math.abs(payFor(2).net - before);
+    if (s.hourNotes.length && s.hourNotes[s.hourNotes.length - 1].k === k) s.hourNotes[s.hourNotes.length - 1].d = pd;
+    if (o.sale) s.grocDiscount += o.sale;
+    if (o.owe) s.owe = (s.owe || 0) + o.owe;
+    if (o.note){ if (o.note.good) addNote('good', o.note.good); if (o.note.hard) addNote('hard', o.note.hard); }
+    var after = typeof o.after === 'function' ? o.after(e, pd) : o.after;
+    s.evRes[k] = {i:Number(i), label:o.label, c: viaPlan ? 0 : (o.c || 0), plan:viaPlan, gain:o.gain || 0, kind:o.kind || null, after:after, toSavings:!!o.toSavings};
+    return true;
+  });
+}
+
+/* =====================================================================
+   UI core
+   ===================================================================== */
+function $(id){ return document.getElementById(id); }
+var S = {}, A = {}, IN = {}, bootResume = false;
+var STEPS = ['Setup', 'Job', 'Interview', 'Paycheck', 'Plan', 'Month', 'Results'];
+var STEP_OF = {welcome:0, avatar:0, area:0, home:0, pets:0, phone:0, license:0, car:0, carPaid:0, meds:0, jobs:1, prep:2, interview:2, iresult:2, paycheck:3, income:3, plan:4, week:5, report:6};
+function go(screen){ state.screen = screen; save(); render(true); }
+function btn(label, act, arg, cls, extra){ return '<button class="btn ' + (cls || 'secondary') + '" data-act="' + act + '"' + (arg != null ? ' data-arg="' + esc(arg) + '"' : '') + (extra || '') + '>' + label + '</button>'; }
+function actions(left, right){ return '<div class="actions">' + (left || '') + '<span class="sp"></span>' + (right || '') + '</div>'; }
+function fb(kind, icon, html){ return '<div class="feedback ' + kind + ' say"><span class="fi" aria-hidden="true">' + icon + '</span><div>' + html + '</div></div>'; }
+function head(eyebrow, title, lead){ return (eyebrow ? '<p class="eyebrow">' + eyebrow + '</p>' : '') + '<h1 tabindex="-1">' + title + '</h1>' + (lead ? '<p class="lead say">' + lead + '</p>' : ''); }
+function choice(act, arg, icon, title, sub, amt, sel, dis){
+  return '<button class="choice' + (sel ? ' sel' : '') + '" data-act="' + act + '" data-arg="' + esc(arg) + '" aria-pressed="' + (sel ? 'true' : 'false') + '"' + (dis ? ' disabled' : '') + '>' +
+    (icon ? '<span class="ci" aria-hidden="true">' + icon + '</span>' : '') + '<span class="ct"><b>' + title + '</b>' + (sub ? '<span>' + sub + '</span>' : '') + '</span>' +
+    (amt != null ? '<span class="cm">' + amt + '</span>' : '') + '</button>';
+}
+function nextBtn(act, arg, ok, label){ return btn(label || 'Next ➜', act, arg, 'primary big', ok ? '' : ' disabled'); }
+function backBtn(to){ return btn('⬅ Back', 'go', to); }
+function progressBar(){
+  var cur = bootResume ? 0 : (STEP_OF[state.screen] || 0);
+  return STEPS.map(function(t, i){ return '<div class="pstep ' + (i < cur ? 'done' : i === cur ? 'cur' : '') + '"' + (i === cur ? ' aria-current="step"' : '') + '><div class="pb"></div>' + t + '</div>'; }).join('');
+}
+function focusKey(el){ if (!el || !el.getAttribute) return null; var a = el.getAttribute('data-act'), g = el.getAttribute('data-arg'), i = el.id; return a ? '[data-act="' + a + '"]' + (g != null ? '[data-arg="' + g.replace(/"/g, '\\"') + '"]' : '') : (i ? '#' + i : null); }
+var focusAfter = null;
+function render(nav){
+  stopSpeech();
+  var modalOpen = !$('modal').classList.contains('hidden');
+  var key = nav || modalOpen ? null : focusKey(document.activeElement);
+  var sc = bootResume ? 'resume' : state.screen;
+  if (!S[sc]) sc = state.screen = state.name ? 'area' : 'welcome';
+  if ((sc === 'week' || sc === 'report') && !state.sim) sc = state.screen = state.jobId ? 'plan' : 'jobs';
+  $('progress').innerHTML = progressBar();
+  var y = window.scrollY;
+  $('screen').innerHTML = '<div class="' + (nav ? 'anim' : '') + '">' + S[sc]() + '</div>';
+  $('hdrAvatar').innerHTML = state.avatar ? avatarSVG(state.avatar, 40) : '';
+  $('btnSpeak').classList.toggle('hidden', !speechOK());
+  if (nav){
+    window.scrollTo(0, 0);
+    var h = $('screen').querySelector('h1'); if (h && !modalOpen) h.focus({preventScroll:true});
+  } else {
+    window.scrollTo(0, y);
+    var f = focusAfter ? $('screen').querySelector(focusAfter) : null; focusAfter = null;
+    if (!f && key) f = $('screen').querySelector(key);
+    if (!f || f.disabled) f = $('screen').querySelector('.change, [data-focus]');
+    if (f && !f.disabled){ if (!f.hasAttribute('tabindex') && !/^(BUTTON|INPUT|A|SELECT)$/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({preventScroll:true}); }
+  }
+  save();
+}
+function rerender(){ render(false); }
+function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove('show'); }, 2600); }
+function live(msg){ var l = $('live'); l.textContent = ''; setTimeout(function(){ l.textContent = msg; }, 30); }
+A.go = function(s){ go(s); };
+
+/* ---------- Money display (month only): Checking, Savings, Bills left ---------- */
+function moneyStrip(){
+  var s = S_(), fx = s.fx && s.fx.key === stepKey() ? s.fx : null;
+  var ckHl = fx && fx.ck[0] !== fx.ck[1], svHl = fx && fx.sv[0] !== fx.sv[1];
+  return '<div class="money" role="group" aria-label="My money">' +
+    '<div class="mt ck' + (ckHl ? ' hl' : '') + '"><span class="l">🏦 Checking</span><span class="v" data-testid="checking">' + money(s.checking) + '</span></div>' +
+    '<div class="mt sv' + (svHl ? ' hl' : '') + '"><span class="l">🫙 Savings</span><span class="v" data-testid="savings">' + money(s.savings) + '</span></div>' +
+    '<div class="mt bl"><span class="l">🧾 Bills left</span><span class="v" data-testid="billsleft">' + money(billsLeft()) + '</span></div></div>';
+}
+function changeBox(fx){
+  if (!fx) return '';
+  var dc = fx.ck[1] - fx.ck[0], ds = fx.sv[1] - fx.sv[0], rows = '';
+  function amt(d){ return '<span class="' + (d >= 0 ? 'amt-in' : 'amt-out') + '">' + (d >= 0 ? '+' : '−') + money(Math.abs(d)) + '</span>'; }
+  var both = dc && ds;
+  if (dc || !ds) rows += '<span class="row">' + (both ? amt(dc) + ' · ' : '') + '🏦 Checking ' + money(fx.ck[0]) + ' → <b>' + money(fx.ck[1]) + '</b></span>';
+  if (ds) rows += '<span class="row">' + (both ? amt(ds) + ' · ' : '') + '🫙 Savings ' + money(fx.sv[0]) + ' → <b>' + money(fx.sv[1]) + '</b></span>';
+  var t = fx.text || '', cls = /^\+|^You got/.test(t) ? 'amt-in' : /spent \$0|saved|^\s*$/.test(t) ? '' : 'amt-out';
+  return '<div class="change say" data-testid="change" tabindex="-1" role="status"><span class="amt ' + cls + '">' + esc(t) + '</span>' + rows + '</div>';
+}
+function curFx(){ var s = S_(); return s && s.fx && s.fx.key === stepKey() ? s.fx : null; }
+
+/* ---------- Resume ---------- */
+S.resume = function(){
+  return head('Welcome back', 'Hi, ' + esc(state.name || 'friend') + '!', 'You have a game saved on this device.') +
+    (state.avatar ? '<div class="hero-av">' + avatarSVG(state.avatar, 110) + '</div>' : '') +
+    '<div class="card say"><p>Do you want to keep playing where you left off?</p></div>' +
+    actions(btn('↺ Start a new game', 'newGame'), btn('▶ Keep playing', 'resume', null, 'primary big'));
+};
+A.resume = function(){ bootResume = false; render(true); };
+A.newGame = function(){ bootResume = false; state = freshState(); save(); render(true); };
+
+/* ---------- Setup: one question per screen ---------- */
+S.welcome = function(){
+  return '<div class="center" aria-hidden="true" style="font-size:54px">💼 💵 🏠</div>' +
+    head('Welcome', 'Money Moves', 'You will get a job, get paid, pay bills, and make choices for one month.') +
+    '<div class="card"><label class="label" for="nameIn">What is your name?</label><p class="muted small" id="nameHelp">You can use a nickname.</p><input id="nameIn" class="input" data-in="name" autocomplete="off" maxlength="24" aria-describedby="nameHelp" value="' + esc(state.name) + '"></div>' +
+    actions('', nextBtn('goAvatar', null, true));
+};
+IN.name = function(v){ state.name = v.slice(0, 24); save(); };
+A.goAvatar = function(){ state.name = (state.name || '').trim() || 'Friend'; go('avatar'); };
+S.avatar = function(){
+  return head('Setup', 'Pick a picture for you', 'Choose any picture you like.') +
+    '<div class="card"><div class="avatars" role="radiogroup" aria-label="Pictures">' +
+    AVATARS.map(function(a){ var sel = a.id === state.avatar; return '<button class="av' + (sel ? ' sel' : '') + '" role="radio" aria-checked="' + sel + '" aria-label="' + esc(a.label) + '" data-act="avatar" data-arg="' + a.id + '">' + avatarSVG(a.id, 80) + '</button>'; }).join('') + '</div></div>' +
+    actions(backBtn('welcome'), nextBtn('go', 'area', !!state.avatar));
+};
+A.avatar = function(a){ state.avatar = a; rerender(); };
+S.area = function(){
+  return head('Setup', 'Where do you live?', 'Pick one.') + '<div class="choices">' +
+    choice('area', 'city', '🏙️', 'City or town', 'Stores and jobs are closer. Rent costs more.', null, state.area === 'city') +
+    choice('area', 'rural', '🌾', 'Rural area', 'Rent costs less. Jobs are farther away.', null, state.area === 'rural') + '</div>' +
+    actions(backBtn('avatar'), nextBtn('go', 'home', !!state.area));
+};
+A.area = function(a){ state.area = a; state.transport = null; rerender(); };
+S.home = function(){
+  var R = state.area === 'rural' ? 'Rural' : 'City';
+  return head('Setup', 'Who do you live with?', 'Pick one. The amount is what you pay each month.') + '<div class="choices one">' +
+    choice('home', 'family', '👨‍👩‍👧', 'With family', 'You help pay family bills.', money(cost('fam' + R)), state.home === 'family') +
+    choice('home', 'roommate', '🧑‍🤝‍🧑', 'With a roommate', 'You pay half the rent and electric.', money(cost('room' + R) + cost('elecRoom')), state.home === 'roommate') +
+    choice('home', 'own', '🏠', 'In my own apartment', 'You pay all the rent and electric.', money(cost('own' + R) + cost('elecOwn')), state.home === 'own') + '</div>' +
+    actions(state.returnTo ? '' : backBtn('area'), nextBtn('go', state.returnTo || 'pets', !!state.home, state.returnTo ? 'Back to my plan ➜' : null));
+};
+A.home = function(a){ state.home = a; rerender(); };
+S.pets = function(){
+  return head('Setup', 'Do you have a pet?', 'Pets need food and care each month.') + '<div class="choices one">' +
+    choice('pets', 'none', '🚫', 'No pet', null, null, state.pets === 'none') +
+    choice('pets', 'dog', '🐶', 'A dog', 'Food and care each month', money(cost('dogCare')), state.pets === 'dog') +
+    choice('pets', 'cat', '🐱', 'A cat', 'Food and care each month', money(cost('catCare')), state.pets === 'cat') + '</div>' +
+    actions(backBtn('home'), nextBtn('go', 'phone', !!state.pets));
+};
+A.pets = function(a){ state.pets = a; rerender(); };
+S.phone = function(){
+  return head('Setup', 'Do you have a phone plan?', 'A phone plan is a bill you pay each month for your phone.') + '<div class="choices one">' +
+    choice('phone', 'yes', '📱', 'Yes', 'You pay this each month', money(cost('phone')), state.phone === true) +
+    choice('phone', 'no', '🚫', 'No phone plan', 'No phone bill', null, state.phone === false) + '</div>' +
+    actions(backBtn('pets'), nextBtn('go', 'license', state.phone != null));
+};
+A.phone = function(a){ state.phone = a === 'yes'; rerender(); };
+S.license = function(){
+  return head('Setup', 'Do you have a driver\u2019s license?', null) + '<div class="choices">' +
+    choice('license', 'yes', '🪪', 'Yes', null, null, state.license === true) + choice('license', 'no', '🚫', 'No', null, null, state.license === false) + '</div>' +
+    actions(backBtn('phone'), nextBtn('afterLicense', null, state.license != null));
+};
+A.license = function(a){ state.license = a === 'yes'; if (!state.license){ state.ownsCar = false; state.carPaid = null; } state.transport = null; rerender(); };
+A.afterLicense = function(){ go(state.license ? 'car' : 'meds'); };
+S.car = function(){
+  return head('Setup', 'Do you currently own a car?', null) + '<div class="choices">' +
+    choice('car', 'yes', '🚗', 'Yes', null, null, state.ownsCar === true) + choice('car', 'no', '🚫', 'No', null, null, state.ownsCar === false) + '</div>' +
+    actions(backBtn('license'), nextBtn('afterCar', null, state.ownsCar != null));
+};
+A.car = function(a){ state.ownsCar = a === 'yes'; if (!state.ownsCar) state.carPaid = null; state.transport = null; rerender(); };
+A.afterCar = function(){ go(state.ownsCar ? 'carPaid' : 'meds'); };
+S.carPaid = function(){
+  return head('Setup', 'Is your car paid off?', 'Cars cost money each month for insurance, gas, and care.') + '<div class="choices one">' +
+    choice('carPaid', 'yes', '🚗', 'Yes, it is paid off', 'An older car. No car payment.', null, state.carPaid === true) +
+    choice('carPaid', 'no', '🚘', 'No, I make car payments', 'A newer car. You pay ' + money(cost('carPay')) + ' each month.', null, state.carPaid === false) + '</div>' +
+    actions(backBtn('car'), nextBtn('go', 'meds', state.carPaid != null));
+};
+A.carPaid = function(a){ state.carPaid = a === 'yes'; state.transport = null; rerender(); };
+S.meds = function(){
+  return head('Setup', 'Do you pay a copay for medicine each month?', 'A copay is the part of the medicine cost that you pay.') + '<div class="choices">' +
+    choice('meds', 'yes', '💊', 'Yes', 'About ' + money(cost('meds')) + ' each month', null, state.meds === true) + choice('meds', 'no', '🚫', 'No', null, null, state.meds === false) + '</div>' +
+    actions(backBtn(state.license ? (state.ownsCar ? 'carPaid' : 'car') : 'license'), nextBtn('go', 'jobs', state.meds != null, 'Next: find a job ➜'));
+};
+A.meds = function(a){ state.meds = a === 'yes'; rerender(); };
+
+/* ---------- Job board ---------- */
+function jobCard(j){
+  var sel = state.jobId === j.id;
+  return '<button class="job' + (sel ? ' sel' : '') + '" data-act="pickJob" data-arg="' + j.id + '" aria-pressed="' + sel + '">' +
+    '<span class="jh"><span class="ji">' + jobIcon(j.id) + '</span><span><span class="jt">' + esc(j.title) + '</span><span class="jd">' + esc(j.duties) + '</span></span></span>' +
+    '<span class="jp">' + money(C(j.rate)) + ' <small>an hour</small></span>' +
+    '<span class="jf"><span>🕒 ' + hoursWord(j.hours) + ' a week</span><span>📅 ' + j.daysText + '</span><span>⏰ ' + j.timeText + '</span><span>📍 ' + milesStr(j.dist[state.area || 'city']) + '</span></span></button>';
+}
+S.jobs = function(){
+  return head('Job board', 'Pick a job to apply for', 'Look at the days, times, and pay. Pick one job.') +
+    '<div class="jobs">' + allJobs().map(jobCard).join('') + '</div>' +
+    actions(backBtn('meds'), nextBtn('startPrep', null, !!state.jobId, 'Get ready for the interview ➜'));
+};
+A.pickJob = function(id){ if (state.jobId !== id){ state.jobId = id; state.prep = {}; state.ians = {}; state.iq = 0; state.transport = null; } rerender(); };
+A.startPrep = function(){ state.prep = {i:0, a:{}}; go('prep'); };
+
+/* ---------- Interview prep: 5 short screens ---------- */
+function prepQs(){
+  var j = currentJob(), att = j.attire.charAt(0).toUpperCase() + j.attire.slice(1);
+  return [
+    {key:'hygiene', icon:'🚿', title:'Get clean and fresh', q:'Your interview is tomorrow. How do you get ready?', opts:[
+      ['Shower, brush my teeth, and comb my hair', 2, 'Great! Being clean helps you look and feel ready.'],
+      ['Just wash my face', 0, 'Try to also shower, brush your teeth, and comb your hair.'],
+      ['Wear a lot of perfume or cologne', 0, 'Strong smells can bother people. Being clean is best.']]},
+    {key:'clothes', icon:'👕', title:'Pick your clothes', q:'What will you wear to the interview for ' + esc(j.title.toLowerCase()) + '?', opts:[
+      ['Pajamas or sweatpants', 0, 'Pajamas are for home. Try ' + esc(j.attire) + '.'],
+      [esc(att), 2, 'Good choice! This fits the job.'],
+      ['Clothes with stains or holes', 0, 'Try clean clothes without stains or holes.']]},
+    {key:'time', icon:'⏰', title:'Be on time', q:'Your interview is at 10:00 AM. When will you get there?', opts:[
+      ['9:45 AM', 2, 'Great! Getting there 10 to 15 minutes early is best.'],
+      ['10:00 AM', 1, 'You are on time. Getting there a little early is even better. Try 9:45 AM.'],
+      ['10:20 AM', 0, 'That is late. Try to get there at 9:45 AM.']]},
+    {key:'ride', icon:'🚌', title:'Plan how to get there', q:'How will you get to work?', transport:true},
+    {key:'bring', icon:'🪪', title:'What to bring', q:'What will you bring to the interview?', opts:[
+      ['My phone only', 0, 'Also bring a photo ID and a list of your past jobs or a résumé.'],
+      ['A photo ID and a list of my past jobs or a résumé', 2, 'Great! The manager may ask for these.'],
+      ['Nothing', 0, 'Bring a photo ID and a list of your past jobs or a résumé.']]}
+  ];
+}
+function relText(r){ return REL[r].icon + ' ' + REL[r].word; }
+S.prep = function(){
+  var qs = prepQs(), i = state.prep.i || 0, q = qs[i], a = state.prep.a[q.key], body = '', ok = false;
+  if (q.transport){
+    var ti = transportInfo(currentJob());
+    body = '<div class="choices one">' + ti.opts.map(function(o){
+      return choice('prepRide', o.id, o.icon, esc(o.name), esc(o.why) + '<br><b style="display:inline;font-size:17px;color:var(--pri-d)">' + money(o.cost) + ' a month</b> · ' + relText(o.rel), null, state.transport === o.id); }).join('') + '</div>';
+    if (ti.notes.length) body += '<div class="card"><h2>Not possible for you</h2><ul class="tips say">' + ti.notes.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>';
+    var cur = transportOpt();
+    if (cur) body += cur.rel === 'low' ? fb('warn', '⚠️', 'This can be hard for these work hours. Have a backup plan.') : fb('good', '👍', 'Good plan. Your job is ' + milesStr(currentJob().dist[state.area]) + '.');
+    ok = !!cur;
+  } else {
+    body = '<div class="choices one">' + q.opts.map(function(o, k){ return choice('prepAns', k, null, o[0], null, null, a === k); }).join('') + '</div>';
+    if (a != null){ var o = q.opts[a]; body += fb(o[1] === 2 ? 'good' : 'tip', o[1] === 2 ? '✅' : '💡', o[2] + (o[1] < 2 ? ' Pick again.' : '')); ok = o[1] >= 1; }
+  }
+  return head('Get ready · ' + (i + 1) + ' of 5', '<span aria-hidden="true">' + q.icon + '</span> ' + q.title, q.q) + body +
+    actions(state.returnTo ? '' : btn('⬅ Back', 'prepBack'), nextBtn('prepNext', null, ok, state.returnTo ? 'Back to my plan ➜' : i === 4 ? 'Go to the interview ➜' : 'Next ➜'));
+};
+A.prepAns = function(k){ var q = prepQs()[state.prep.i]; state.prep.a[q.key] = Number(k); focusAfter = '.feedback'; rerender(); };
+A.prepRide = function(id){ state.transport = id; rerender(); };
+A.prepBack = function(){ if (state.prep.i > 0){ state.prep.i--; render(true); } else go('jobs'); };
+A.prepNext = function(){ if (state.returnTo === 'plan'){ go('plan'); return; } if (state.prep.i < 4){ state.prep.i++; render(true); } else { state.iq = 0; state.ians = {}; go('interview'); } };
+
+/* ---------- Interview: one question per screen ---------- */
+var ADA = 'You have the right to request a reasonable accommodation under the Americans with Disabilities Act (ADA).';
+var BENEFITS = 'Your job coach can refer you to a benefits counselor to help you understand how working may affect your SSI or SSDI benefits.';
+function interviewQs(){
+  var j = currentJob();
+  return [
+    {icon:'👋', q:'The manager says, \u201cHi, I\u2019m Pat. Nice to meet you.\u201d What do you do?', opts:[
+      ['Look at my phone', 0, 'Put your phone away. Look up, smile, and say \u201cNice to meet you.\u201d'],
+      ['Smile and say, \u201cNice to meet you.\u201d', 2, 'Great start! Pat smiles back.'],
+      ['Say \u201cHi\u201d very quietly and look down', 1, 'That is OK. Try to speak a little louder and smile.']]},
+    {icon:'💬', q:'Pat asks, \u201cWhy do you want to work here?\u201d', opts:[
+      ['\u201cI want to learn this job and work hard.\u201d', 2, 'Great answer! Pat nods.'],
+      ['\u201cI need money.\u201d', 1, 'That is true for most people. Also say what you like about the job.'],
+      ['\u201cI don\u2019t know.\u201d', 0, 'Think of one thing you like about this job. Say that.']]},
+    {icon:'⭐', q:'Pat asks, \u201cWhat is something you are good at?\u201d', opts:[
+      ['\u201cNothing, really.\u201d', 0, 'Everyone is good at something. You can say, \u201cI am on time and I work hard.\u201d'],
+      ['\u201cI am good at video games.\u201d', 1, 'Try to pick something that helps at work, like being on time.'],
+      ['\u201cI am always on time and I work hard.\u201d', 2, 'Great answer! Managers like workers who are on time.']]},
+    {icon:'📅', avail:true, q:'Pat says, \u201cThis job is ' + j.daysText + ', ' + j.timeText + '. Can you work these times?\u201d', opts:[
+      ['Yes, I can work these times', 2, 'Great! Pat writes that down.'],
+      ['No, I cannot work these times', 0, 'That is OK. It is good to be honest. You may want a job with different times.']]},
+    {icon:'🤝', ada:true, q:'Pat asks, \u201cIs there anything that would help you do your best at work?\u201d', opts:[
+      ['\u201cYes. I would like to ask about a reasonable accommodation.\u201d', 2, 'Good. Your job coach can help you ask for what you need.'],
+      ['\u201cNo, not right now.\u201d', 2, 'That is OK. You can ask later if you need to.']]},
+    {icon:'❓', q:'Pat asks, \u201cDo you have any questions for me?\u201d', opts:[
+      ['\u201cWhat would a normal day look like?\u201d', 2, 'Great question! It shows you care about the job.'],
+      ['\u201cNo.\u201d', 1, 'That is OK. Next time, try asking one question about the job.'],
+      ['\u201cHow soon can I take a vacation?\u201d', 0, 'It is better to ask about the job first.']]}
+  ];
+}
+var SCORED = [0, 1, 2, 5];
+function interviewScore(){ var qs = interviewQs(); return sum(SCORED, function(i){ var a = state.ians[i]; return a == null ? 0 : qs[i].opts[a][1]; }); }
+function interviewAvailable(){ return state.ians[3] === 0; }
+S.interview = function(){
+  var qs = interviewQs(), i = state.iq || 0, q = qs[i], a = state.ians[i], j = currentJob();
+  var body = (q.ada ? '<div class="card say"><p><b>' + ADA + '</b></p><p class="small muted">An accommodation is a change that helps you do the job, like a written checklist or a quiet break.</p></div>' : '') +
+    '<div class="choices one">' + q.opts.map(function(o, k){ return choice('ians', k, null, o[0], null, null, a === k, a != null && a !== k); }).join('') + '</div>';
+  if (a != null){ var o = q.opts[a]; body += fb(o[1] === 2 ? 'good' : 'tip', o[1] === 2 ? '✅' : '💡', o[2]); }
+  return head('Interview · ' + esc(j.title) + ' · Question ' + (i + 1) + ' of ' + qs.length, '<span aria-hidden="true">' + q.icon + '</span> ' + q.q, null) + body +
+    actions('', nextBtn('inext', null, a != null, i === qs.length - 1 ? 'Finish the interview ➜' : 'Next question ➜'));
+};
+A.ians = function(k){ var i = state.iq || 0; if (state.ians[i] != null) return; state.ians[i] = Number(k); focusAfter = '.feedback'; rerender(); };
+A.inext = function(){ if (state.iq < interviewQs().length - 1){ state.iq++; render(true); } else go('iresult'); };
+S.iresult = function(){
+  var j = currentJob(), sc = interviewScore(), av = interviewAvailable(), qs = interviewQs();
+  if (av && sc >= 5){
+    state.hired = true;
+    return '<div class="center" aria-hidden="true" style="font-size:60px">🎉</div>' + head('Interview result', 'You got the job!', 'Pat says, \u201cWelcome to the team!\u201d You are now a ' + esc(j.title.toLowerCase()) + '.') +
+      '<div class="card say"><div class="jh" style="display:flex;gap:12px;align-items:center"><span class="ji">' + jobIcon(j.id) + '</span><div><b>' + esc(j.title) + '</b><br>📅 ' + j.daysText + '<br>⏰ ' + j.timeText + '<br>💵 ' + money(C(j.rate)) + ' an hour</div></div></div>' +
+      actions('', nextBtn('go', 'paycheck', true, 'See my paycheck ➜'));
+  }
+  state.hired = false;
+  var tips = [];
+  if (!av) tips.push('You said you cannot work these times. Pick a job with days and times that work for you.');
+  SCORED.forEach(function(i){ var a = state.ians[i]; if (a != null && qs[i].opts[a][1] < 2) tips.push(qs[i].opts[a][2]); });
+  return head('Interview result', 'Not this time', 'Pat says, \u201cThank you for coming in. We picked someone else this time.\u201d') +
+    '<div class="card"><h2>💡 Tips for next time</h2><ul class="tips say">' + tips.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ul></div>' +
+    fb('tip', '🙂', 'Lots of people have many interviews before they get a job. Practice makes it easier.') +
+    actions(btn('Pick another job', 'otherJob'), av ? btn('Try this interview again', 'retryInterview', null, 'primary big') : '');
+};
+A.retryInterview = function(){ state.iq = 0; state.ians = {}; go('interview'); };
+A.otherJob = function(){ if (state.tried.indexOf(state.jobId) < 0) state.tried.push(state.jobId); state.jobId = null; state.transport = null; state.ians = {}; state.iq = 0; go('jobs'); };
+
+/* ---------- Paycheck explanation ---------- */
+function stubHtml(pc, showRate){
+  var r = '<div class="stub say"><div class="row"><b>YOU WORKED ' + num(pc.hours) + ' HOURS</b><span></span></div>';
+  if (showRate) r += '<div class="row"><span>' + num(pc.hours) + ' hours × ' + money(C(pc.rate)) + ' an hour</span><span></span></div>';
+  r += '<div class="row"><span>Gross pay</span><b>' + money(pc.gross) + '</b></div>';
+  if (!easy() && pc.lines.length > 1) pc.lines.forEach(function(l){ r += '<div class="row small"><span>− ' + esc(l.label) + '</span><span>' + money(l.c) + '</span></div>'; });
+  r += '<div class="row"><span>Taxes and deductions</span><b class="amt-out">−' + money(pc.taxes) + '</b></div>';
+  return r + '<div class="row"><b>TAKE-HOME PAY</b><span class="net">' + money(pc.net) + '</span></div></div>';
+}
+S.paycheck = function(){
+  var j = currentJob(), pc = stdPay(j);
+  return head('💵 Your paycheck', 'How your paycheck works', 'You get paid every two weeks. Paydays are in Week 1 and Week 3. Each paycheck is for two weeks of work.') +
+    '<div class="card">' + stubHtml(pc, true) + '</div>' +
+    '<div class="card say"><p><b>Gross pay</b> = what you earned before deductions.</p><p><b>Take-home pay</b> = what goes into your account after deductions.</p></div>' +
+    actions(backBtn('iresult'), nextBtn('go', 'income', true));
+};
+
+/* ---------- Other money ---------- */
+S.income = function(){
+  var o = state.other || {};
+  return head('Other money', 'Do you get other money each month?', 'Some people get SSI, SSDI, or other money. If you do not, leave it at $0.') +
+    '<div class="card">' + OTHER.map(function(x){ return '<label class="label" for="in_' + x.k + '">' + x.label + ' ($ each month)</label><input id="in_' + x.k + '" class="input" type="number" min="0" step="1" inputmode="decimal" data-in="other" data-k="' + x.k + '" value="' + esc(o[x.k] || 0) + '" style="margin-bottom:12px">'; }).join('') + '</div>' +
+    fb('tip', '🤝', BENEFITS) + actions(backBtn('paycheck'), nextBtn('go', 'plan', true));
+};
+IN.other = function(v, el){ var n = Number(v); state.other[el.getAttribute('data-k')] = isFinite(n) && n >= 0 ? Math.min(5000, Math.round(n * 100) / 100) : 0; save(); };
+
+/* ---------- MY MONTHLY PLAN (one screen) ---------- */
+function weekWord(w){ return 'Week ' + w; }
+S.plan = function(){
+  var p = plan(), ok = p.left >= 0;
+  var first = C(settings.startChecking) + p.pay + sum(p.other.filter(function(x){ return x.week <= 2; }), function(x){ return x.c; }) - sum(p.bills.filter(function(b){ return b.due === 1; }), function(b){ return b.c; }) - state.saveGoal - Math.floor(p.groceries / 2);
+  var tooTight = first < -C(settings.startSavings);
+  var h = head('📋 Plan', 'MY MONTHLY PLAN', null) + '<div class="card plan"><h2>💵 Money coming in</h2><ul class="lines">' +
+    '<li><span>💵 Paycheck (Week 1)</span><b>' + money(p.pay) + '</b></li><li><span>💵 Paycheck (Week 3)</span><b>' + money(p.pay) + '</b></li>' +
+    p.other.map(function(x){ return '<li><span>🏛️ ' + x.label + ' (Week ' + x.week + ')</span><b>' + money(x.c) + '</b></li>'; }).join('') +
+    '<li class="total"><span>Total</span><span>' + money(p.income) + '</span></li></ul></div>' +
+    '<div class="card plan"><h2>🧾 Bills and needs</h2><ul class="lines">' +
+    p.bills.map(function(b){ return '<li><span>' + b.icon + ' ' + esc(b.label) + ' <span class="muted small">(' + weekWord(b.due) + ')</span></span><b>' + money(b.c) + '</b></li>'; }).join('') +
+    '<li><span>🛒 Groceries <span class="muted small">(Week 2 and Week 4)</span></span><b>' + money(p.groceries) + '</b></li>' +
+    '<li class="total"><span>Total</span><span>' + money(p.needs) + '</span></li></ul></div>' +
+    '<div class="card plan"><h2>🫙 Savings goal</h2><p class="small muted">How much do you want to save each payday?</p><div class="btnrow" role="group" aria-label="Savings goal">' +
+    [0, 2500, 5000].map(function(c){ var sel = state.saveGoal === c; return '<button class="btn ' + (sel ? 'primary' : 'secondary') + '" data-act="saveGoal" data-arg="' + c + '" aria-pressed="' + sel + '">' + money(c) + '</button>'; }).join('') +
+    '</div><p class="small">That is <b>' + money(p.save) + '</b> this month.</p></div>' +
+    '<div class="planleft' + (ok ? '' : ' no') + ' say"><div><b>MONEY LEFT FOR OTHER THINGS</b></div><div class="big-money" data-testid="left">' + (ok ? '' : '−') + money(Math.abs(p.left)) + '</div></div>';
+  if (!ok || tooTight){
+    h += fb('warn', '⚠️', (ok ? 'Your first paycheck comes before your second, and your bills in Week 1 are too big for it.' : 'Your bills and needs cost more than the money coming in.') + ' Change one thing to make your plan work.') +
+      '<div class="btnrow">' + (state.saveGoal ? btn('Save less', 'saveGoal', '0') : '') + (ok && !state.rentSplit ? btn('🏠 Ask to pay rent in two parts', 'rentSplit') : '') + btn('🏠 Change where I live', 'changeHome') + btn('🚌 Change how I get to work', 'changeRide') + btn('💼 Pick a different job', 'otherJob') + '</div>';
+  } else if (first < 0) h += fb('tip', '💡', 'Money will be tight before your second payday. You may need some savings in Week 1 or Week 2.');
+  return h + actions(backBtn('income'), nextBtn('startMonth', null, ok && !tooTight, 'START MY MONTH ➜'));
+};
+A.rentSplit = function(){ state.rentSplit = true; rerender(); toast('Your rent is now paid in two parts: Week 1 and Week 3.'); };
+A.saveGoal = function(c){ state.saveGoal = Number(c); rerender(); };
+A.changeHome = function(){ state.returnTo = 'plan'; go('home'); };
+A.changeRide = function(){ state.returnTo = 'plan'; state.prep = {i:3, a:state.prep && state.prep.a || {}}; go('prep'); };
+A.startMonth = function(){ state.returnTo = null; startMonth(); go('week'); };
+
+/* ---------- The month ---------- */
+var WEEK_INFO = {1:['💵 Payday', '🧾 Bills'], 2:['🛒 Everyday life', '❗ Life happens'], 3:['💵 Payday', '🧾 Bills'], 4:['🛒 Everyday life', '🏁 Finish']};
+var WEEK_NAME = {1:'Payday and bills', 2:'Everyday life', 3:'Payday and bills', 4:'Everyday life'};
+function calendar(){
+  var s = S_();
+  return '<div class="cal" role="list" aria-label="Calendar for this month">' + [1, 2, 3, 4].map(function(w){
+    var done = w < s.week || s.finished, cur = w === s.week && !s.finished;
+    return '<div class="wk' + (done ? ' done' : '') + (cur ? ' cur' : '') + '" role="listitem"' + (cur ? ' aria-current="step"' : '') + '>' + (done ? '<span class="tick" aria-label="done">✓</span>' : '') +
+      '<b>Week ' + w + '</b>' + WEEK_INFO[w].map(function(t){ return '<span class="wi">' + t + '</span>'; }).join('') + '</div>'; }).join('') + '</div>';
+}
+S.week = function(){
+  var s = S_(), st = curStep(), steps = s.steps[s.week], last = s.step === steps.length - 1, ready = stepReady(st);
+  var body = STEP_UI[st.t](st);
+  var nextLabel = !last ? 'Next ➜' : s.week === 4 ? '🏁 Finish the month' : 'Finish Week ' + s.week + ' ✓';
+  return '<p class="eyebrow">📅 Week ' + s.week + ' of 4 · ' + WEEK_NAME[s.week] + '</p>' + calendar() + moneyStrip() + body +
+    actions(btn('🧾 What I spent', 'openHistory', null, 'link'), nextBtn('wnext', null, ready, nextLabel));
+};
+A.wnext = function(){
+  var s = S_(); if (!stepReady(curStep())) return;
+  if (s.step < s.steps[s.week].length - 1){ s.step++; }
+  else { endWeek(s.week); if (s.week < 4){ s.week++; s.step = 0; } else { s.finished = true; go('report'); return; } }
+  render(true);
+};
+var STEP_UI = {};
+STEP_UI.payday = function(st){
+  var s = S_(), d = s.done['pay' + st.n], pc = d || payFor(st.n), h = '';
+  h += head('💵 Payday', 'PAYDAY!', st.n === 1 ? 'This paycheck is for your work in the two weeks before this month.' : 'This paycheck is for your work in Week 1 and Week 2.');
+  if (st.n === 2) s.hourNotes.forEach(function(n){ h += hourNoteFb(n, false); });
+  h += '<div class="card center"><p class="say" style="margin:0">Your paycheck</p><div class="big-money" data-testid="paynet">' + money(pc.net) + '</div>' +
+    '<p class="small muted">' + num(pc.hours) + ' hours × ' + money(C(pc.rate)) + ' = ' + money(pc.gross) + ' gross pay, minus ' + money(pc.taxes) + ' taxes and deductions</p>' +
+    (d ? '' : '<button class="btn good big" data-act="deposit" data-arg="' + st.n + '">🏦 DEPOSIT MY PAYCHECK</button>') + '</div>';
+  return h + (d ? changeBox(curFx()) : '');
+};
+function hourNoteFb(n, future){
+  var d = money(n.d || 0), is = future ? 'Your Week 3 paycheck will be about ' : 'Your paycheck is ';
+  if (n.k === 'sched') return n.h < 0 ? fb('tip', '📅', 'Your manager posted next week’s schedule with ' + hoursWord(-n.h) + ' less work. ' + is + d + ' smaller.') : fb('good', '📅', 'Your manager posted next week’s schedule with ' + hoursWord(n.h) + ' more work. ' + is + d + ' bigger.');
+  if (n.h > 0) return fb('good', '➕', 'You worked ' + hoursWord(n.h) + ' more. ' + is + d + ' bigger.');
+  if (n.k === 'callOff') return fb('tip', '🕒', 'You missed ' + hoursWord(-n.h) + ' of work. ' + is + d + ' smaller.');
+  if (n.k === 'lostShift') return fb('tip', '🕒', 'A shift was canceled. You worked ' + num(-n.h) + ' fewer hours. ' + is + d + ' smaller.');
+  return fb('tip', '🕒', 'You worked ' + num(-n.h) + ' fewer hours. ' + is + d + ' smaller.');
+}
+A.deposit = function(n){ if (depositPay(Number(n))){ live('Deposited. Checking is now ' + money(S_().checking) + '.'); rerender(); } };
+STEP_UI.other = function(st){
+  var s = S_(), xs = otherFor(st.w), t = sum(xs, function(x){ return x.c; });
+  return head('🏛️ Other money', 'You have other money this week', null) +
+    '<div class="card"><ul class="lines say">' + xs.map(function(x){ return '<li><span>' + x.label + '</span><b>' + money(x.c) + '</b></li>'; }).join('') + '</ul>' +
+    (s.done['other' + st.w] ? '' : '<div class="center"><button class="btn good big" data-act="depositOther" data-arg="' + st.w + '">🏦 DEPOSIT ' + money(t) + '</button></div>') + '</div>' +
+    (s.done['other' + st.w] ? changeBox(curFx()) : '');
+};
+A.depositOther = function(w){ if (depositOther(w)) rerender(); };
+STEP_UI.bills = function(){
+  var s = S_(), done = s.done['bills' + s.week], due = billsDueNow(), h = head('🧾 Bills', 'BILLS DUE', null);
+  if (done){
+    var paid = s.bills.filter(function(b){ return b.paidWeek === s.week && owed(b) === 0; }), left = s.bills.filter(function(b){ return owed(b) > 0 && b.due <= s.week; }), arr = done.arranged ? find(s.bills, function(b){ return b.id === done.arranged; }) : null;
+    h += changeBox(curFx()) + (paid.length ? '<div class="card"><ul class="lines say">' + paid.map(function(b){ return '<li class="paid"><span>✓ ' + b.icon + ' ' + esc(b.label) + '</span><b>' + money(b.c + b.fee) + '</b></li>'; }).join('') + '</ul></div>' : '');
+    if (arr) h += fb('tip', '📞', 'Payment plan: you paid half of ' + esc(arr.label.toLowerCase()) + '. You will pay ' + money(owed(arr)) + (arr.due === 3 ? ' in Week 3.' : ' next month.'));
+    if (left.length) h += fb('warn', '⚠️', 'Not paid yet: ' + left.map(function(b){ return esc(b.label) + ' ' + money(owed(b)); }).join(', ') + '. ' + left.map(function(b){ return b.late === 'fee' ? (b.lateFee ? 'Late fee: ' + money(b.lateFee) + '.' : '') : LATE_TEXT[b.late]; }).filter(function(x, i, a){ return x && a.indexOf(x) === i; }).join(' ') + (s.week === 1 ? ' You can pay on your next payday in Week 3.' : ''));
+    return h;
+  }
+  if (!due.length) return h + fb('good', '✅', 'No bills are due this week.');
+  var total = sum(due, owed);
+  h += '<div class="card"><ul class="lines say">' + due.map(function(b){ return '<li><span>' + b.icon + ' ' + esc(b.label) + (b.lateApplied ? ' <span class="tag">Late' + (b.fee ? ', includes ' + money(b.fee) + ' fee' : '') + '</span>' : b.arranged ? ' <span class="tag">Payment plan</span>' : '') + '</span><b>' + money(owed(b)) + '</b></li>'; }).join('') +
+    '<li class="total"><span>Total</span><span>' + money(total) + '</span></li></ul></div>';
+  if (s.checking >= total) return h + '<div class="center">' + btn('🧾 PAY BILLS', 'payBills', 'all', 'good big') + '</div>';
+  var need = total - s.checking;
+  h += fb('warn', '⚠️', 'You have ' + money(s.checking) + ' in checking. You need ' + money(need) + ' more to pay all your bills.');
+  var arrB = canArrange();
+  h += '<div class="btnrow">' + (s.checking + s.savings >= total ? btn('🫙 Use ' + money(need) + ' from savings and pay', 'payBills', 'savings', 'good big') : '') +
+    (arrB ? btn('📞 Ask for a payment plan for ' + esc(arrB.label.toLowerCase()), 'payBills', 'plan', 'secondary big') : '') + btn('Pay what I can', 'payBills', 'cando', 'secondary big') + '</div>';
+  return h;
+};
+A.payBills = function(m){ if (payBillsNow(m)) rerender(); };
+STEP_UI.save = function(){
+  var s = S_(), d = s.done['save' + s.week], h = head('🫙 Savings', 'DO YOU WANT TO SAVE SOME MONEY?', 'Your plan: save ' + money(s.saveGoal) + ' on payday.');
+  var back = Math.min(s.usedSavings - s.paidBack, s.checking);
+  h += '<div class="choices">' + [0, 2500, 5000].map(function(c){ var sel = d && !d.back && d.c === c;
+    return choice('saveNow', c, c ? '🫙' : '🚫', money(c), c === s.saveGoal ? 'Your plan' : null, null, sel, !!d && !sel || !d && s.checking < c); }).join('') +
+    (s.week === 3 && (back > 0 || (d && d.back)) ? choice('payBack', '1', '↩️', 'Put back ' + money(d && d.back ? d.c : back), 'You used savings earlier this month.', null, d && d.back, !!d && !d.back) : '') + '</div>';
+  return h + (d ? changeBox(curFx()) + (d.c ? fb('good', '🫙', 'Savings can help you later if something happens.') : '') : '');
+};
+A.saveNow = function(c){ if (saveAmount(c)) rerender(); };
+A.payBack = function(){ if (payBackSavings()) rerender(); };
+STEP_UI.groc = function(st){
+  var s = S_(), d = s.done['groc' + st.n], opts = grocOptions(st.n), h = head('🛒 Groceries', 'TIME TO BUY GROCERIES', 'Your plan: ' + money(grocPlan(st.n)));
+  if (st.n === 1) s.hourNotes.forEach(function(n){ if (n.k === 'sched') h += hourNoteFb(n, true); });
+  if (st.n === 2 && s.grocDiscount) h += fb('good', '🏷️', 'Food you need is on sale. Your plan is ' + money(s.grocDiscount) + ' less.');
+  var canList = canPay(opts[0].c);
+  h += '<div class="choices one">' + opts.map(function(o){ var sel = d && d.id === o.id;
+    return choice('groc', o.id, o.icon, o.label.toUpperCase(), null, money(o.c), sel, !!d && !sel || !d && !canPay(o.c)); }).join('') +
+    (!canList || (d && d.id === 'pantry') ? choice('groc', 'pantry', '🥫', 'GET FOOD FROM A FOOD PANTRY', 'Free food from a community food pantry', money(0), d && d.id === 'pantry', !!d && d.id !== 'pantry') : '') + '</div>';
+  return h + (d ? changeBox(curFx()) : '');
+};
+A.groc = function(id){ var st = curStep(); if (buyGroceries(st.n, id)) rerender(); };
+STEP_UI.want = function(){
+  var s = S_(), w = wantNow(), d = s.done['want' + s.week], opts = easy() ? w.opts.slice(0, 2) : w.opts;
+  var h = head('🛍️ Your choice', w.q, null) + '<div class="choices one">' + opts.map(function(o, i){ var sel = d && d.label === o[0];
+    return choice('want', i, i ? w.icon : '🚫', o[0], null, money(o[1]), sel, !!d && !sel || !d && !canPay(o[1])); }).join('') + '</div>';
+  return h + (d ? changeBox(curFx()) : '');
+};
+A.want = function(i){ if (buyWant(i)) rerender(); };
+STEP_UI.event = function(st){
+  var s = S_(), e = eventFor(st.k), d = evDef(st.k), r = s.evRes[st.k];
+  var h = '<div class="card event' + (d.good ? ' goodev' : '') + '"><div class="eh"><span class="ei" aria-hidden="true">' + d.icon + '</span><div><span class="tag">' + (d.good ? '🎉 Good news' : '❗ Life happens') + '</span>' +
+    '<h1 tabindex="-1">' + esc(d.title) + '</h1></div></div><p class="say">' + esc(evText(d, e)) + '</p></div>';
+  h += '<div class="choices one">' + evOpts(d).map(function(o, i){ var sel = r && r.i === i, amt = o.gain ? '+' + money(o.gain) : money(o.c || 0), short = !r && o.c && !canPay(o.c);
+    return choice('ev', st.k + ':' + i, null, esc(o.label), short ? (o.plan ? '📞 Not enough money now. You can set up a payment plan.' : 'Not enough money') : null, amt, sel, !!r && !sel || short && !o.plan); }).join('') + '</div>';
+  if (r) h += fb(d.good ? 'good' : 'tip', d.good ? '🎉' : '💬', esc(r.after)) + changeBox(curFx());
+  return h;
+};
+A.ev = function(a){ var p = String(a).split(':'); if (resolveEvent(p[0], p[1])) rerender(); };
+
+STEP_UI.finish = function(){
+  var s = S_(), d = s.done.finish, h = head('🏁 Finish', 'Money left at the end of the month', 'You have ' + money(s.checking) + ' in checking. Do you want to move some to savings?');
+  var opts = [[0, '🏦', 'Keep it in checking'], [2500, '🫙', 'Move ' + money(2500)], [5000, '🫙', 'Move ' + money(5000)], ['half', '🫙', 'Move half (' + money(Math.floor(s.checking / 2)) + ')']];
+  h += '<div class="choices">' + opts.map(function(o){ var sel = d && (o[0] === 'half' ? d.half : !d.half && d.c === o[0]); var c = o[0] === 'half' ? Math.floor(s.checking / 2) : o[0];
+    return choice('finishMove', o[0], o[1], o[2], null, null, sel, !!d && !sel || !d && (s.checking < c || (o[0] === 'half' && c <= 0))); }).join('') + '</div>';
+  return h + (d ? changeBox(curFx()) : '');
+};
+A.finishMove = function(c){ var s = S_(); if (finishMove(c)){ if (c === 'half') s.done.finish.half = true; rerender(); } };
+
+/* ---------- Report ---------- */
+function reportData(){
+  var s = S_(), L = s.ledger;
+  function tot(f){ return sum(L.filter(f), function(t){ return t.c; }); }
+  var r = {earned:tot(function(t){ return t.kind === 'pay'; }), other:tot(function(t){ return t.kind === 'other'; }), bills:tot(function(t){ return t.kind === 'bill'; }),
+    groc:tot(function(t){ return t.kind === 'groc'; }), fun:tot(function(t){ return t.kind === 'want'; }), needs:tot(function(t){ return t.kind === 'need'; }),
+    saved:tot(function(t){ return t.kind === 'save' && t.to === 'savings'; }), savings:s.savings, checking:s.checking};
+  var good = [], hard = [], tips = [];
+  var gs = [1, 2].map(function(n){ return s.done['groc' + n]; }).filter(Boolean);
+  function gsum(id, f){ return sum(gs.filter(function(g){ return g.id === id; }), f); }
+  if (gs.some(function(g){ return g.id === 'coupons'; })) good.push('You used coupons and saved ' + money(gsum('coupons', function(g){ return g.plan - g.c; })) + ' on groceries.');
+  if (gs.some(function(g){ return g.id === 'extras'; })) hard.push('Snacks and extras added ' + money(gsum('extras', function(g){ return g.c - g.plan; })) + ' to your groceries.');
+  if (gs.some(function(g){ return g.id === 'pantry'; })) good.push('You used a food pantry to get groceries.');
+  if (r.saved) good.push('You saved ' + money(r.saved) + ' this month.');
+  var unpaid = s.bills.filter(function(b){ return owed(b) > 0; }), late = s.bills.filter(function(b){ return b.lateApplied; });
+  if (!unpaid.length && !late.length) good.push('You paid all your bills on time.');
+  else if (!unpaid.length) good.push('You paid all your bills.');
+  s.hourNotes.forEach(function(n){ var d = money(n.d || 0);
+    if (n.k === 'sched') (n.h < 0 ? hard : good).push('Your manager posted ' + (n.h < 0 ? 'fewer' : 'more') + ' hours for you. Your paycheck was ' + d + (n.h < 0 ? ' smaller. This was not your fault.' : ' bigger.'));
+    else if (n.k === 'extraShift') good.push('You worked an extra shift. Your paycheck was ' + d + ' bigger.');
+    else if (n.k === 'callOff') hard.push('You missed ' + hoursWord(-n.h) + ' of work, so your paycheck was ' + d + ' smaller.');
+    else if (n.k === 'sentHome') hard.push('Work sent you home early. That reduced your paycheck by ' + d + '. This was not your fault.');
+    else if (n.k === 'lostShift') hard.push('A shift was canceled. Your paycheck was ' + d + ' smaller. This was not your fault.'); });
+  if (s.evRes.birthday) good.push('You got ' + money(2500) + ' for your birthday' + (s.evRes.birthday.toSavings ? ' and saved it.' : '.'));
+  if (s.evRes.sale) good.push('A sale made your groceries cost less.');
+  if (s.evRes.dinner) good.push('A friend bought you dinner.');
+  Object.keys(s.evRes).forEach(function(k){ var x = s.evRes[k], d = evDef(k);
+    if (x.kind === 'need' && x.c) hard.push(d.title + ': you spent ' + money(x.c) + '. This was not your fault.');
+    if (x.kind === 'want' && x.c) (r.fun > 4000 ? hard : good).push(k === 'bingo' ? 'You spent ' + money(x.c) + ' at bingo.' : d.title + ': you spent ' + money(x.c) + '.'); });
+  var wantBuys = L.filter(function(t){ return t.kind === 'want' && /^want/.test(t.ref || ''); });
+  if (wantBuys.length) (r.fun > 4000 ? hard : good).push('Small buys added up to ' + money(sum(wantBuys, function(t){ return t.c; })) + '.');
+  s.notes.good.forEach(function(n){ if (good.indexOf(n) < 0) good.push(n); });
+  s.notes.hard.forEach(function(n){ if (hard.indexOf(n) < 0) hard.push(n); });
+  if (s.usedSavings) hard.push('You used ' + money(s.usedSavings) + ' from savings to cover costs.' + (s.paidBack ? ' You put ' + money(s.paidBack) + ' back.' : ''));
+  if (s.low != null && s.low < 2000 && s.low < s.checking) hard.push('Your checking got down to ' + money(s.low) + ' at one point.');
+  s.lateNotes.forEach(function(n){ if (hard.indexOf(n) < 0) hard.push(n); });
+  s.bills.filter(function(b){ return owed(b) > 0 && b.due > 4; }).forEach(function(b){ hard.push('You will pay ' + money(owed(b)) + ' for ' + b.label.toLowerCase() + ' next month.'); });
+  if (s.owe) hard.push('You still owe ' + money(s.owe) + ' for the car repair.');
+  if (late.length || unpaid.length) tips.push('On payday, pay your bills first.');
+  if (!r.saved) tips.push('Try saving ' + money(2500) + ' on payday. Savings can help when something happens.');
+  if (gs.some(function(g){ return g.id !== 'coupons' && g.id !== 'pantry'; })) tips.push('Try store brands and coupons to spend less on groceries.');
+  if (r.fun > 4000) tips.push('Small buys add up. Try picking one extra each week.');
+  if (tips.length < 2) tips.push('Play another month and try a different job, home, or way to get to work.');
+  if (!hard.length) hard.push('Nothing big this month. Nice!');
+  r.good = good.length ? good : ['You made it through all four weeks.']; r.hard = hard; r.tips = tips;
+  return r;
+}
+S.report = function(){
+  var r = reportData(), s = S_();
+  function stat(icon, label, c, id){ return '<div class="stat"><div class="sl">' + icon + ' ' + label + '</div><div class="sv" data-testid="' + id + '">' + money(c) + '</div></div>'; }
+  function list(t, xs){ return '<div class="card"><h2>' + t + '</h2><ul class="tips say">' + xs.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>'; }
+  return '<div class="center" style="display:flex;justify-content:center;gap:10px;align-items:center">' + (state.avatar ? '<span class="hero-av" style="margin:0">' + avatarSVG(state.avatar, 110) + '</span>' : '') + '<span aria-hidden="true" style="font-size:48px">🏁</span></div>' +
+    head('Results', 'YOU MADE IT THROUGH THE MONTH!', 'Here is what happened to your money, ' + esc(state.name || 'friend') + '.') +
+    '<div class="glance">' + stat('💵', 'Earned from work', r.earned, 'r-earned') + (r.other ? stat('🏛️', 'Other money', r.other, 'r-other') : '') + stat('🧾', 'Bills paid', r.bills, 'r-bills') + stat('🛒', 'Groceries', r.groc, 'r-groc') +
+    stat('🎱', 'Fun/wants', r.fun, 'r-fun') + (r.needs ? stat('🔧', 'Other needs', r.needs, 'r-needs') : '') + stat('🫙', 'Savings', r.savings, 'r-savings') + stat('🏦', 'Checking left', r.checking, 'r-checking') + '</div>' +
+    list('✅ WHAT WENT WELL', r.good) + list('⚠️ WHAT MADE THIS MONTH HARDER', r.hard) + list('💡 TRY THIS NEXT TIME', r.tips) +
+    actions(btn('🧾 What I spent', 'openHistory', null, 'link') + btn('↺ START AGAIN', 'askRestart'), btn('▶ PLAY ANOTHER MONTH', 'playAgain', null, 'primary big'));
+};
+A.playAgain = function(){ state = freshState(state); save(); go('area'); };
+
+/* ---------- Modal ---------- */
+var modalReturn = null, modalKind = null;
+function openModal(kind, html, wide){
+  var m = $('modal');
+  if (m.classList.contains('hidden')) modalReturn = document.activeElement;
+  modalKind = kind;
+  m.innerHTML = '<div class="modal-card' + (wide ? ' wide' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' + html + '</div>';
+  m.classList.remove('hidden');
+  var f = m.querySelector('[data-autofocus]') || m.querySelector('h2');
+  if (f){ if (f.tagName === 'H2') f.setAttribute('tabindex', '-1'); f.focus(); }
+}
+function closeModal(){
+  var m = $('modal'); if (m.classList.contains('hidden')) return;
+  m.classList.add('hidden'); m.innerHTML = ''; modalKind = null; stopSpeech();
+  if (modalReturn && document.body.contains(modalReturn)) modalReturn.focus(); else { var h = $('screen').querySelector('h1'); if (h) h.focus(); }
+  modalReturn = null;
+}
+function trapFocus(e){
+  var m = $('modal'); if (m.classList.contains('hidden')) return;
+  var f = Array.prototype.filter.call(m.querySelectorAll('button,input,select,textarea,summary,[href],[tabindex]:not([tabindex="-1"])'), function(x){ return !x.disabled && x.offsetParent !== null; });
+  if (!f.length) return;
+  var first = f[0], last = f[f.length - 1];
+  if (!m.contains(document.activeElement)){ e.preventDefault(); first.focus(); return; }
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+}
+A.closeModal = function(){ closeModal(); };
+
+/* ---------- What I spent (small history) ---------- */
+A.openHistory = function(){
+  var s = S_(), rows = s ? s.ledger.slice().reverse() : [];
+  function who(t){ return t.from === 'world' ? '+' : t.to === 'world' ? '−' : '↔'; }
+  openModal('history', '<h2 id="mTitle">🧾 What I spent</h2>' + (rows.length ? '<table class="txt"><thead><tr><th>Week</th><th>What</th><th class="n">Amount</th></tr></thead><tbody>' +
+    rows.map(function(t){ var mv = t.from !== 'world' && t.to !== 'world';
+      return '<tr><td>' + t.w + '</td><td>' + esc(t.label) + (mv ? ' <span class="muted small">(' + (t.to === 'savings' ? 'Checking → Savings' : 'Savings → Checking') + ')</span>' : '') + '</td><td class="n ' + (who(t) === '+' ? 'amt-in' : who(t) === '−' ? 'amt-out' : '') + '">' + (mv ? '' : who(t)) + money(t.c) + '</td></tr>'; }).join('') +
+    '</tbody></table>' : '<p>Nothing yet.</p>') + '<div class="modal-actions">' + btn('Close', 'closeModal', null, 'primary', ' data-autofocus') + '</div>');
+};
+
+/* ---------- Start again ---------- */
+A.askRestart = function(){
+  openModal('restart', '<h2 id="mTitle">Start again?</h2><p class="say">Your game will start over from the beginning.</p><div class="modal-actions">' + btn('No, keep playing', 'closeModal', null, 'secondary', ' data-autofocus') + btn('Yes, start again', 'restart', null, 'danger') + '</div>');
+};
+A.restart = function(){ closeModal(); bootResume = false; state = freshState(); save(); render(true); };
+
+/* ---------- Job coach settings (staff only) ---------- */
+function coachHtml(st){
+  function cb(id, label, on){ return '<label class="crow"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + '> ' + label + '</label>'; }
+  function nf(id, label, v, step, extra){ return '<div class="cfield"><label for="' + id + '">' + label + '</label><input id="' + id + '" type="number" inputmode="decimal" min="0" step="' + (step || '1') + '" value="' + v + '"' + (extra || '') + '></div>'; }
+  var h = '<h2 id="mTitle">⚙︎ Job coach settings</h2><div class="coach"><p class="small muted">For staff. Settings are saved only on this device. Nothing is sent anywhere.</p>';
+  h += '<h3>Mode</h3><div role="radiogroup" aria-label="Game mode">' +
+    '<label class="crow"><input type="radio" name="cMode" value="easy"' + (st.mode === 'easy' ? ' checked' : '') + '> <span><b>Easy</b>: simple paycheck (about 12% taxes), fewer choices, about 1 Life Happens event</span></label>' +
+    '<label class="crow"><input type="radio" name="cMode" value="standard"' + (st.mode === 'standard' ? ' checked' : '') + '> <span><b>Standard</b>: tax details, more choices, about 2 Life Happens events</span></label></div>';
+  h += '<h3>Life Happens and starting money</h3><div class="cgrid"><div class="cfield"><label for="cEvents">Life Happens events</label><select id="cEvents">' +
+    [['none','None'],['fewer','Fewer (1)'],['normal','Normal (Easy 1, Standard 2)'],['more','More (Easy 2, Standard 3)']].map(function(o){ return '<option value="' + o[0] + '"' + (st.events === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+    nf('cCheck', 'Starting checking ($)', st.startChecking, '0.01') + nf('cSave', 'Starting savings ($)', st.startSavings, '0.01') + '</div>';
+  h += '<h3>Jobs: wages and hours</h3><p class="small muted">Weekly hours are rounded so every shift is the same length (in half hours). The job card shows the new times.</p><details><summary>💼 Wages and hours</summary>' + JOBS.map(function(j){ var o = find(st.jobs, function(x){ return x.id === j.id; });
+    return '<div class="cgrid"><div class="cfield" style="grid-column:1/-1"><b>' + esc(j.title) + '</b> <span class="small muted">(' + daysStr(j.days) + ')</span></div>' + nf('jr_' + j.id, '$ an hour', o.rate, '0.01') + nf('jh_' + j.id, 'Hours a week', o.hours, '0.5') + '</div>'; }).join('') + '</details>';
+  h += '<h3>Monthly costs ($)</h3>';
+  COST_LABELS.forEach(function(g){ h += '<details><summary>' + g[0] + '</summary><div class="cgrid">' + g[1].map(function(c){ return nf('c_' + c[0], c[1], st.costs[c[0]], '0.01'); }).join('') + '</div></details>'; });
+  h += '<h3>Public transportation</h3>';
+  ['city','rural'].forEach(function(a){ var t = st.transit[a];
+    h += '<details><summary>' + (a === 'city' ? '🏙️ City or town' : '🌾 Rural area') + '</summary>' + cb('t_' + a + '_bus', 'Public bus', t.bus) + cb('t_' + a + '_evenings', 'Buses run after 7:00 PM', t.evenings) + cb('t_' + a + '_weekends', 'Buses run on Saturday and Sunday', t.weekends) + cb('t_' + a + '_shared', 'Shared-ride van (book a day ahead)', t.shared) + '</details>'; });
+  h += '<h3>Other income (starting amounts)</h3><div class="cgrid">' + OTHER.map(function(x){ return nf('o_' + x.k, x.label + ' ($ a month)', st.other[x.k], '0.01'); }).join('') + '</div><p class="small muted">The game does not calculate benefit changes.</p>';
+  h += '<p class="small muted">Changes apply to the next month. A month already started keeps its numbers.</p><p id="coachMsg" class="small" aria-live="polite"></p></div>';
+  h += '<div class="modal-actions">' + btn('Reset to defaults', 'coachReset') + btn('Cancel', 'closeModal') + btn('Save settings', 'coachSave', null, 'primary') + '</div>';
+  return h;
+}
+A.openCoach = function(){ openModal('coach', coachHtml(settings), true); };
+A.coachReset = function(){ openModal('coach', coachHtml(clone(DEFAULT_SETTINGS)), true); $('coachMsg').textContent = 'Defaults loaded. Press Save settings to keep them.'; };
+A.coachSave = function(){
+  var m = $('modal'), st = clone(settings);
+  function v(id){ var el = $(id); return el ? Number(el.value) : NaN; }
+  var mode = m.querySelector('input[name=cMode]:checked'); if (mode) st.mode = mode.value;
+  st.events = $('cEvents').value; st.startChecking = v('cCheck'); st.startSavings = v('cSave');
+  ['city','rural'].forEach(function(a){ ['bus','evenings','weekends','shared'].forEach(function(k){ st.transit[a][k] = !!$('t_' + a + '_' + k).checked; }); });
+  Object.keys(st.costs).forEach(function(k){ st.costs[k] = v('c_' + k); });
+  st.jobs.forEach(function(j){ j.rate = v('jr_' + j.id); j.hours = v('jh_' + j.id); });
+  OTHER.forEach(function(x){ st.other[x.k] = v('o_' + x.k); });
+  var oldOther = clone(settings.other);
+  settings = mergeSettings(st); store(LS_SET, settings);
+  if (state && !state.sim && JSON.stringify(state.other) === JSON.stringify(oldOther)) state.other = clone(settings.other);
+  if (state && !state.sim && state.transport && state.jobId && !find(transportInfo(currentJob()).opts, function(o){ return o.id === state.transport; })) state.transport = null;
+  closeModal(); rerender(); toast('✅ Settings saved on this device.');
+};
+
+/* ---------- Read aloud ---------- */
+function speechOK(){ return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; }
+var speaking = false;
+function cleanSpeech(t){ return t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{2190}-\u{21FF}\u{2300}-\u{23FF}]/gu, ' ').replace(/\s+/g, ' ').trim(); }
+function speechText(){
+  var root = $('modal').classList.contains('hidden') ? $('screen') : $('modal'), parts = [];
+  var h = root.querySelector('h1, h2'); if (h) parts.push(h.textContent);
+  Array.prototype.forEach.call(root.querySelectorAll('.say, .choice .ct b, .job .jt'), function(el){ var t = el.textContent; if (t && parts.indexOf(t) < 0) parts.push(t); });
+  return cleanSpeech(parts.join('. ').replace(/\.\s*\./g, '.'));
+}
+function setSpeakBtn(on){ var b = $('btnSpeak'); speaking = on; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.classList.toggle('on', on); b.setAttribute('aria-label', on ? 'Stop reading' : 'Read this screen out loud'); b.innerHTML = on ? '⏹ <span>Stop</span>' : '🔊 <span>Read aloud</span>'; }
+function stopSpeech(){ if (speechOK()){ try{ window.speechSynthesis.cancel(); }catch(e){} } if (speaking) setSpeakBtn(false); }
+A.speak = function(){
+  if (!speechOK()) return;
+  if (speaking){ stopSpeech(); return; }
+  var t = speechText(); if (!t) return;
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.92;
+  u.onend = u.onerror = function(){ setSpeakBtn(false); };
+  setSpeakBtn(true);
+  window.speechSynthesis.speak(u);
+};
+
+/* ---------- Clicks, typing, keys ---------- */
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if (el){
+    if (el.disabled) return;
+    var f = A[el.getAttribute('data-act')]; if (!f) return;
+    e.preventDefault(); f(el.getAttribute('data-arg'), el); return;
+  }
+  if (e.target === $('modal')) closeModal();
+});
+document.addEventListener('input', function(e){ var k = e.target.getAttribute && e.target.getAttribute('data-in'); if (k && IN[k]) IN[k](e.target.value, e.target); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){ if (!$('modal').classList.contains('hidden')){ e.preventDefault(); closeModal(); } else if (speaking) stopSpeech(); }
+  else if (e.key === 'Tab') trapFocus(e);
+  else if (e.key === 'Enter' && e.target && e.target.id === 'nameIn'){ e.preventDefault(); A.goAvatar(); }
+});
+window.addEventListener('pagehide', stopSpeech);
+
+/* ---------- Test hooks (read-only helpers; no network) ---------- */
+window.MMM = {
+  get state(){ return state; }, get settings(){ return settings; },
+  check: function(){ return invariants(); }, go: function(sc){ go(sc); }, plan: function(){ return plan(); }, jobs: function(){ return allJobs(); },
+  transport: function(){ return state.jobId ? transportInfo(currentJob()) : null; }, report: function(){ return state.sim ? reportData() : null; },
+  payFor: function(n){ return payFor(n); }, paycheckFor: function(rate, h){ return paycheckFor({rate:rate}, h); },
+  events: function(){ return Object.keys(EV()); }, step: function(){ return state.sim ? curStep() : null; }, avatars: AVATARS.map(function(a){ return a.id; }),
+  speechText: function(){ return speechText(); },
+  sampleEvents: function(n){ var seen = {}, old = rng; rng = mulberry32(99); for (var i = 0; i < (n || 200); i++) genEvents().forEach(function(e){ seen[e.k] = (seen[e.k] || 0) + 1; }); rng = old; return seen; }
+};
+
+/* ---------- Start ---------- */
+if (state.screen !== 'welcome' && state.name) bootResume = true;
+render(true);
+})();
+</script>
+</body>
+</html>

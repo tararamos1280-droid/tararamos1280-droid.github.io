@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interview Quick Pick</title>
+<style>
+:root{--ink:#18222d;--muted:#627180;--paper:#f4f1ea;--card:#fffdf8;--blue:#245c8a;--green:#2f7d4a;--gold:#e2a325;--red:#c23b3b;--shadow:0 10px 28px rgba(24,34,45,.12)}
+*{box-sizing:border-box} body{margin:0;font-family:"Trebuchet MS","Segoe UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}.wrap{max-width:760px;margin:0 auto;padding:24px 16px 48px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.back{text-decoration:none;color:var(--blue);font-weight:800}.pill{background:var(--card);padding:7px 11px;border-radius:999px;box-shadow:var(--shadow)}.screen{background:var(--card);border-radius:22px;padding:22px;box-shadow:var(--shadow)}h1{margin:0 0 10px;font-size:34px}h2{margin:0 0 8px}.lead{color:var(--muted);font-size:18px;line-height:1.45}.choices{display:grid;gap:10px;margin-top:16px}.choice{font:inherit;text-align:left;border:2px solid #ece3d5;background:white;border-radius:14px;padding:14px;cursor:pointer}.choice:hover{border-color:var(--blue)}.feedback{margin-top:14px;border-radius:14px;padding:14px}.good{background:#e7f6ec}.mid{background:#fff4d8}.low{background:#fde8e8}.btn{font:inherit;border:0;background:var(--blue);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;margin-top:12px}.hidden{display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.btn.alt{background:#efe8da;color:var(--ink);margin-left:8px}
+a:focus-visible,button:focus-visible{outline:3px solid #e69500;outline-offset:3px}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class='back' href='/'>← Back to game hub</a><div class="pill">Score <b id="score">0</b>/6</div></div>
+  <section class="screen" id="start">
+    <h1>Interview Quick Pick</h1>
+    <p class="lead">Three quick interview situations. Pick the strongest response and see why it works.</p>
+    <button class="btn" id="go">Start</button>
+  </section>
+  <section class="screen hidden" id="play"></section>
+  <section class="screen hidden" id="end"></section>
+  <div id="live" class="sr-only" aria-live="polite"></div>
+</div>
+<script>
+const qs=[
+ {q:"The interviewer asks, ‘Tell me about yourself.’",a:[
+   ["Tell your entire life story from childhood forward.",0,"Too much personal detail can bury the useful information."],
+   ["Give a short answer about your work strengths and the kind of role you want.",2,"Focused and job-related."],
+   ["Say, ‘I don’t know. It’s all on my resume.’",1,"The resume helps, but this is a chance to summarize your fit."]]},
+ {q:"You do not understand a question.",a:[
+   ["Guess what they meant and answer something unrelated.",0,"A guess can create confusion."],
+   ["Stay silent until they move on.",1,"Silence avoids a wrong answer, but asking is stronger."],
+   ["Ask the interviewer to repeat or rephrase it.",2,"Clarifying is appropriate and shows you want to answer accurately."]]},
+ {q:"They ask if you have any questions at the end.",a:[
+   ["Ask a question about the job, like ‘What would you expect me to learn first?’",2,"Shows interest in the job and what they expect from you."],
+   ["Say no immediately even though you have questions.",1,"Acceptable, but you miss a useful opportunity."],
+   ["Ask how soon you can call off after being hired.",0,"That creates the wrong first impression."]]}
+];
+let i=0,score=0;const s=document.getElementById('start'),p=document.getElementById('play'),e=document.getElementById('end'),se=document.getElementById('score');
+document.getElementById('go').onclick=()=>{s.classList.add('hidden');p.classList.remove('hidden');render()};
+function render(){const x=qs[i];p.innerHTML=`<h2 id="qh" tabindex="-1">Question ${i+1} of ${qs.length}</h2><p class="lead">${x.q}</p><div class="choices">${x.a.map((v,n)=>`<button class="choice" data-i="${n}">${v[0]}</button>`).join('')}</div><div id="fb"></div>`;p.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(+b.dataset.i));document.getElementById('live').textContent='';document.getElementById('qh').focus();}
+function pick(n){const x=qs[i].a[n];score+=x[1];se.textContent=score;const c=x[1]===2?'good':x[1]===1?'mid':'low';p.querySelectorAll('.choice').forEach(b=>b.disabled=true);const lbl=x[1]===2?'Strong answer':x[1]===1?'Okay answer':'Not the strongest answer';const best=qs[i].a.find(v=>v[1]===2)[0];const tip=x[1]===2?'':`<div><b>Stronger answer:</b> ${best}</div>`;document.getElementById('fb').innerHTML=`<div class="feedback ${c}"><b>${lbl} · +${x[1]}</b><div>${x[2]}</div>${tip}<button class="btn" id="next">${i===qs.length-1?'See score':'Next'}</button></div>`;document.getElementById('live').textContent=`${lbl}, plus ${x[1]}. ${x[2]}${x[1]===2?'':' Stronger answer: '+best}`;document.getElementById('next').onclick=next;}
+function next(){i++;if(i>=qs.length){finish();return;}render()}
+function finish(){p.classList.add('hidden');e.classList.remove('hidden');e.innerHTML=`<h1 id="endh" tabindex="-1">Interview complete</h1><p class="lead">Final score: <b>${score}/6</b></p><p>Use the feedback to talk through why each answer helps or hurts the interview.</p><button class="btn" id="again">↻ Play again</button><a class="btn alt" style="display:inline-block;text-decoration:none" href="/">Back to game hub</a>`;document.getElementById('again').onclick=restart;document.getElementById('live').textContent='';document.getElementById('endh').focus();}
+function restart(){i=0;score=0;se.textContent=0;e.classList.add('hidden');p.classList.remove('hidden');render();}
+</script>
+</body>
+</html>
