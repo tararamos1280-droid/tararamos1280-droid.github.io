@@ -100,9 +100,10 @@
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
   .practice { margin: 12px 0 0; padding-left: 22px; line-height: 1.5; }
   footer { margin-top: 14px; color: var(--muted); font-size: 13px; }
+.readbtn{border:2px solid var(--blue);border-radius:16px;background:white;color:inherit;padding:12px 18px;min-height:48px;font-weight:bold;font-family:inherit;font-size:16px;cursor:pointer}
 a:focus-visible,button:focus-visible{outline:3px solid #e69500;outline-offset:3px}</style>
 </head>
-<body><nav style="max-width:900px;margin:16px auto;padding:0 20px"><a href='/' style='color:inherit;font:700 16px system-ui'>← Back to game hub</a></nav>
+<body><nav style="max-width:900px;margin:16px auto;padding:0 20px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><a href='/' style='color:inherit;font:700 16px system-ui'>← Back to game hub</a><button id="read" type="button" class="readbtn">🔊 Read aloud</button></nav><p id="speechStatus" role="status" style="max-width:900px;margin:0 auto;padding:0 20px;font-size:16px"></p>
 <div class="wrap">
   <header class="top">
     <div class="brand">SHIFT CHALLENGE</div>
@@ -268,6 +269,7 @@ function updateHud() {
 }
 
 function render() {
+  stopVoice(); ttsStatus("");
   updateHud();
   const round = rounds[index];
   if (round.type === "choice") renderChoice(round);
@@ -391,6 +393,7 @@ function next() {
 }
 
 function finish() {
+  stopVoice(); ttsStatus("");
   play.classList.add("hidden");
   end.classList.remove("hidden");
   const max = 16;
@@ -422,6 +425,7 @@ function finish() {
     </div>
     <div class="actions">
       <button class="btn" id="again">Run the shift again</button>
+      <a class="btn alt" href="/" style="text-decoration:none">← Back to game hub</a>
     </div>
   `;
   document.getElementById("again").onclick = () => {
@@ -434,6 +438,37 @@ function finish() {
   live.textContent = "";
   document.getElementById("endh").focus();
 }
+
+/* Read aloud (offline, browser speech). Handles missing voices, waits for voiceschanged, cancels before speaking, and reports failures. */
+var ttsVoices=[];function ttsOk(){return 'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window}
+function ttsLoad(){try{ttsVoices=window.speechSynthesis.getVoices()||[]}catch(e){ttsVoices=[]}}
+if(ttsOk()){ttsLoad();try{window.speechSynthesis.addEventListener('voiceschanged',ttsLoad)}catch(e){window.speechSynthesis.onvoiceschanged=ttsLoad}}
+function ttsVoice(){return ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)&&v.localService})||ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)})||ttsVoices.find(function(v){return /^en/i.test(v.lang)})||null}
+function ttsStatus(msg){var s=document.getElementById('speechStatus');if(s)s.textContent=msg||''}
+function stopVoice(){if(ttsOk()){try{window.speechSynthesis.cancel()}catch(e){}}}
+function speak(words){ttsStatus('');if(!ttsOk()){ttsStatus('Read aloud is not available on this device. Ask a helper to read.');return}
+ stopVoice();if(!ttsVoices.length)ttsLoad();
+ var go=function(){var u=new SpeechSynthesisUtterance(words),v=ttsVoice(),started=false;if(v)u.voice=v;u.lang=v?v.lang:'en-US';u.rate=.85;
+  u.onstart=function(){started=true;ttsStatus('')};
+  u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;ttsStatus('Read aloud could not play on this device. Ask a helper to read.')};
+  try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();window.speechSynthesis.speak(u)}catch(e){ttsStatus('Read aloud could not play on this device. Ask a helper to read.');return}
+  setTimeout(function(){if(!started&&!window.speechSynthesis.speaking&&!window.speechSynthesis.pending)ttsStatus('Read aloud did not start. Check the volume, or ask a helper to read.')},2500)};
+ /* short delay after cancel() avoids a Chrome bug where the next utterance is dropped; wait briefly for voices if none loaded yet */
+ if(ttsVoices.length)setTimeout(go,60);else{var waited=0,t=setInterval(function(){ttsLoad();waited+=100;if(ttsVoices.length||waited>=1000){clearInterval(t);go()}},100)}}
+window.addEventListener('pagehide',stopVoice);
+document.getElementById("read").onclick = () => {
+  const vis = [home, play, end].find(x => !x.classList.contains("hidden"));
+  let w;
+  if (vis === play) {
+    const r = rounds[index];
+    w = r.title + ". " + r.text + " ";
+    if (r.type === "choice") w += r.options.map((o, i) => "Choice " + (i + 1) + ". " + o.t).join(" ");
+    else w += "The list now: " + sortOrder.map((it, pos) => (pos + 1) + ". " + r.items[it] + ".").join(" ");
+    const f = play.querySelector(".feedback");
+    if (f) w += " " + f.innerText.replace(/(Next spot|See the shift score)\s*$/, "");
+  } else w = vis.innerText.replace(/(Start the shift|Run the shift again|← Back to game hub)/g, "");
+  speak(w.replace(/·/g, ","));
+};
 </script>
 </body>
 </html>

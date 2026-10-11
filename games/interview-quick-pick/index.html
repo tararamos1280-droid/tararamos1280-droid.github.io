@@ -6,12 +6,14 @@
 <title>Interview Quick Pick</title>
 <style>
 :root{--ink:#18222d;--muted:#627180;--paper:#f4f1ea;--card:#fffdf8;--blue:#245c8a;--green:#2f7d4a;--gold:#e2a325;--red:#c23b3b;--shadow:0 10px 28px rgba(24,34,45,.12)}
-*{box-sizing:border-box} body{margin:0;font-family:"Trebuchet MS","Segoe UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}.wrap{max-width:760px;margin:0 auto;padding:24px 16px 48px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.back{text-decoration:none;color:var(--blue);font-weight:800}.pill{background:var(--card);padding:7px 11px;border-radius:999px;box-shadow:var(--shadow)}.screen{background:var(--card);border-radius:22px;padding:22px;box-shadow:var(--shadow)}h1{margin:0 0 10px;font-size:34px}h2{margin:0 0 8px}.lead{color:var(--muted);font-size:18px;line-height:1.45}.choices{display:grid;gap:10px;margin-top:16px}.choice{font:inherit;text-align:left;border:2px solid #ece3d5;background:white;border-radius:14px;padding:14px;cursor:pointer}.choice:hover{border-color:var(--blue)}.feedback{margin-top:14px;border-radius:14px;padding:14px}.good{background:#e7f6ec}.mid{background:#fff4d8}.low{background:#fde8e8}.btn{font:inherit;border:0;background:var(--blue);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;margin-top:12px}.hidden{display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.btn.alt{background:#efe8da;color:var(--ink);margin-left:8px}
+*{box-sizing:border-box} body{margin:0;font-family:"Trebuchet MS","Segoe UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}.wrap{max-width:760px;margin:0 auto;padding:24px 16px 48px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}.back{text-decoration:none;color:var(--blue);font-weight:800}.pill{background:var(--card);padding:7px 11px;border-radius:999px;box-shadow:var(--shadow)}.screen{background:var(--card);border-radius:22px;padding:22px;box-shadow:var(--shadow)}h1{margin:0 0 10px;font-size:34px}h2{margin:0 0 8px}.lead{color:var(--muted);font-size:18px;line-height:1.45}.choices{display:grid;gap:10px;margin-top:16px}.choice{font:inherit;text-align:left;border:2px solid #ece3d5;background:white;border-radius:14px;padding:14px;cursor:pointer}.choice:hover{border-color:var(--blue)}.feedback{margin-top:14px;border-radius:14px;padding:14px}.good{background:#e7f6ec}.mid{background:#fff4d8}.low{background:#fde8e8}.btn{font:inherit;border:0;background:var(--blue);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;margin-top:12px}.hidden{display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.btn.alt{background:#efe8da;color:var(--ink);margin-left:8px}
+.readbtn{border:2px solid var(--blue);border-radius:16px;background:white;color:inherit;padding:12px 18px;min-height:48px;font-weight:bold;font-family:inherit;font-size:16px;cursor:pointer}
 a:focus-visible,button:focus-visible{outline:3px solid #e69500;outline-offset:3px}</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a class='back' href='/'>← Back to game hub</a><div class="pill">Score <b id="score">0</b>/6</div></div>
+  <div class="top"><a class='back' href='/'>← Back to game hub</a><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill">Score <b id="score">0</b>/6</div><button id="read" type="button" class="readbtn">🔊 Read aloud</button></div></div>
+  <p id="speechStatus" role="status" style="margin:0 0 12px;font-size:16px"></p>
   <section class="screen" id="start">
     <h1>Interview Quick Pick</h1>
     <p class="lead">Three quick interview situations. Pick the strongest response and see why it works.</p>
@@ -38,11 +40,30 @@ const qs=[
 ];
 let i=0,score=0;const s=document.getElementById('start'),p=document.getElementById('play'),e=document.getElementById('end'),se=document.getElementById('score');
 document.getElementById('go').onclick=()=>{s.classList.add('hidden');p.classList.remove('hidden');render()};
-function render(){const x=qs[i];p.innerHTML=`<h2 id="qh" tabindex="-1">Question ${i+1} of ${qs.length}</h2><p class="lead">${x.q}</p><div class="choices">${x.a.map((v,n)=>`<button class="choice" data-i="${n}">${v[0]}</button>`).join('')}</div><div id="fb"></div>`;p.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(+b.dataset.i));document.getElementById('live').textContent='';document.getElementById('qh').focus();}
+function render(){stopVoice();ttsStatus('');const x=qs[i];p.innerHTML=`<h2 id="qh" tabindex="-1">Question ${i+1} of ${qs.length}</h2><p class="lead">${x.q}</p><div class="choices">${x.a.map((v,n)=>`<button class="choice" data-i="${n}">${v[0]}</button>`).join('')}</div><div id="fb"></div>`;p.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(+b.dataset.i));document.getElementById('live').textContent='';document.getElementById('qh').focus();}
 function pick(n){const x=qs[i].a[n];score+=x[1];se.textContent=score;const c=x[1]===2?'good':x[1]===1?'mid':'low';p.querySelectorAll('.choice').forEach(b=>b.disabled=true);const lbl=x[1]===2?'Strong answer':x[1]===1?'Okay answer':'Not the strongest answer';const best=qs[i].a.find(v=>v[1]===2)[0];const tip=x[1]===2?'':`<div><b>Stronger answer:</b> ${best}</div>`;document.getElementById('fb').innerHTML=`<div class="feedback ${c}"><b>${lbl} · +${x[1]}</b><div>${x[2]}</div>${tip}<button class="btn" id="next">${i===qs.length-1?'See score':'Next'}</button></div>`;document.getElementById('live').textContent=`${lbl}, plus ${x[1]}. ${x[2]}${x[1]===2?'':' Stronger answer: '+best}`;document.getElementById('next').onclick=next;}
 function next(){i++;if(i>=qs.length){finish();return;}render()}
-function finish(){p.classList.add('hidden');e.classList.remove('hidden');e.innerHTML=`<h1 id="endh" tabindex="-1">Interview complete</h1><p class="lead">Final score: <b>${score}/6</b></p><p>Use the feedback to talk through why each answer helps or hurts the interview.</p><button class="btn" id="again">↻ Play again</button><a class="btn alt" style="display:inline-block;text-decoration:none" href="/">Back to game hub</a>`;document.getElementById('again').onclick=restart;document.getElementById('live').textContent='';document.getElementById('endh').focus();}
+function finish(){stopVoice();ttsStatus('');p.classList.add('hidden');e.classList.remove('hidden');e.innerHTML=`<h1 id="endh" tabindex="-1">Interview complete</h1><p class="lead">Final score: <b>${score}/6</b></p><p>Use the feedback to talk through why each answer helps or hurts the interview.</p><button class="btn" id="again">↻ Play again</button><a class="btn alt" style="display:inline-block;text-decoration:none" href="/">Back to game hub</a>`;document.getElementById('again').onclick=restart;document.getElementById('live').textContent='';document.getElementById('endh').focus();}
 function restart(){i=0;score=0;se.textContent=0;e.classList.add('hidden');p.classList.remove('hidden');render();}
+
+/* Read aloud (offline, browser speech). Handles missing voices, waits for voiceschanged, cancels before speaking, and reports failures. */
+var ttsVoices=[];function ttsOk(){return 'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window}
+function ttsLoad(){try{ttsVoices=window.speechSynthesis.getVoices()||[]}catch(e){ttsVoices=[]}}
+if(ttsOk()){ttsLoad();try{window.speechSynthesis.addEventListener('voiceschanged',ttsLoad)}catch(e){window.speechSynthesis.onvoiceschanged=ttsLoad}}
+function ttsVoice(){return ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)&&v.localService})||ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)})||ttsVoices.find(function(v){return /^en/i.test(v.lang)})||null}
+function ttsStatus(msg){var s=document.getElementById('speechStatus');if(s)s.textContent=msg||''}
+function stopVoice(){if(ttsOk()){try{window.speechSynthesis.cancel()}catch(e){}}}
+function speak(words){ttsStatus('');if(!ttsOk()){ttsStatus('Read aloud is not available on this device. Ask a helper to read.');return}
+ stopVoice();if(!ttsVoices.length)ttsLoad();
+ var go=function(){var u=new SpeechSynthesisUtterance(words),v=ttsVoice(),started=false;if(v)u.voice=v;u.lang=v?v.lang:'en-US';u.rate=.85;
+  u.onstart=function(){started=true;ttsStatus('')};
+  u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;ttsStatus('Read aloud could not play on this device. Ask a helper to read.')};
+  try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();window.speechSynthesis.speak(u)}catch(e){ttsStatus('Read aloud could not play on this device. Ask a helper to read.');return}
+  setTimeout(function(){if(!started&&!window.speechSynthesis.speaking&&!window.speechSynthesis.pending)ttsStatus('Read aloud did not start. Check the volume, or ask a helper to read.')},2500)};
+ /* short delay after cancel() avoids a Chrome bug where the next utterance is dropped; wait briefly for voices if none loaded yet */
+ if(ttsVoices.length)setTimeout(go,60);else{var waited=0,t=setInterval(function(){ttsLoad();waited+=100;if(ttsVoices.length||waited>=1000){clearInterval(t);go()}},100)}}
+window.addEventListener('pagehide',stopVoice);
+document.getElementById('read').onclick=()=>{let w;if(!p.classList.contains('hidden')){const x=qs[i];w='Question '+(i+1)+' of '+qs.length+'. '+x.q+' '+x.a.map((v,n)=>'Choice '+'ABC'[n]+'. '+v[0]).join(' ');const f=p.querySelector('.feedback');if(f)w+=' '+f.innerText.replace(/(Next|See score)\s*$/,'').replace(/·/g,',')}else{const v=e.classList.contains('hidden')?s:e;w=v.innerText.replace(/↻ Play again|Back to game hub|Start/g,'')}speak(w)};
 </script>
 </body>
 </html>

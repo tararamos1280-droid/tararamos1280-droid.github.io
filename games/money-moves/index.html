@@ -193,6 +193,11 @@ p{margin:0 0 10px}
   .wk .wi{font-size:12px}
   .avatars{grid-template-columns:repeat(4,1fr);gap:8px}
 }
+@media (max-width:420px){
+  .brand{gap:6px}
+  .hdr-av,.hdr-av svg{width:32px;height:32px;flex:0 0 32px}
+  .brand-t{white-space:normal;overflow:visible;text-overflow:clip;font-size:16px;line-height:1.1}
+}
 </style>
 </head>
 <body>
@@ -958,7 +963,7 @@ function changeBox(fx){
   var both = dc && ds;
   if (dc || !ds) rows += '<span class="row">' + (both ? amt(dc) + ' · ' : '') + '🏦 Checking ' + money(fx.ck[0]) + ' → <b>' + money(fx.ck[1]) + '</b></span>';
   if (ds) rows += '<span class="row">' + (both ? amt(ds) + ' · ' : '') + '🫙 Savings ' + money(fx.sv[0]) + ' → <b>' + money(fx.sv[1]) + '</b></span>';
-  var t = fx.text || '', cls = /^\+|^You got/.test(t) ? 'amt-in' : /spent \$0|saved|^\s*$/.test(t) ? '' : 'amt-out';
+  var t = fx.text || '', cls = /^\+|^You got/.test(t) ? 'amt-in' : /spent \$0|saved|^You paid|^\s*$/.test(t) ? '' : 'amt-out';
   return '<div class="change say" data-testid="change" tabindex="-1" role="status"><span class="amt ' + cls + '">' + esc(t) + '</span>' + rows + '</div>';
 }
 function curFx(){ var s = S_(); return s && s.fx && s.fx.key === stepKey() ? s.fx : null; }
