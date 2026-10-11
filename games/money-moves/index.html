@@ -1502,6 +1502,11 @@ A.coachSave = function(){
 /* ---------- Read aloud ---------- */
 function speechOK(){ return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; }
 var speaking = false;
+/* Natural voice picker (self-contained): waits for voiceschanged; en-US first, then other English; prefers natural/neural voices; avoids robotic eSpeak/Chrome OS voices; falls back to the browser default. */
+var nvList=[];function nvLoad(){try{nvList=window.speechSynthesis.getVoices()||[]}catch(e){nvList=[]}}
+if('speechSynthesis' in window){nvLoad();try{window.speechSynthesis.addEventListener('voiceschanged',nvLoad)}catch(e){window.speechSynthesis.onvoiceschanged=nvLoad}}
+function pickVoice(){if(!nvList.length)nvLoad();var good=/Natural|Neural|Online|Premium|Enhanced|Google US English|Samantha|\bAva\b|Allison|\bAria\b|Jenny/i,bad=/eSpeak|Chrome OS/i,best=null,bs=0;nvList.forEach(function(v){var s=/^en[-_]US/i.test(v.lang)?40:/^en/i.test(v.lang)?20:-99;if(good.test(v.name))s+=10;if(bad.test(v.name))s=-99;if(v.default)s+=1;if(s>bs){bs=s;best=v}});return best}
+function nvReady(cb){if(nvList.length){setTimeout(cb,60);return}var waited=0,t=setInterval(function(){nvLoad();waited+=100;if(nvList.length||waited>=1000){clearInterval(t);cb()}},100)}
 function cleanSpeech(t){ return t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{2190}-\u{21FF}\u{2300}-\u{23FF}]/gu, ' ').replace(/\s+/g, ' ').trim(); }
 function speechText(){
   var root = $('modal').classList.contains('hidden') ? $('screen') : $('modal'), parts = [];
@@ -1516,10 +1521,13 @@ A.speak = function(){
   if (speaking){ stopSpeech(); return; }
   var t = speechText(); if (!t) return;
   try{ window.speechSynthesis.cancel(); }catch(e){}
-  var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.92;
-  u.onend = u.onerror = function(){ setSpeakBtn(false); };
   setSpeakBtn(true);
-  window.speechSynthesis.speak(u);
+  nvReady(function(){
+    if (!speaking) return;
+    var u = new SpeechSynthesisUtterance(t), v = pickVoice(); u.lang = v ? v.lang : 'en-US'; if (v) u.voice = v; u.rate = 0.95; u.pitch = 1;
+    u.onend = u.onerror = function(){ setSpeakBtn(false); };
+    window.speechSynthesis.speak(u);
+  });
 };
 
 /* ---------- Clicks, typing, keys ---------- */

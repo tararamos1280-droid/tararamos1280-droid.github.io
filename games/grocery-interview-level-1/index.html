@@ -10,12 +10,13 @@ const qs=[
 var ttsVoices=[];function ttsOk(){return 'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window}
 function ttsLoad(){try{ttsVoices=window.speechSynthesis.getVoices()||[]}catch(e){ttsVoices=[]}}
 if(ttsOk()){ttsLoad();try{window.speechSynthesis.addEventListener('voiceschanged',ttsLoad)}catch(e){window.speechSynthesis.onvoiceschanged=ttsLoad}}
-function ttsVoice(){return ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)&&v.localService})||ttsVoices.find(function(v){return /^en[-_]US/i.test(v.lang)})||ttsVoices.find(function(v){return /^en/i.test(v.lang)})||null}
+/* Natural voice picker: en-US first, then other English; prefers natural/neural voices; avoids robotic eSpeak/Chrome OS voices; null = browser default */
+function ttsVoice(){var good=/Natural|Neural|Online|Premium|Enhanced|Google US English|Samantha|\bAva\b|Allison|\bAria\b|Jenny/i,bad=/eSpeak|Chrome OS/i,best=null,bs=0;ttsVoices.forEach(function(v){var s=/^en[-_]US/i.test(v.lang)?40:/^en/i.test(v.lang)?20:-99;if(good.test(v.name))s+=10;if(bad.test(v.name))s=-99;if(v.default)s+=1;if(s>bs){bs=s;best=v}});return best}
 function ttsStatus(msg){var s=document.getElementById('speechStatus');if(s)s.textContent=msg||''}
 function stopVoice(){if(ttsOk()){try{window.speechSynthesis.cancel()}catch(e){}}}
 function speak(words){ttsStatus('');if(!ttsOk()){ttsStatus('Read aloud is not available on this device. Ask a helper to read.');return}
  stopVoice();if(!ttsVoices.length)ttsLoad();
- var go=function(){var u=new SpeechSynthesisUtterance(words),v=ttsVoice(),started=false;if(v)u.voice=v;u.lang=v?v.lang:'en-US';u.rate=.85;
+ var go=function(){var u=new SpeechSynthesisUtterance(words),v=ttsVoice(),started=false;if(v)u.voice=v;u.lang=v?v.lang:'en-US';u.rate=.95;u.pitch=1;
   u.onstart=function(){started=true;ttsStatus('')};
   u.onerror=function(e){if(e&&(e.error==='canceled'||e.error==='interrupted'))return;ttsStatus('Read aloud could not play on this device. Ask a helper to read.')};
   try{if(window.speechSynthesis.paused)window.speechSynthesis.resume();window.speechSynthesis.speak(u)}catch(e){ttsStatus('Read aloud could not play on this device. Ask a helper to read.');return}
