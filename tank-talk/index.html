@@ -58,6 +58,31 @@ html,body{margin:0;height:100%;font-family:"Trebuchet MS","Segoe UI",Arial,sans-
 #start svg.big{width:min(60vw,300px)}
 @media (max-width:640px){#play{grid-template-columns:1fr;justify-items:center}#right{width:100%}#tankWrap{flex-basis:40%}#mascotRow{justify-content:center}.choice{min-height:84px}}
 @media (max-height:560px) and (min-width:641px){#tankWrap{flex-basis:38%}}
+
+#play{display:flex;flex-direction:column;gap:8px;padding:8px;grid-template-columns:none}
+#tankWrap{flex:1 1 34%}
+#mascotRow{justify-content:center;min-height:0}#mascot{width:clamp(70px,10vw,110px)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,18px)}
+.pcard{aspect-ratio:1;max-height:30vh;justify-self:center;width:100%;border-radius:22px;background:radial-gradient(circle at 40% 30%,#fffef6,#e9e1c8);border:5px solid #f5d77a;box-shadow:0 6px 0 #a8862a;cursor:pointer;padding:6px;position:relative;transition:transform .2s}
+.pcard svg{width:100%;height:100%}
+.pcard.matched{border-color:#1a8a3a;box-shadow:0 0 0 6px #1a8a3a,0 6px 0 #0b5022;transform:scale(.96)}
+.pcard .tag{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);background:#fff;color:#123;border:3px solid #1a8a3a;border-radius:14px;padding:2px 12px;font-size:clamp(20px,4vw,34px);font-weight:900;font-family:"Comic Sans MS","Trebuchet MS",sans-serif;animation:pop .6s}
+.pcard .tag::before{content:"✔ ";color:#1a8a3a}
+.wcard{min-height:80px;border-radius:20px;border:5px solid #fff;background:linear-gradient(#fff,#dfeefa);color:#123;font-size:clamp(30px,6vw,54px);font-weight:900;font-family:"Comic Sans MS","Trebuchet MS",sans-serif;box-shadow:0 7px 0 #6b8aa3;cursor:pointer;touch-action:none;letter-spacing:2px}
+.wcard.sel{border-color:#ffb300;outline:6px dashed #ffb300;transform:translateY(-6px) scale(1.05)}
+.wcard.used{visibility:hidden}
+.wcard.no,.pcard.no{animation:wob .5s}
+#done{position:fixed;inset:0;background:radial-gradient(circle,#13527acc,#04121ccc);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9;gap:16px}
+#done[hidden]{display:none}#done svg.big{width:min(60vw,300px);animation:flip 1.4s ease-in-out infinite}
+#againBtn{font-size:34px;padding:18px 40px;border-radius:30px;border:6px solid #fff;background:linear-gradient(#3fd06a,#178a3b);color:#fff;font-weight:900;cursor:pointer;box-shadow:0 8px 0 #0b5022;display:flex;align-items:center;gap:12px}
+@media (max-width:640px){.pcard{max-height:none}.wcard{min-height:70px}#tankWrap{flex-basis:30%}}
+
+#tankWrap{flex:1 1 0;min-height:110px}#play{flex:0 0 auto}
+.row{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pcard{max-height:24vh;width:auto;max-width:100%}
+.wcard{min-height:64px}
+#bubbleSay{cursor:pointer}#bubbleSay svg{width:30px;height:30px}
+@media (max-width:640px){.pcard{max-height:none;width:100%;border-width:4px}#mascot{width:70px}}
 </style></head>
 <body>
 <div id="app">
@@ -75,13 +100,13 @@ html,body{margin:0;height:100%;font-family:"Trebuchet MS","Segoe UI",Arial,sans-
   <svg id="tankFx" viewBox="0 0 1000 500" preserveAspectRatio="none" style="pointer-events:none"></svg>
  </div>
  <div id="play">
-  <div id="picCard" role="button" aria-label="Hear the word"><div id="pic"></div><div class="ear"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" fill="#fff"/></svg></div></div>
-  <div id="right">
-   <div id="mascotRow"><svg id="mascot" viewBox="-20 -30 260 190"></svg><div id="bubbleSay" aria-live="polite"></div></div>
-   <div id="choices"></div>
-  </div>
+  <div id="mascotRow"><svg id="mascot" viewBox="-20 -30 260 190"></svg><div id="bubbleSay" aria-live="polite"></div></div>
+  <div id="pics" class="row"></div>
+  <div id="words" class="row"></div>
  </div>
 </div>
+<svg id="link" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:7"></svg>
+<div id="done" hidden><svg class="big" viewBox="-20 -30 260 190" id="doneFish"></svg><button id="againBtn" aria-label="Play again"><svg viewBox="0 0 24 24" width="44" height="44"><path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" fill="#fff"/></svg>Play again</button></div>
 <div id="start"><svg class="big" viewBox="-20 -30 260 190" id="startFish"></svg><button id="goBtn" aria-label="Start"><svg viewBox="0 0 24 24" width="44" height="44"><path d="M7 4l13 8-13 8z" fill="#fff"/></svg>Go</button></div>
 <script>
 "use strict";
@@ -201,6 +226,7 @@ const PICS={
  bag:()=>P(`<path d="M70 70 c0 -40 60 -40 60 0" stroke="#5a3010" stroke-width="10" fill="none"/><path d="M35 70 h130 l15 105 h-160z" fill="url(#bg)" stroke="#5a3010" stroke-width="3"/><rect x="85" y="95" width="30" height="16" rx="3" fill="#ffd34d" stroke="#8a6a00"/><path d="M45 80 l-8 85" stroke="#fff" stroke-width="6" opacity=".35"/>`,lg('bg','#c88848','#7a4a1a',1)),
  pen:()=>P(`<g transform="rotate(-40 100 100)"><rect x="30" y="85" width="120" height="30" rx="6" fill="url(#pe)" stroke="#123" stroke-width="3"/><path d="M150 85 l35 15 -35 15z" fill="#e8d0a0" stroke="#123" stroke-width="3"/><path d="M175 96 l10 4 -10 4z" fill="#123"/><rect x="40" y="78" width="50" height="8" rx="3" fill="#bbb" stroke="#555"/><path d="M36 92 h110" stroke="#fff" stroke-width="5" opacity=".5"/></g>`,lg('pe','#4a8aff','#1a3aa0',1)),
 };
+PICS.fish=()=>`<svg viewBox="-20 -30 260 190">${fishSVG('goldfish')}</svg>`;
 /* rounds: picture word, sound, match, other, other2 options */
 const ROUNDS=[
  ['sun','s','sock','map'],['cup','k','cab','dish'],['hat','h','ham','net'],['key','k','kit','bowl'],
@@ -258,10 +284,10 @@ function placeItem(k,i,isNew){
  const el=document.createElement('div');el.className='swimmer';el.dataset.kind=k;
  const box=$('#tankItems');
  if(isFish(k)){
-  const w=Math.max(60,Math.min(130,box.clientWidth*0.11))*(k==='puffer'?1.1:k==='tetra'?.7:1);
+  const w=Math.max(70,Math.min(200,box.clientWidth*0.16))*(k==='puffer'?1.1:k==='tetra'?.7:1);
   el.style.width=w+'px';el.style.height=(w*.8)+'px';
   el.innerHTML=`<div class="bob" style="animation-delay:${-i*.37}s;width:100%;height:100%"><svg viewBox="-20 -30 260 190">${fishSVG(k)}</svg></div>`;
-  const top=8+((i*23)%58);el.style.top=top+'%';
+  const top=4+((i*23)%52);el.style.top=top+'%';
   swim(el,i);
  }else{
   const w=Math.max(44,Math.min(90,box.clientWidth*0.08));
@@ -298,46 +324,67 @@ function star(x,y,s,r){cx.save();cx.translate(x,y);cx.rotate(r);cx.beginPath();f
 function loop(){anim=true;cx.clearRect(0,0,innerWidth,innerHeight);parts=parts.filter(p=>p.life>0);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.vx*=.98;p.life--;p.r+=.1;cx.globalAlpha=Math.min(1,p.life/40);cx.fillStyle=p.c;cx.shadowColor=p.c;cx.shadowBlur=12;star(p.x,p.y,p.s,p.r)});cx.globalAlpha=1;if(parts.length)requestAnimationFrame(loop);else{anim=false;cx.clearRect(0,0,innerWidth,innerHeight)}}
 
 /* ---------- GAME ---------- */
-let order=[],cur=null,locked=false;
+const POOL=Object.keys(PICS);const SETS=5;
+const NICE=['Yes!','Nice match.','You got it.','That is it.','Good eye.','Right on.'];
+let sets=[],setIdx=0,sel=null,left=0,lastPrompt='';
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function nextRound(){
- if(!order.length)order=shuffle(ROUNDS.slice());
- cur=order.pop();locked=false;
- const [w,snd,good,bad]=cur;
- $('#pic').innerHTML=PICS[w]();
- $('#bubbleSay').innerHTML=`${SPK.replace('#fff','#1f6a99')}<span>${w}</span>`;
- const opts=shuffle([good,bad]);
- $('#choices').innerHTML=opts.map(o=>`<button class="choice" data-w="${o}" aria-label="${o}">${o}<span class="say" data-say="${o}" role="button" aria-label="hear ${o}">${SPK}</span></button>`).join('');
- document.querySelectorAll('.choice').forEach(b=>{
-  b.addEventListener('click',e=>{if(e.target.closest('.say')){e.stopPropagation();say(b.dataset.w,false);return}answer(b)});
-  b.addEventListener('mouseenter',()=>{if(matchMedia('(hover:hover)').matches&&!locked)say(b.dataset.w,false)});
- });
- prompt();
+function newGame(){const w=shuffle(POOL.slice());sets=[];for(let i=0;i<SETS;i++)sets.push(w.slice(i*3,i*3+3));setIdx=0;startSet()}
+function gus(c){const m=$('#mascot');m.classList.remove('flip','shake');void m.offsetWidth;m.classList.add(c)}
+function startSet(){
+ const ws=sets[setIdx];left=3;sel=null;$('#link').innerHTML='';
+ $('#pics').innerHTML=shuffle(ws.slice()).map(w=>`<div class="pcard" data-w="${w}" role="button" aria-label="picture">${PICS[w]()}</div>`).join('');
+ $('#words').innerHTML=shuffle(ws.slice()).map(w=>`<button class="wcard" data-w="${w}">${w}</button>`).join('');
+ $('#bubbleSay').innerHTML=SPK.replace('#fff','#1f6a99');
+ document.querySelectorAll('.pcard').forEach(p=>p.addEventListener('click',()=>tapPic(p)));
+ document.querySelectorAll('.wcard').forEach(setupWord);
+ lastPrompt=['Tap a word. Then tap its picture.'];say(lastPrompt);
 }
-function prompt(){const [w]=cur;say([w+'.','Which word starts like '+w+'?'])}
-function answer(b){
- if(locked)return;const [w,snd,good]=cur;
- if(b.dataset.w===good){
-  locked=true;b.classList.add('right');
-  const m=$('#mascot');m.classList.remove('flip');void m.offsetWidth;m.classList.add('flip');
-  const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,70);
-  const mr=m.getBoundingClientRect();burst(mr.left+mr.width/2,mr.top+mr.height/2,40);
-  const k=addToTank();
-  const p=PRAISE[Math.floor(Math.random()*PRAISE.length)];
-  say([`${p} ${w}, ${good}. Same sound.`,isFish(k)?'A new fish joined your tank.':'A new treasure for your tank.']);
-  setTimeout(nextRound,4200);
+function setupWord(b){
+ let drag=null;
+ b.addEventListener('pointerdown',e=>{if(b.classList.contains('used'))return;pick(b);drag={x:e.clientX,y:e.clientY,moved:false};b.setPointerCapture(e.pointerId)});
+ b.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>15)drag.moved=true;if(drag.moved){b.style.transform=`translate(${dx}px,${dy}px) scale(1.05)`;b.style.zIndex=6}});
+ b.addEventListener('pointerup',e=>{if(!drag)return;const m=drag.moved;drag=null;b.style.transform='';b.style.zIndex='';if(m){b.style.visibility='hidden';const t=document.elementFromPoint(e.clientX,e.clientY);b.style.visibility='';const p=t&&t.closest('.pcard');if(p)tapPic(p)}});
+ b.addEventListener('pointercancel',()=>{drag=null;b.style.transform=''});
+}
+function pick(b){document.querySelectorAll('.wcard').forEach(x=>x.classList.remove('sel'));sel=b;b.classList.add('sel');say(b.dataset.w,false)}
+function tapPic(p){
+ if(p.classList.contains('matched')){say(p.dataset.w,false);return}
+ if(!sel){say(['Tap a word first.'],false);p.classList.remove('no');void p.offsetWidth;p.classList.add('no');return}
+ const w=sel.dataset.w,b=sel;
+ if(p.dataset.w===w){
+  const r1=b.getBoundingClientRect(),r2=p.getBoundingClientRect();
+  const x1=r1.left+r1.width/2,y1=r1.top+r1.height/2,x2=r2.left+r2.width/2,y2=r2.top+r2.height/2;
+  $('#link').innerHTML=`<path d="M${x1} ${y1} Q${(x1+x2)/2+60} ${(y1+y2)/2} ${x2} ${y2}" stroke="#ffe14a" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="2000" stroke-dashoffset="2000" style="filter:drop-shadow(0 0 8px #fff)"><animate attributeName="stroke-dashoffset" to="0" dur=".45s" fill="freeze"/><animate attributeName="opacity" values="1;1;0" dur="1.2s" fill="freeze"/></path>`;
+  setTimeout(()=>burst(x2,y2,45),400);
+  b.classList.remove('sel');b.classList.add('used');sel=null;p.classList.add('matched');p.insertAdjacentHTML('beforeend',`<div class="tag">${w}</div>`);
+  left--;
+  if(left>0){say([`${NICE[Math.floor(Math.random()*NICE.length)]} ${w}.`],false)}
+  else setTimeout(setDone,700);
  }else{
-  b.classList.remove('tryagain');void b.offsetWidth;b.classList.add('tryagain');
-  const m=$('#mascot');m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake');
-  say([`Good try. Listen: ${SOUND[snd]}... ${w}.`,`${b.dataset.w} has a different start.`,'Take your time. Try again.']);
+  [b,p].forEach(x=>{x.classList.remove('no');void x.offsetWidth;x.classList.add('no')});gus('shake');
+  say([`Hmm, this word says ${w}.`,`Look for the ${w}. Take your time.`],false);
  }
 }
-$('#repeatBtn').onclick=()=>{if(lastSaid)say(lastSaid)};
+function setDone(){
+ gus('flip');const k=addToTank();
+ const mr=$('#mascot').getBoundingClientRect();burst(mr.left+mr.width/2,mr.top+mr.height/2,60);
+ document.querySelectorAll('.swimmer').forEach(e=>{e._boost=4;setTimeout(()=>e._boost=1,2500)});
+ setIdx++;
+ if(setIdx<SETS){say(['All three. Nice work!',isFish(k)?'A new fish is in your tank. Look at it go!':'A new treasure for your tank.'],false);setTimeout(startSet,4200)}
+ else setTimeout(finale,1500);
+}
+function finale(){
+ for(let i=0;i<8;i++)setTimeout(()=>burst(Math.random()*innerWidth,Math.random()*innerHeight*.6,60),i*300);
+ $('#done').hidden=false;say(['Your tank is full of life. Great job today!','Want to play again with new words? Tap play again.'],false);
+}
+$('#againBtn').onclick=()=>{$('#done').hidden=true;items=[];try{localStorage.setItem('tt_tank','[]')}catch(e){}renderTank();newGame()};
+$('#repeatBtn').onclick=()=>say(lastPrompt);
 $('#stopBtn').onclick=()=>{if('speechSynthesis' in window)speechSynthesis.cancel()};
-$('#soundBtn').onclick=()=>{soundOn=!soundOn;localStorage.setItem('tt_sound',soundOn?'on':'off');setSoundIcon();if(soundOn)say('Sound is on.',false);else speechSynthesis&&speechSynthesis.cancel()};
-$('#picCard').onclick=()=>{if(cur)say(cur[0],false)};
-$('#mascot').onclick=()=>{say(["Hi, I'm Gus.","I like your tank."],false)};
-$('#goBtn').onclick=()=>{$('#start').remove();say(["Hi, I'm Gus. Let's fill your tank.","Listen to the word, then pick the word that starts the same."]);setTimeout(nextRound,5200)};
+$('#soundBtn').onclick=()=>{soundOn=!soundOn;localStorage.setItem('tt_sound',soundOn?'on':'off');setSoundIcon();if(soundOn)say('Sound is on.',false);else if('speechSynthesis' in window)speechSynthesis.cancel()};
+$('#bubbleSay').onclick=()=>say(lastPrompt);
+$('#mascot').onclick=()=>say(["Hi, I'm Gus.","I like your tank."],false);
+$('#goBtn').onclick=()=>{$('#start').remove();say(["Hi, I'm Gus. Let's match words and pictures, and fill your tank."]);setTimeout(newGame,4000)};
+$('#doneFish').innerHTML=fishSVG('gus');
 $('#mascot').innerHTML=fishSVG('gus');$('#startFish').innerHTML=fishSVG('gus');
 setSoundIcon();drawTankBg();renderTank();
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(renderTank,300)});
