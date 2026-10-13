@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workday Mayhem – First Shift at FreshMart</title>
+<style>
+:root{--bg:#1d2340;--panel:#fffdf7;--ink:#1f2333;--accent:#ff7a3d;--good:#1f8a4c;--ok:#2a6fc9;--try:#b5462b;--focus:#ffd400}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(circle at 30% 0%,#3b4a8c,#1d2340 60%,#121528);color:var(--ink);font-size:18px;line-height:1.45}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.btn{min-height:52px;min-width:52px;padding:10px 18px;border:0;border-radius:14px;background:linear-gradient(#ff9a5c,#ef6424);color:#fff;font-weight:700;box-shadow:0 4px 0 #b4441a,0 8px 16px rgba(0,0,0,.25);text-shadow:0 1px 1px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b4441a}
+.btn.sec{background:linear-gradient(#f4f6ff,#cfd6f2);color:#1f2333;box-shadow:0 4px 0 #8e97ba,0 8px 16px rgba(0,0,0,.2);text-shadow:none}
+header.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;color:#fff}
+header.top h1{font-size:1.25rem;margin:0 auto 0 0;letter-spacing:1px;font-weight:900;background:linear-gradient(#ffe36b,#ff8a3d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.screen{display:none}.screen.on{display:block}
+/* title */
+#select{max-width:1100px;margin:0 auto;padding:12px;color:#fff;text-align:center}
+.logo{font-size:clamp(2.2rem,8vw,4.6rem);font-weight:900;margin:.2em 0 0;letter-spacing:2px;background:linear-gradient(#fff38a,#ff9b3d 55%,#e2491e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 #7a2a12) drop-shadow(0 12px 18px rgba(0,0,0,.5))}
+.tag{opacity:.9;margin:.2em 0 1em}
+.chars{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.char{background:linear-gradient(160deg,#ffffff,#e7ebff);border:4px solid transparent;border-radius:22px;padding:10px;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.35);min-height:250px;display:flex;flex-direction:column;align-items:center}
+.char[aria-pressed=true]{border-color:var(--accent);background:linear-gradient(160deg,#fff7e8,#ffd9b8)}
+.char[aria-pressed=true]::after{content:"✔ Selected";font-weight:800;color:#a3410f}
+.char svg{width:130px;height:150px}
+.char b{font-size:1.1rem}.char small{display:block;opacity:.8}
+.opts{margin:16px auto;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tog{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);padding:8px 14px;border-radius:12px;min-height:52px;color:#fff;border:2px solid rgba(255,255,255,.3)}
+.tog[aria-pressed=true]{background:#fff;color:#1f2333}
+.tog[aria-pressed=true]::before{content:"✔ "}.tog[aria-pressed=false]::before{content:"✖ "}
+/* game */
+#game{max-width:1280px;margin:0 auto;padding:0 8px 12px}
+.layout{display:grid;grid-template-columns:1fr 290px;gap:10px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.stage{position:relative;width:100%;aspect-ratio:1000/640;border-radius:18px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.5);background:#2b2f4a}
+.stage svg.world{position:absolute;inset:0;width:100%;height:100%}
+.hot{position:absolute;transform:translate(-50%,-50%);min-width:56px;min-height:56px;padding:6px 12px;border-radius:30px;border:3px solid #fff;background:rgba(31,35,51,.82);color:#fff;font-weight:800;font-size:clamp(11px,1.6vw,16px);display:flex;align-items:center;gap:6px;box-shadow:0 6px 14px rgba(0,0,0,.45)}
+.hot .pin{width:26px;height:26px;border-radius:50%;background:linear-gradient(#ffd25e,#ff8a1f);color:#222;display:grid;place-items:center;font-size:14px;flex:none}
+.hot.next{animation:pulse 1.6s infinite;background:rgba(239,100,36,.95)}
+.hot.done .pin{background:linear-gradient(#7be3a4,#1f8a4c);color:#fff}
+.hot.locked{opacity:.75;border-style:dashed}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,210,94,.9),0 6px 14px rgba(0,0,0,.45)}50%{box-shadow:0 0 0 12px rgba(255,210,94,0),0 6px 14px rgba(0,0,0,.45)}}
+#player{position:absolute;width:11%;transform:translate(-50%,-92%);transition:left 1.1s ease-in-out,top 1.1s ease-in-out;pointer-events:none;z-index:3}
+#player svg{width:100%;height:auto;overflow:visible;filter:drop-shadow(0 0 3px rgba(0,0,0,.55))}
+.bubble{position:absolute;z-index:4;left:50%;bottom:100%;transform:translateX(-50%);background:#fff;border-radius:14px;padding:6px 10px;font-size:clamp(11px,1.5vw,15px);font-weight:700;white-space:nowrap;box-shadow:0 4px 10px rgba(0,0,0,.35);display:none}
+.bubble.on{display:block}
+.side{background:linear-gradient(#fffdf7,#f1ecdf);border-radius:18px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.side h2{font-size:1.05rem;margin:.2em 0 .4em}
+.check{list-style:none;padding:0;margin:0}
+.check li{padding:6px 4px;border-bottom:1px dashed #d6ccb4;display:flex;gap:8px}
+.check li .ic{flex:none;width:26px;text-align:center;font-weight:900}
+.side select{width:100%;min-height:52px;font:inherit;border-radius:12px;padding:6px}
+.side .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.hint{background:#fff3c4;border-left:6px solid #e0a800;border-radius:10px;padding:8px;margin-top:8px;font-size:.95rem}
+/* dialog */
+.dlg{position:fixed;inset:0;background:rgba(10,12,25,.66);display:none;align-items:center;justify-content:center;padding:10px;z-index:20}
+.dlg.on{display:flex}
+.card{background:var(--panel);border-radius:22px;max-width:760px;width:100%;max-height:94vh;overflow:auto;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6);position:relative}
+.card h2{margin:.1em 0 .3em;font-size:1.35rem}
+.scene{display:flex;gap:12px;align-items:flex-end;background:linear-gradient(#dff1ff,#fbe9cf);border-radius:16px;padding:8px 12px;margin-bottom:10px;min-height:120px}
+.scene svg{width:110px;height:120px;flex:none}
+.say{background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 3px 8px rgba(0,0,0,.15);position:relative;flex:1}
+.say b{display:block;font-size:.85rem;color:#6a5a3a}
+.choices{display:grid;gap:10px;margin:10px 0}
+.choice{text-align:left;min-height:56px;padding:12px 14px;border-radius:14px;border:3px solid #c9cfe6;background:linear-gradient(#fff,#eef1fb);box-shadow:0 3px 0 #aab2d0}
+.choice:hover{border-color:var(--accent)}
+.choice[data-res=best]{border-color:var(--good);background:#e5f7ec}
+.choice[data-res=ok]{border-color:var(--ok);background:#e6effc}
+.choice[data-res=try]{border-color:var(--try);background:#fbe9e4}
+.fb{border-radius:14px;padding:10px 12px;margin:8px 0;display:none;font-size:1rem}
+.fb.on{display:block}
+.fb.best{background:#e5f7ec;border-left:8px solid var(--good)}
+.fb.ok{background:#e6effc;border-left:8px solid var(--ok)}
+.fb.try{background:#fbe9e4;border-left:8px solid var(--try)}
+.fb strong{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.prod,.shelf{min-height:64px;border-radius:14px;border:3px solid #c9cfe6;background:linear-gradient(#fff,#eef1fb);display:flex;align-items:center;gap:8px;padding:6px 10px;text-align:left;box-shadow:0 3px 0 #aab2d0}
+.prod[aria-pressed=true]{border-color:var(--accent);background:#fff1e4;outline:3px dashed var(--accent)}
+.prod[disabled]{opacity:.55}
+.prod svg,.shelf svg{width:44px;height:44px;flex:none}
+.shelf{background:linear-gradient(#f6efe2,#e1d3b8)}
+.shelf .sign{font-weight:800}
+.hz{min-height:64px}
+.end{max-width:900px;margin:0 auto;padding:12px;color:#fff}
+.end .side{color:var(--ink);margin-bottom:12px}
+.end ul{margin:.3em 0}
+.close-x{position:absolute;right:10px;top:10px}
+.tts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tts .btn{min-height:44px;padding:6px 12px;font-size:.9rem}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+body.rm *{animation:none!important;transition:none!important}
+/* character idle animations */
+.bob{animation:bob 2.2s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-4px) scaleY(1.02)}}
+.walking .bob{animation:walk .35s ease-in-out infinite}
+@keyframes walk{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+.blink{animation:blink 4s infinite;transform-origin:center;transform-box:fill-box}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.happy .bob{animation:hop .5s ease 2}
+@keyframes hop{50%{transform:translateY(-18px) scale(1.05)}}
+.oops .bob{animation:shake .4s ease 2}
+@keyframes shake{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+</style>
+</head>
+<body>
+<div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ============ SELECT SCREEN ============ -->
+<main id="select" class="screen on" aria-labelledby="logoT">
+  <h1 id="logoT" class="logo">WORKDAY MAYHEM</h1>
+  <p class="tag">Your first shift at <b>FreshMart Grocery</b>. Pick your worker. Everyone has the same skills — it's just about style.</p>
+  <div class="chars" role="group" aria-label="Choose your character" id="charList"></div>
+  <div class="opts" role="group" aria-label="Settings">
+    <button class="tog" id="tgSpeak" aria-pressed="false">Read aloud</button>
+    <button class="tog" id="tgMotion" aria-pressed="false">Reduce motion</button>
+    <button class="tog" id="tgHints" aria-pressed="true">Show instructions</button>
+  </div>
+  <button class="btn" id="startBtn" style="font-size:1.3rem;padding:14px 34px">Start my shift ▶</button>
+  <p id="resumeNote" style="opacity:.85"></p>
+</main>
+
+<!-- ============ GAME SCREEN ============ -->
+<div id="game" class="screen">
+  <header class="top">
+    <h1>WORKDAY MAYHEM</h1>
+    <button class="btn sec" id="bSpeak" aria-pressed="false">🔈 Read aloud: Off</button>
+    <button class="btn sec" id="bMotion" aria-pressed="false">Motion: Normal</button>
+    <button class="btn sec" id="bMenu">Change worker</button>
+  </header>
+  <div class="layout">
+    <div class="stage" id="stage" role="region" aria-label="FreshMart store map. Use the location buttons to walk there.">
+      <svg class="world" id="world" viewBox="0 0 1000 640" aria-hidden="true"></svg>
+      <div id="player"><div class="bubble" id="bubble"></div><div id="playerArt"></div></div>
+      <div id="hots"></div>
+    </div>
+    <aside class="side" aria-label="Shift checklist and navigation">
+      <h2>📋 Today's checklist</h2>
+      <ul class="check" id="checklist"></ul>
+      <label for="goto"><h2 style="margin-top:12px">🚶 Go to a place</h2></label>
+      <select id="goto" aria-label="Choose a place to go"></select>
+      <div class="row"><button class="btn" id="goBtn">Go there</button></div>
+      <div class="hint" id="hintBox" role="note"></div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============ END SCREEN ============ -->
+<main id="end" class="screen end" aria-labelledby="endT">
+  <h1 id="endT" class="logo" style="font-size:clamp(2rem,6vw,3.4rem)">Shift Complete!</h1>
+  <div class="scene" id="endScene" style="background:linear-gradient(#ffe9a8,#ffc68a)"></div>
+  <section class="side"><h2>✅ Tasks completed</h2><ul class="check" id="endTasks"></ul></section>
+  <section class="side"><h2>🧠 Skills you practiced</h2><ul id="endSkills"></ul></section>
+  <section class="side"><h2>⭐ Decisions you made on your own</h2><ul id="endDec"></ul></section>
+  <section class="side"><h2>➡️ Ideas for your next shift</h2><ul id="endNext"></ul></section>
+  <div class="opts"><button class="btn" id="againBtn">Play another shift</button><button class="btn sec" id="newCharBtn">Pick a different worker</button></div>
+</main>
+
+<!-- ============ ACTIVITY DIALOG ============ -->
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+  <div class="card">
+    <button class="btn sec close-x" id="dlgClose" aria-label="Close and go back to the store">✕</button>
+    <h2 id="dlgT"></h2>
+    <div id="dlgBody"></div>
+    <div class="tts" id="ttsRow" hidden><button class="btn sec" id="ttsRep">🔁 Repeat</button><button class="btn sec" id="ttsStop">⏹ Stop</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------------- CHARACTER ART (layered SVG with gradients) ---------------- */
+const DEF=`<defs>
+<radialGradient id="gShadow"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<linearGradient id="gVest" x1="0" x2="1"><stop offset="0" stop-color="#ffe000"/><stop offset=".6" stop-color="#ffb300"/><stop offset="1" stop-color="#e08a00"/></linearGradient>
+<radialGradient id="gGoose" cx=".35" cy=".3"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#e9e9ef"/><stop offset="1" stop-color="#b9bccb"/></radialGradient>
+<radialGradient id="gPickle" cx=".35" cy=".3"><stop offset="0" stop-color="#b7e36b"/><stop offset=".6" stop-color="#5fa63a"/><stop offset="1" stop-color="#2f6a1e"/></radialGradient>
+<radialGradient id="gRac" cx=".35" cy=".3"><stop offset="0" stop-color="#c9c9cf"/><stop offset=".7" stop-color="#8a8b95"/><stop offset="1" stop-color="#55565f"/></radialGradient>
+<linearGradient id="gHood" x1="0" x2="1"><stop offset="0" stop-color="#6f5cff"/><stop offset="1" stop-color="#3a2ab8"/></linearGradient>
+<radialGradient id="gTater" cx=".35" cy=".3"><stop offset="0" stop-color="#f4cf8a"/><stop offset=".65" stop-color="#cf9a52"/><stop offset="1" stop-color="#8c5f2a"/></radialGradient>
+<radialGradient id="gAlien" cx=".35" cy=".3"><stop offset="0" stop-color="#d4ffe9"/><stop offset=".6" stop-color="#4fd6a0"/><stop offset="1" stop-color="#16805a"/></radialGradient>
+<linearGradient id="gShoe" x1="0" y1="0" y2="1"><stop offset="0" stop-color="#ff5d5d"/><stop offset="1" stop-color="#a61e2b"/></linearGradient>
+<linearGradient id="gBoot" x1="0" y1="0" y2="1"><stop offset="0" stop-color="#8a5a2b"/><stop offset="1" stop-color="#3f2410"/></linearGradient>
+<radialGradient id="gEye" cx=".4" cy=".35"><stop offset="0" stop-color="#555"/><stop offset="1" stop-color="#000"/></radialGradient>
+</defs>`;
+function eye(x,y,r=6){return `<g class="blink"><circle cx="${x}" cy="${y}" r="${r+3}" fill="#fff"/><circle cx="${x+1}" cy="${y+1}" r="${r}" fill="url(#gEye)"/><circle cx="${x+3}" cy="${y-2}" r="2" fill="#fff"/></g>`}
+const CHARS={
+ gary:{name:"Gary the Goose",blurb:"Safety vest. Strong opinions. Occasionally honks.",
+  art:()=>`<ellipse cx="60" cy="146" rx="34" ry="7" fill="url(#gShadow)"/><g class="bob">
+  <path d="M48 128 l-8 12 h14z M70 128 l-4 12 h14z" fill="#ff8a1f" stroke="#c45c00" stroke-width="2"/>
+  <ellipse cx="60" cy="102" rx="34" ry="30" fill="url(#gGoose)"/>
+  <path d="M34 90 q26 -8 52 0 l-4 34 q-22 8 -44 0z" fill="url(#gVest)"/><path d="M38 104 h44 M40 114 h40" stroke="#e8f0ff" stroke-width="5" opacity=".95"/>
+  <path d="M60 80 q-6 -30 4 -48" stroke="url(#gGoose)" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <ellipse cx="66" cy="28" rx="15" ry="13" fill="url(#gGoose)"/><path d="M78 26 q16 2 18 7 q-6 4 -18 3z" fill="#ff8a1f" stroke="#c45c00" stroke-width="1.5"/>${eye(68,24,4)}</g>`},
+ pickles:{name:"Pickles",blurb:"A walking pickle with fresh sneakers and a name tag.",
+  art:()=>`<ellipse cx="60" cy="146" rx="30" ry="7" fill="url(#gShadow)"/><g class="bob">
+  <rect x="40" y="126" width="16" height="14" rx="6" fill="url(#gShoe)"/><rect x="64" y="126" width="16" height="14" rx="6" fill="url(#gShoe)"/><path d="M40 136h16M64 136h16" stroke="#fff" stroke-width="3"/>
+  <rect x="30" y="14" width="60" height="116" rx="30" fill="url(#gPickle)"/>
+  <g fill="#3f7d24" opacity=".7"><circle cx="42" cy="40" r="3"/><circle cx="76" cy="60" r="3"/><circle cx="44" cy="98" r="3"/><circle cx="74" cy="112" r="2.5"/></g>
+  ${eye(50,48)}${eye(72,48)}<path d="M50 66 q11 9 22 0" stroke="#1e3d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="44" y="82" width="32" height="16" rx="3" fill="#fff" stroke="#2a6fc9" stroke-width="2"/><text x="60" y="94" font-size="7" text-anchor="middle" font-weight="700" fill="#2a6fc9" font-family="Arial">PICKLES</text></g>`},
+ frank:{name:"Frank the Raccoon",blurb:"Hoodie, backpack, and very curious hands.",
+  art:()=>`<ellipse cx="60" cy="146" rx="32" ry="7" fill="url(#gShadow)"/><g class="bob">
+  <path d="M90 110 q22 -4 18 -24 q-4 10 -14 10" fill="url(#gRac)" stroke="#333" stroke-width="2"/><path d="M98 98 l8 -6 M102 106 l6 -8" stroke="#333" stroke-width="4"/>
+  <rect x="80" y="70" width="22" height="40" rx="8" fill="#e0543b"/><rect x="44" y="126" width="14" height="12" rx="5" fill="#333"/><rect x="64" y="126" width="14" height="12" rx="5" fill="#333"/>
+  <path d="M30 128 q0 -60 30 -62 q30 2 30 62z" fill="url(#gHood)"/><path d="M52 80 v20 M68 80 v20" stroke="#fff" stroke-width="3"/>
+  <circle cx="34" cy="26" r="11" fill="url(#gRac)"/><circle cx="86" cy="26" r="11" fill="url(#gRac)"/>
+  <ellipse cx="60" cy="46" rx="30" ry="26" fill="url(#gRac)"/><path d="M36 42 q24 -14 48 0 q-4 14 -24 10 q-20 4 -24 -10z" fill="#2a2a32"/>
+  ${eye(49,43,4)}${eye(71,43,4)}<ellipse cx="60" cy="60" rx="5" ry="4" fill="#111"/></g>`},
+ tater:{name:"Tater Tot",blurb:"Work boots. Sunglasses. Too cool to panic.",
+  art:()=>`<ellipse cx="60" cy="146" rx="32" ry="7" fill="url(#gShadow)"/><g class="bob">
+  <path d="M38 122 h20 v18 h-26 q0 -8 6 -8z M64 122 h20 v10 q6 0 6 8 h-26z" fill="url(#gBoot)"/>
+  <path d="M60 18 q36 4 36 56 q0 52 -36 54 q-38 -2 -38 -54 q2 -54 38 -56z" fill="url(#gTater)"/>
+  <g fill="#9b6a33" opacity=".7"><circle cx="40" cy="90" r="3"/><circle cx="80" cy="100" r="2.5"/><circle cx="76" cy="34" r="2"/></g>
+  <path d="M32 50 h56 v4 q-2 14 -14 14 q-10 0 -12 -12 h-4 q-2 12 -12 12 q-12 0 -14 -14z" fill="#111"/><path d="M38 54 l8 -2 M66 54 l8 -2" stroke="#7fd3ff" stroke-width="3"/>
+  <path d="M50 84 q12 6 22 -2" stroke="#5a3510" stroke-width="3" fill="none" stroke-linecap="round"/></g>`},
+ kevin:{name:"Kevin the Alien",blurb:"Visiting Earth. Still learning what 'break room' means.",
+  art:()=>`<ellipse cx="60" cy="146" rx="30" ry="7" fill="url(#gShadow)"/><g class="bob">
+  <path d="M46 4 q-4 12 4 22 M74 4 q4 12 -4 22" stroke="#16805a" stroke-width="3" fill="none"/><circle cx="46" cy="5" r="5" fill="#ffd400"/><circle cx="74" cy="5" r="5" fill="#ffd400"/>
+  <rect x="44" y="124" width="12" height="16" rx="5" fill="#16805a"/><rect x="64" y="124" width="12" height="16" rx="5" fill="#16805a"/>
+  <path d="M40 130 q-4 -50 20 -52 q24 2 20 52z" fill="#9aa3c8"/><path d="M50 90 h20" stroke="#fff" stroke-width="3"/>
+  <ellipse cx="60" cy="50" rx="34" ry="30" fill="url(#gAlien)"/>
+  <ellipse cx="46" cy="50" rx="10" ry="13" fill="#0b1b22" class="blink"/><ellipse cx="74" cy="50" rx="10" ry="13" fill="#0b1b22" class="blink"/><circle cx="49" cy="45" r="3" fill="#fff"/><circle cx="77" cy="45" r="3" fill="#fff"/>
+  <ellipse cx="60" cy="70" rx="5" ry="3" fill="#0d5c40"/></g>`}
+};
+function charSVG(id,w=120,h=150){return `<svg viewBox="0 0 120 150" width="${w}" height="${h}" aria-hidden="true" focusable="false">${DEF}${CHARS[id].art()}</svg>`}
+
+/* NPCs */
+function npc(kind){
+ const skin={sup:"#c98b5a",cust1:"#f0c8a0",cust2:"#8d5a3b",cust3:"#e8b48c",co:"#6b4630"}[kind]||"#e0b090";
+ const shirt={sup:"#2a6fc9",cust1:"#d64f8a",cust2:"#ffb000",cust3:"#7a52c7",co:"#1f8a4c"}[kind]||"#888";
+ const hair={sup:"#3a2a1a",cust1:"#c9a14a",cust2:"#111",cust3:"#ddd",co:"#111"}[kind]||"#333";
+ return `<svg viewBox="0 0 110 120" aria-hidden="true" focusable="false"><defs><linearGradient id="sh${kind}" x1="0" x2="1"><stop offset="0" stop-color="${shirt}"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs>
+ <ellipse cx="55" cy="116" rx="30" ry="5" fill="#000" opacity=".2"/><path d="M22 118 q0 -46 33 -48 q33 2 33 48z" fill="${shirt}"/><path d="M22 118 q0 -46 33 -48 q33 2 33 48z" fill="url(#sh${kind})"/>
+ ${kind==="sup"?'<rect x="60" y="86" width="20" height="10" rx="2" fill="#fff"/>':''}
+ <circle cx="55" cy="44" r="24" fill="${skin}"/><path d="M31 40 q4 -26 24 -26 q22 0 24 26 q-8 -10 -24 -10 q-16 0 -24 10z" fill="${hair}"/>
+ <circle cx="46" cy="46" r="3" fill="#222"/><circle cx="64" cy="46" r="3" fill="#222"/><path d="M47 56 q8 6 16 0" stroke="#5a2a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+}
+
+/* ---------------- WORLD (2.5D store) ---------------- */
+function box(x,y,w,h,d,front,top,side){ // pseudo-isometric box: front face at x,y w*h, depth d up-right
+ return `<polygon points="${x},${y} ${x+d},${y-d*.55} ${x+w+d},${y-d*.55} ${x+w},${y}" fill="${top}"/>
+ <polygon points="${x+w},${y} ${x+w+d},${y-d*.55} ${x+w+d},${y+h-d*.55} ${x+w},${y+h}" fill="${side}"/>
+ <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${front}"/>`;}
+function products(x,y,w,rows,palette){let s="";for(let r=0;r<rows;r++){let cx=x+6;let i=0;while(cx<x+w-14){const c=palette[(i+r)%palette.length];const pw=12+((i*7+r*3)%3)*3,ph=16+((i*5+r)%3)*4;
+ s+=`<rect x="${cx}" y="${y+r*34+28-ph}" width="${pw}" height="${ph}" rx="2" fill="${c}"/><rect x="${cx+2}" y="${y+r*34+30-ph}" width="3" height="${ph-4}" fill="#fff" opacity=".35"/>`;cx+=pw+3;i++;}}return s;}
+function shelfUnit(x,y,label,pal){return `<ellipse cx="${x+80}" cy="${y+122}" rx="100" ry="14" fill="#000" opacity=".25"/>${box(x,y,160,118,26,"url(#wShelf)","#e9eef7","#9aa6bd")}
+ ${[0,1,2].map(r=>`<rect x="${x+4}" y="${y+30+r*34}" width="152" height="5" fill="#7f8aa3"/>`).join("")}${products(x+2,y+2,156,3,pal)}
+ <g transform="translate(${x+80},${y-36})"><rect x="-46" y="-14" width="92" height="26" rx="6" fill="url(#wSign)" stroke="#fff" stroke-width="2"/><text y="5" text-anchor="middle" font-size="14" font-weight="800" fill="#fff" font-family="Arial">${label}</text></g>`;}
+function buildWorld(){
+ const tiles=[];for(let r=0;r<9;r++)for(let c=0;c<14;c++){if((r+c)%2)tiles.push(`<rect x="${c*75}" y="${300+r*40}" width="75" height="40" fill="#fff" opacity=".07"/>`)}
+ document.getElementById("world").innerHTML=`<defs>
+ <linearGradient id="wWall" y2="1" x2="0"><stop offset="0" stop-color="#ffe9c7"/><stop offset="1" stop-color="#f4c995"/></linearGradient>
+ <linearGradient id="wFloor" y2="1" x2="0"><stop offset="0" stop-color="#d9c7a8"/><stop offset="1" stop-color="#a88b66"/></linearGradient>
+ <linearGradient id="wShelf" y2="1" x2="0"><stop offset="0" stop-color="#f8fbff"/><stop offset="1" stop-color="#c3cbe0"/></linearGradient>
+ <linearGradient id="wSign" y2="1" x2="0"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#d4501c"/></linearGradient>
+ <linearGradient id="wGreen" y2="1" x2="0"><stop offset="0" stop-color="#34b36b"/><stop offset="1" stop-color="#1b7444"/></linearGradient>
+ <linearGradient id="wDoor" y2="1" x2="0"><stop offset="0" stop-color="#8a96b8"/><stop offset="1" stop-color="#4e5878"/></linearGradient>
+ <linearGradient id="wReg" y2="1" x2="0"><stop offset="0" stop-color="#3a4160"/><stop offset="1" stop-color="#1c2036"/></linearGradient>
+ <radialGradient id="wLight" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="wWin" x2="1" y2="1"><stop offset="0" stop-color="#bfe8ff"/><stop offset="1" stop-color="#6fb4e8"/></linearGradient></defs>
+ <rect width="1000" height="300" fill="url(#wWall)"/><rect y="270" width="1000" height="30" fill="#c98a52"/><rect y="296" width="1000" height="6" fill="#000" opacity=".15"/>
+ <rect y="300" width="1000" height="340" fill="url(#wFloor)"/>${tiles.join("")}
+ <text x="500" y="54" text-anchor="middle" font-size="40" font-weight="900" fill="#e2491e" font-family="Arial Black,Arial" stroke="#fff" stroke-width="2">FRESHMART</text>
+ ${[150,500,850].map(x=>`<ellipse cx="${x}" cy="10" rx="70" ry="10" fill="#fff" opacity=".9"/><rect x="${x-160}" y="10" width="320" height="300" fill="url(#wLight)"/>`).join("")}
+ <!-- stockroom door -->
+ <rect x="30" y="110" width="120" height="180" rx="6" fill="#6b4a2e"/><rect x="40" y="120" width="100" height="170" fill="url(#wDoor)"/><rect x="58" y="140" width="64" height="40" rx="4" fill="url(#wWin)"/><rect x="118" y="210" width="12" height="6" rx="3" fill="#ffd25e"/>
+ <rect x="46" y="88" width="88" height="20" rx="4" fill="#1f2333"/><text x="90" y="103" text-anchor="middle" font-size="13" font-weight="800" fill="#fff" font-family="Arial">STOCKROOM</text>
+ <!-- boxes stacked near stockroom -->
+ ${box(160,250,46,40,18,"#c98a4a","#e6b073","#9a6332")}${box(168,214,36,34,14,"#d39a5a","#efc08a","#a06a38")}
+ <!-- time clock on wall -->
+ <rect x="236" y="120" width="70" height="96" rx="10" fill="#2b3150"/><rect x="244" y="130" width="54" height="28" rx="4" fill="#7dffb0"/><text x="271" y="150" text-anchor="middle" font-size="15" font-weight="800" fill="#0f4a2a" font-family="monospace">8:00</text><rect x="252" y="170" width="38" height="8" rx="3" fill="#111"/><circle cx="271" cy="196" r="9" fill="#ff5d5d"/>
+ <rect x="226" y="96" width="90" height="20" rx="4" fill="#1f2333"/><text x="271" y="111" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="Arial">TIME CLOCK</text>
+ <!-- notice board -->
+ <rect x="328" y="128" width="70" height="80" rx="4" fill="#b7814b"/><rect x="334" y="134" width="58" height="68" fill="#e9d2a6"/><rect x="340" y="140" width="22" height="26" fill="#fff"/><rect x="366" y="146" width="20" height="18" fill="#ffe26b"/><rect x="342" y="172" width="40" height="22" fill="#bfe8ff"/>
+ <!-- office -->
+ <rect x="850" y="120" width="120" height="170" rx="6" fill="#5b3b22"/><rect x="860" y="130" width="100" height="160" fill="url(#wDoor)"/><rect x="872" y="146" width="76" height="44" rx="4" fill="url(#wWin)"/>
+ <rect x="852" y="96" width="116" height="20" rx="4" fill="#1f2333"/><text x="910" y="111" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="Arial">SUPERVISOR</text>
+ <!-- shelves -->
+ ${shelfUnit(430,160,"CEREAL",["#e2491e","#ffb000","#2a6fc9","#d64f8a"])}${shelfUnit(640,160,"CANNED",["#b0b8c8","#c94a3a","#e5c14a","#5f9e4a"])}
+ ${shelfUnit(300,370,"SNACKS",["#ff7a3d","#7a52c7","#ffd400","#1fa9a0"])}
+ <!-- produce bins -->
+ <ellipse cx="610" cy="470" rx="110" ry="16" fill="#000" opacity=".25"/>${box(520,400,170,60,24,"url(#wGreen)","#5ccf8c","#167040")}
+ ${Array.from({length:26},(_,i)=>`<circle cx="${530+(i%13)*12+(i>12?6:0)}" cy="${392-(i>12?10:0)}" r="8" fill="${["#e83a3a","#ffb000","#7bc843"][i%3]}"/>`).join("")}
+ <text x="605" y="436" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="Arial">PRODUCE</text>
+ <!-- checkout -->
+ <ellipse cx="860" cy="560" rx="120" ry="16" fill="#000" opacity=".25"/>${box(760,470,190,80,26,"url(#wReg)","#5a6390","#151829")}
+ <rect x="770" y="452" width="170" height="10" fill="#222"/><rect x="880" y="404" width="50" height="40" rx="4" fill="#2b3150"/><rect x="886" y="410" width="38" height="24" fill="#7dd3ff"/>
+ <rect x="790" y="506" width="60" height="22" rx="4" fill="#ffd25e"/><text x="820" y="522" text-anchor="middle" font-size="12" font-weight="800" fill="#222" font-family="Arial">LANE 1</text>
+ <!-- break room -->
+ <rect x="20" y="430" width="200" height="190" rx="14" fill="#7a5c9e" opacity=".25"/>${box(50,530,90,40,20,"#e6d7f6","#fff","#b8a7d1")}
+ <rect x="150" y="470" width="44" height="90" rx="6" fill="#c9ced8"/><rect x="154" y="476" width="36" height="40" rx="3" fill="#e9edf5"/><text x="120" y="458" text-anchor="middle" font-size="14" font-weight="800" fill="#4a3a6a" font-family="Arial">BREAK ROOM</text>
+ <!-- wet floor spill (hazard) -->
+ <g id="spill"><ellipse cx="500" cy="590" rx="46" ry="12" fill="#7fd3ff" opacity=".75"/><ellipse cx="488" cy="586" rx="14" ry="4" fill="#fff" opacity=".7"/></g>
+ <!-- customer -->
+ <g transform="translate(700,510) scale(.9)">${npc("cust1").replace(/<\/?svg[^>]*>/g,"")}</g>`;
+}
+
+/* ---------------- STATE ---------------- */
+const KEY="workdayMayhem.v1";
+const S=Object.assign({char:"gary",speak:false,motion:false,hints:true,done:{},indep:[],retries:{},loc:"entrance"},JSON.parse(localStorage.getItem(KEY)||"{}"));
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+const PLACES={entrance:{n:"Entrance",x:68,y:94},clock:{n:"Time clock",x:27,y:27,act:"clock"},stock:{n:"Stockroom",x:9,y:42,act:"stock"},checkout:{n:"Checkout",x:86,y:68,act:"cust"},spill:{n:"Aisle 5 hazards",x:46,y:87,act:"safety"},office:{n:"Supervisor",x:91,y:40,act:"endshift"},breakroom:{n:"Break room",x:12,y:70}};
+const ACTS=[{id:"clock",n:"Clock in at the time clock",place:"clock",skill:"Being on time and starting the shift correctly"},
+ {id:"stock",n:"Stock the shelves",place:"stock",skill:"Sorting products and reading shelf signs"},
+ {id:"cust",n:"Help customers",place:"checkout",skill:"Friendly customer communication"},
+ {id:"safety",n:"Fix safety hazards",place:"spill",skill:"Spotting hazards and reporting them"},
+ {id:"endshift",n:"Finish up and clock out",place:"office",skill:"Talking with your supervisor and finishing tasks"}];
+const QUIPS={gary:{hi:"HONK! Ready to work.",good:"Honk of approval!",oops:"*confused honk*"},pickles:{hi:"Let's get this dill done!",good:"Kind of a big dill.",oops:"Hmm, in a bit of a pickle."},frank:{hi:"Hands clean, hoodie on.",good:"Nice. No trash involved.",oops:"Wait… let me rethink."},tater:{hi:"Cool as a potato.",good:"Totally tot-ally right.",oops:"Mashed it. Again!"},kevin:{hi:"Greetings, coworkers!",good:"Human job: understood!",oops:"Error. Re-learning."}};
+
+/* ---------------- SPEECH ---------------- */
+let lastSpeech="",voice=null;
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>x.name==="Google US English")||v.find(x=>/natural|neural/i.test(x.name)&&/^en/.test(x.lang))||v.find(x=>x.lang==="en-US")||v.find(x=>/^en/.test(x.lang))||null}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(t,force){lastSpeech=t;if(!(S.speak||force)||!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[^\w\s.,!?'’-]/g," "));if(voice)u.voice=voice;u.rate=.95;speechSynthesis.speak(u)}
+function stopSpeak(){if("speechSynthesis" in window)speechSynthesis.cancel()}
+function announce(t){const l=document.getElementById("live");l.textContent="";setTimeout(()=>l.textContent=t,30)}
+
+/* ---------------- UI helpers ---------------- */
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id))}
+function applySettings(){document.body.classList.toggle("rm",S.motion);
+ [["tgSpeak",S.speak],["tgMotion",S.motion],["tgHints",S.hints],["bSpeak",S.speak],["bMotion",S.motion]].forEach(([i,v])=>$(i).setAttribute("aria-pressed",v));
+ $("bSpeak").textContent=S.speak?"🔊 Read aloud: On":"🔈 Read aloud: Off";$("bMotion").textContent=S.motion?"Motion: Reduced":"Motion: Normal";
+ $("ttsRow").hidden=!S.speak;$("hintBox").hidden=!S.hints;if(!S.speak)stopSpeak();}
+function bubble(t,ms=2600){const b=$("bubble");b.textContent=t;b.classList.add("on");clearTimeout(bubble.t);bubble.t=setTimeout(()=>b.classList.remove("on"),ms)}
+function react(kind){const p=$("player");p.classList.remove("happy","oops");void p.offsetWidth;p.classList.add(kind==="good"?"happy":"oops");bubble(QUIPS[S.char][kind])}
+function nextAct(){if(!S.done.clock)return "clock";const mid=["stock","cust","safety"].find(a=>!S.done[a]);return mid||(!S.done.endshift?"endshift":null)}
+function locked(a){if(a==="clock")return false;if(!S.done.clock)return true;if(a==="endshift")return !(S.done.stock&&S.done.cust&&S.done.safety);return false}
+
+function renderCharList(){$("charList").innerHTML=Object.entries(CHARS).map(([id,c])=>`<button class="char" data-c="${id}" aria-pressed="${S.char===id}" aria-label="${c.name}. ${c.blurb}">${charSVG(id)}<b>${c.name}</b><small>${c.blurb}</small></button>`).join("");
+ $("charList").querySelectorAll(".char").forEach(b=>b.onclick=()=>{S.char=b.dataset.c;save();renderCharList();$("charList").querySelector(`[data-c=${S.char}]`).focus();if(S.char==="gary")speak("Honk!");announce(CHARS[S.char].name+" selected")});}
+
+function renderGame(){
+ $("playerArt").innerHTML=charSVG(S.char);
+ const n=nextAct();
+ $("hots").innerHTML=Object.entries(PLACES).map(([k,p])=>{const a=p.act;const st=a?(S.done[a]?"done":locked(a)?"locked":(a===n?"next":"")):"";
+  const status=a?(S.done[a]?"Done":locked(a)?"Not yet":"Ready"):"";
+  return `<button class="hot ${st}" style="left:${p.x}%;top:${p.y}%" data-p="${k}" aria-label="${p.n}${status?". "+status:""}"><span class="pin" aria-hidden="true">${a?(S.done[a]?"✔":locked(a)?"🔒":"!"):"•"}</span><span>${p.n}</span></button>`}).join("");
+ $("hots").querySelectorAll(".hot").forEach(b=>b.onclick=()=>goTo(b.dataset.p));
+ $("checklist").innerHTML=ACTS.map((a,i)=>`<li><span class="ic" aria-hidden="true">${S.done[a.id]?"✔":locked(a.id)?"🔒":"☐"}</span><span>${a.n}<span class="sr">${S.done[a.id]?" – done":locked(a.id)?" – not yet available":" – to do"}</span></span></li>`).join("");
+ $("goto").innerHTML=Object.entries(PLACES).map(([k,p])=>`<option value="${k}">${p.n}${p.act&&S.done[p.act]?" (done)":""}</option>`).join("");
+ const nP=n?ACTS.find(a=>a.id===n):null;
+ $("hintBox").innerHTML=nP?`<b>Next:</b> ${nP.n}. Tap the glowing spot on the map, or pick it in “Go to a place”.`:"All done! Great shift.";
+ const p=PLACES[S.loc]||PLACES.entrance;$("player").style.left=(p.x>80?p.x-7:p.x+7)+"%";$("player").style.top=Math.min(p.y+14,99)+"%";
+}
+function goTo(k){const p=PLACES[k];const pl=$("player");pl.classList.add("walking");pl.style.left=(p.x>80?p.x-7:p.x+7)+"%";pl.style.top=Math.min(p.y+14,99)+"%";S.loc=k;save();
+ announce("Walking to "+p.n);const t=S.motion||matchMedia("(prefers-reduced-motion: reduce)").matches?50:1150;
+ setTimeout(()=>{pl.classList.remove("walking");
+  if(p.act){if(S.done[p.act]){bubble("Already done here!");speak(p.n+" is already done.");}
+   else if(locked(p.act)){const m=!S.done.clock?"I should clock in first. The time clock is on the back wall.":"My supervisor will want the other tasks finished before I clock out.";bubble(m,3600);announce(m);speak(m)}
+   else openAct(p.act)}
+  else if(k==="breakroom"){const m=S.char==="kevin"?"Kevin: \"Break room? But I don't want to break anything!\" (It's a place to rest during breaks.)":"Break room: for your scheduled breaks. Not break time yet!";bubble("☕",1500);announce(m);speak(m);toast(m)}
+  else bubble(QUIPS[S.char].hi)},t)}
+function toast(m){$("hintBox").hidden=false;$("hintBox").innerHTML=m;setTimeout(()=>{applySettings();renderGame()},5000)}
+
+/* ---------------- ACTIVITY DIALOG ---------------- */
+let lastFocus=null,dlgOnClose=null;
+function openDlg(title,html){lastFocus=document.activeElement;$("dlgT").textContent=title;$("dlgBody").innerHTML=html;$("dlg").classList.add("on");setTimeout(()=>$("dlgT").setAttribute("tabindex","-1")||$("dlgT").focus(),20)}
+function closeDlg(){$("dlg").classList.remove("on");stopSpeak();renderGame();const f=$("hots").querySelector(".hot.next")||$("goto");f.focus();if(dlgOnClose){const c=dlgOnClose;dlgOnClose=null;c()}}
+$("dlgClose").onclick=closeDlg;
+$("dlg").addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg();if(e.key==="Tab"){const f=[...$("dlg").querySelectorAll("button:not([disabled]):not([hidden]),[tabindex='0']")].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+
+function scene(who,name,text){return `<div class="scene">${who==="me"?charSVG(S.char,110,120):npc(who)}<div class="say"><b>${name}</b>${text}</div></div>`}
+/* Run a list of choice-steps. step: {who,name,text,choices:[{t,res:'best'|'ok'|'try',fb}],indep} */
+function runSteps(actId,title,steps,onDone){let i=0;
+ function draw(){const s=steps[i];let firstTry=true;
+  openDlg(`${title} (${i+1} of ${steps.length})`,`${s.pre||""}${scene(s.who,s.name,s.text)}<p id="qq"><b>${s.q||"What would you do?"}</b></p>
+   <div class="choices" role="group" aria-labelledby="qq">${s.choices.map((c,j)=>`<button class="choice" data-j="${j}">${c.t}</button>`).join("")}</div>
+   <div class="fb" id="fb" tabindex="-1"></div><div id="nextRow"></div>`);
+  speak(s.name+" says: "+s.text.replace(/<[^>]+>/g,"")+". "+(s.q||"What would you do?")+" "+s.choices.map((c,j)=>"Choice "+(j+1)+": "+c.t).join(". "));
+  $("dlgBody").querySelectorAll(".choice").forEach(b=>b.onclick=()=>{const c=s.choices[b.dataset.j];b.dataset.res=c.res;
+   const head={best:"✔ Great choice!",ok:"✔ That works.",try:"↺ Not quite — try again."}[c.res];
+   const fb=$("fb");fb.className="fb on "+c.res;fb.innerHTML=`<strong>${head}</strong>${c.fb}`;announce(head+" "+c.fb.replace(/<[^>]+>/g,""));speak(head+" "+c.fb.replace(/<[^>]+>/g,""));
+   if(c.res==="try"){firstTry=false;react("oops");b.disabled=true;return}
+   react("good");if(firstTry&&s.indep&&!S.indep.includes(s.indep))S.indep.push(s.indep);save();
+   $("dlgBody").querySelectorAll(".choice").forEach(x=>x.disabled=true);
+   $("nextRow").innerHTML=`<button class="btn" id="nx">${i<steps.length-1?"Next ▶":"Finish ✔"}</button>`;$("nx").onclick=()=>{i++;i<steps.length?draw():finish()};$("nx").focus()})}
+ function finish(){S.done[actId]=true;save();if(onDone)onDone();else{celebrate(actId)}}
+ draw()}
+function celebrate(actId){const a=ACTS.find(x=>x.id===actId);const m=`Task done: ${a.n}. Nice work!`;
+ openDlg("✔ Task complete",`${scene("me",CHARS[S.char].name,QUIPS[S.char].good)}<p>${m}</p><p>You practiced: <b>${a.skill}</b>.</p><button class="btn" id="cont">Back to the store</button>`);
+ announce(m);speak(m);$("cont").onclick=()=>{closeDlg();if(Object.keys(S.done).length===5&&ACTS.every(x=>S.done[x.id]))showEnd()};}
+function openAct(a){({clock:actClock,stock:actStock,cust:actCust,safety:actSafety,endshift:actEnd})[a]()}
+
+/* 1. CLOCK IN */
+function actClock(){const kev=S.char==="kevin";
+ runSteps("clock","Clock In",[
+ {who:"sup",name:"Dana (Supervisor)",text:`Welcome to FreshMart! Your shift starts at 8:00. ${kev?"Once you're <i>on the clock</i>, you can start.":"Please clock in, then check the task board."}`,
+  pre:kev?`<p class="hint">👽 Kevin climbs onto the wall clock. “I am ON the clock!” <br><b>Real meaning:</b> “on the clock” means you are clocked in and being paid to work.</p>`:"",
+  q:"You arrive at 7:55. What do you do first?",indep:"Clocked in on time without being reminded",
+  choices:[{t:"Find the time clock, scan my badge, and check that it shows I'm clocked in.",res:"best",fb:"Clocking in first means your work time is recorded and your supervisor knows you're here."},
+   {t:"Start stocking shelves right away and clock in later.",res:"try",fb:"Working without clocking in means your time may not be counted. Clock in first, then start tasks."},
+   {t:"Wait in the break room until someone tells me what to do.",res:"try",fb:"Waiting can make you late. The time clock is on the back wall — you can find it yourself."}]},
+ {who:"me",name:CHARS[S.char].name,text:"The screen says: <b>“Badge not read. Try again.”</b>",q:"The clock didn't read your badge. What's a good next step?",indep:"Solved a time clock problem",
+  choices:[{t:"Try scanning the badge again, slowly.",res:"best",fb:"Trying again calmly fixes most scanner problems."},
+   {t:"Ask a nearby coworker how the scanner works.",res:"ok",fb:"Asking a coworker is a great natural support. Trying once more yourself first can be even quicker."},
+   {t:"Leave and go home — it's broken.",res:"try",fb:"Small problems are normal. Try again, or ask a coworker or supervisor for help."}]}
+ ]);}
+
+/* 2. STOCK SHELVES (tap product, then tap shelf) */
+function actStock(){
+ const ITEMS=[{id:"cereal",n:"Corn Flakes box",c:"#ffb000",sh:"Cereal"},{id:"beans",n:"Can of beans",c:"#c94a3a",sh:"Canned food"},{id:"chips",n:"Bag of chips",c:"#7a52c7",sh:"Snacks"},{id:"apple",n:"Bag of apples",c:"#e83a3a",sh:"Produce"},{id:"oats",n:"Oatmeal box",c:"#e2491e",sh:"Cereal"},{id:"soup",n:"Tomato soup can",c:"#b0b8c8",sh:"Canned food"}];
+ const SHELVES=["Cereal","Canned food","Snacks","Produce"];let sel=null;const placed={};let firstTry=true;
+ const icon=(c,s)=>`<svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="pi${c.slice(1)}" x2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs><ellipse cx="22" cy="40" rx="14" ry="3" fill="#000" opacity=".2"/>${s?`<rect x="6" y="10" width="32" height="6" fill="#8a6a40"/><rect x="6" y="28" width="32" height="6" fill="#8a6a40"/>`:`<rect x="11" y="6" width="22" height="32" rx="4" fill="${c}"/><rect x="11" y="6" width="22" height="32" rx="4" fill="url(#pi${c.slice(1)})"/><rect x="14" y="9" width="4" height="26" fill="#fff" opacity=".4"/>`}</svg>`;
+ openDlg("Stock Shelves",`${scene("co","Marco (Coworker)",S.char==="frank"?"Frank, those go on the shelves, <i>not</i> in your backpack. 😄 Match each item to the sign.":"Here's a cart from the stockroom. Match each item to the shelf with the right sign.")}
+ <p class="hint" ${S.hints?"":"hidden"}><b>How:</b> Tap an item, then tap the shelf where it belongs. Read the shelf signs for help.</p>
+ <div class="grid2"><div role="group" aria-label="Items on your cart" id="items"></div><div role="group" aria-label="Shelves" id="shelves"></div></div>
+ <div class="fb" id="fb"></div><div id="nextRow"></div>`);
+ speak("Stock shelves. Tap an item, then tap the shelf where it belongs.");
+ function draw(){$("items").innerHTML=ITEMS.map(it=>`<button class="prod" data-i="${it.id}" aria-pressed="${sel===it.id}" ${placed[it.id]?"disabled":""}>${icon(it.c)}<span>${it.n}${placed[it.id]?" ✔ on shelf":""}</span></button>`).join("");
+  $("shelves").innerHTML=SHELVES.map(s=>`<button class="shelf" data-s="${s}">${icon("#000",1)}<span><span class="sign">${s}</span><br><small>${ITEMS.filter(i=>placed[i.id]&&i.sh===s).length} placed</small></span></button>`).join("");
+  $("items").querySelectorAll(".prod").forEach(b=>b.onclick=()=>{sel=b.dataset.i;draw();$("items").querySelector(`[data-i=${sel}]`).focus();announce(ITEMS.find(i=>i.id===sel).n+" selected. Now choose a shelf.")});
+  $("shelves").querySelectorAll(".shelf").forEach(b=>b.onclick=()=>place(b.dataset.s))}
+ function place(s){const fb=$("fb");if(!sel){fb.className="fb on ok";fb.innerHTML="<strong>Pick an item first.</strong>Tap an item on the cart, then a shelf.";announce("Pick an item first.");return}
+  const it=ITEMS.find(i=>i.id===sel);
+  if(it.sh===s){placed[it.id]=1;sel=null;fb.className="fb on best";fb.innerHTML=`<strong>✔ ${it.n} → ${s}.</strong>Nice, the sign matches.`;react("good")}
+  else{firstTry=false;fb.className="fb on try";fb.innerHTML=`<strong>↺ Not that shelf.</strong>${it.n} goes with similar items. Look for the “${it.sh}” sign.`;react("oops")}
+  announce(fb.textContent);speak(fb.textContent);draw();
+  if(Object.keys(placed).length===ITEMS.length){if(firstTry&&!S.indep.includes("Stocked every item using the shelf signs"))S.indep.push("Stocked every item using the shelf signs");
+   $("nextRow").innerHTML=`<button class="btn" id="nx">One more question ▶</button>`;$("nx").onclick=extra;$("nx").focus()}
+  else{const f=$("items").querySelector(".prod:not([disabled])");f&&f.focus()}}
+ function extra(){runSteps("stock","Stock Shelves",[{who:"me",name:CHARS[S.char].name,text:"You find a dented can with a torn label in the box.",q:"What should you do with it?",indep:"Handled a damaged product correctly",
+  choices:[{t:"Put it aside and tell my supervisor or follow the damaged-items sign in the stockroom.",res:"best",fb:"Damaged items usually go in a special bin. Signs and supervisors tell you where."},
+   {t:"Ask Marco where damaged items go.",res:"ok",fb:"Asking a coworker works well. Next time, check for a sign first — you might find it on your own."},
+   {t:"Put it on the shelf anyway; no one will notice.",res:"try",fb:"Customers could buy a damaged product. Set it aside and ask where damaged items go."}]}])}
+ draw()}
+
+/* 3. CUSTOMER ASSISTANCE */
+function actCust(){const g=S.char==="gary";
+ runSteps("cust","Customer Assistance",[
+ {who:"cust1",name:"Customer",text:"Excuse me, where can I find peanut butter?",q:"You're not sure where it is. What do you say?",indep:"Helped a customer find a product",
+  choices:[{t:"“Good question! Let me check the aisle signs with you.”",res:"best",fb:"Friendly and honest. Aisle signs are a natural support you can use yourself."},
+   {t:"“I'm new — let me ask a coworker so I get it right.”",res:"ok",fb:"Being honest and asking a coworker is good. Checking the aisle signs first can help the customer faster."},
+   {t:"“I don't know.” and keep walking.",res:"try",fb:"The customer still needs help. Offer to look at the signs or find someone who knows."}]},
+ {who:"cust2",name:"Customer",text:g?"Do you have gluten-free bread? — <b>HONK!</b> — …Did you just honk at me?":"Do you have gluten-free bread?",
+  pre:g?`<p class="hint">🪿 Gary honked at exactly the wrong moment. It happens! What matters is what you do next.</p>`:"",
+  q:g?"How do you recover?":"How do you answer?",indep:"Stayed polite and calm with a customer",
+  choices:[{t:g?"“Sorry about that! Yes — gluten-free bread is in aisle 3. I can show you.”":"“Yes! It's in aisle 3. I can show you.”",res:"best",fb:"A quick apology and helpful answer keeps things friendly and professional."},
+   {t:g?"“Sorry! I'm not sure, but the store map by the door can help us.”":"“I'm not sure, but the store map by the door can help us.”",res:"ok",fb:"Using the store map is smart and independent. Offering to walk with them is extra helpful."},
+   {t:"Walk away without saying anything.",res:"try",fb:"Customers feel ignored when we leave. A short, polite answer is enough."}]},
+ {who:"cust3",name:"Customer (upset)",text:"This price tag says $2 but the register charged me $3! This is ridiculous!",q:"What is the best response?",indep:"Got the right person for a price problem",
+  choices:[{t:"“I'm sorry about that. Let me get a cashier or supervisor who can fix the price.”",res:"best",fb:"Staying calm and getting the person who can fix it is exactly right. You don't have to solve everything alone."},
+   {t:"Argue that the tag must be wrong.",res:"try",fb:"Arguing makes customers more upset. Say sorry and find someone who can check the price."},
+   {t:"Change the price on the register yourself.",res:"try",fb:"New workers usually aren't allowed to change prices. Get a cashier or supervisor."}]}
+ ]);}
+
+/* 4. WORKPLACE SAFETY */
+function actSafety(){const kev=S.char==="kevin";
+ runSteps("safety","Workplace Safety",[
+ {who:"co",name:"Marco (Coworker)",text:kev?"Clean up in aisle 5!":"Heads up — there's a spill near aisle 5.",
+  pre:kev?`<p class="hint">👽 Kevin starts tidying his own hair. “I am cleaning ME up in aisle 5!” <br><b>Real meaning:</b> “Clean up in aisle 5” means there is a mess in aisle 5 that needs cleaning.</p>`:"",
+  q:"You see a puddle of spilled juice on the floor. What do you do?",indep:"Made a spill safe",
+  choices:[{t:"Put a “Wet Floor” sign by it, then clean it with the mop from the supply closet.",res:"best",fb:"The sign warns people right away, then the cleanup removes the danger."},
+   {t:"Stand by the spill and tell a coworker so they can bring a mop.",res:"ok",fb:"Guarding the spill keeps people safe. Getting a wet-floor sign yourself is also something you can do."},
+   {t:"Step over it and keep working.",res:"try",fb:"Someone could slip and get hurt. Mark it with a sign and clean it, or tell someone."}]},
+ {who:"me",name:CHARS[S.char].name,text:"A stack of heavy boxes is blocking the emergency exit in the stockroom.",q:"What's the safest choice?",indep:"Reported a blocked exit",
+  choices:[{t:"Tell the supervisor that the exit is blocked so it can be moved safely.",res:"best",fb:"Blocked exits are serious. Supervisors need to know, and heavy boxes may need two people."},
+   {t:"Ask a coworker to help me move the boxes, using safe lifting.",res:"ok",fb:"Teamwork and safe lifting are good. Also let your supervisor know so it doesn't happen again."},
+   {t:"Leave it — it's not my area.",res:"try",fb:"Safety is everyone's job. Tell your supervisor or a coworker."}]},
+ {who:"me",name:CHARS[S.char].name,text:"You see a box cutter left open on a low shelf where kids walk by.",q:"What do you do?",indep:"Put away a sharp tool safely",
+  choices:[{t:"Close the blade and put it back in the stockroom tool spot.",res:"best",fb:"Closing it and returning it removes the danger right away."},
+   {t:"Use it to open boxes in the aisle and leave it there.",res:"try",fb:"Open blades in aisles can hurt people. Close it and return it."},
+   {t:"Kick it under the shelf so nobody sees it.",res:"try",fb:"It's still dangerous there. Close it and put it where tools belong."}]}
+ ]);}
+
+/* 5. END OF SHIFT */
+function actEnd(){
+ runSteps("endshift","End of Shift",[
+ {who:"me",name:CHARS[S.char].name,text:"It's almost 4:00. You look at your task checklist: everything is checked except “Return the cart to the stockroom.”",q:"What do you do?",indep:"Used a checklist to finish work",
+  choices:[{t:"Return the cart, then check the list again.",res:"best",fb:"Checklists help you finish everything before you leave."},
+   {t:"Clock out now — it's close enough.",res:"try",fb:"Unfinished tasks make extra work for others. Finish the cart first."},
+   {t:"Ask a coworker to put the cart back for me.",res:"try",fb:"It's your task, and you have time. Finish it yourself."}]},
+ {who:"sup",name:"Dana (Supervisor)",text:"Hey! How did your first shift go?",q:"How do you check out with your supervisor?",indep:"Gave the supervisor an update",
+  choices:[{t:"“Good! I finished my tasks. I wasn't sure about damaged items — can you show me tomorrow?”",res:"best",fb:"A short update plus a question shows you care and want to learn."},
+   {t:"“Fine, I finished everything.”",res:"ok",fb:"Clear and honest! Adding a question about anything you weren't sure about helps you grow."},
+   {t:"Leave without saying anything.",res:"try",fb:"A quick check-in lets your supervisor know you're done and gives you a chance to ask questions."}]},
+ {who:"me",name:CHARS[S.char].name,text:"You're back at the time clock.",q:"Last step!",indep:"Clocked out correctly",
+  choices:[{t:"Scan my badge to clock out and check that it says “Clocked out.”",res:"best",fb:"Checking the screen makes sure your hours are correct."},
+   {t:"Just walk out — the clock knows.",res:"try",fb:"The clock doesn't know unless you scan out. Your hours could be wrong."}]}
+ ],()=>{celebrate("endshift")});}
+
+/* ---------------- END SCREEN ---------------- */
+function showEnd(){show("end");
+ $("endScene").innerHTML=charSVG(S.char,130,150)+npc("sup")+`<div class="say"><b>Dana (Supervisor)</b>Great first shift, ${CHARS[S.char].name.split(" ")[0]}! See you next time.${S.char==="gary"?" (Please honk less.)":""}</div>`;
+ $("endTasks").innerHTML=ACTS.map(a=>`<li><span class="ic" aria-hidden="true">${S.done[a.id]?"✔":"☐"}</span>${a.n}<span class="sr">${S.done[a.id]?" – completed":" – not completed"}</span></li>`).join("");
+ $("endSkills").innerHTML=ACTS.map(a=>`<li>${a.skill}</li>`).join("")+"<li>Using natural supports: signs, checklists, coworkers, and your supervisor</li>";
+ $("endDec").innerHTML=S.indep.length?S.indep.map(d=>`<li>${d}</li>`).join(""):"<li>You tried every situation and learned from each one. That's how skills grow!</li>";
+ const tips=[];const all=["Clocked in on time without being reminded","Helped a customer find a product","Made a spill safe","Used a checklist to finish work","Stocked every item using the shelf signs"];
+ if(!S.indep.includes(all[0]))tips.push("Go straight to the time clock when you arrive.");
+ if(!S.indep.includes(all[1]))tips.push("Use aisle signs and the store map when customers ask where things are.");
+ if(!S.indep.includes(all[2]))tips.push("Remember: sign first, then clean or tell someone.");
+ if(!S.indep.includes(all[4]))tips.push("Read shelf signs before placing items.");
+ tips.push("Try a different worker for new funny moments.","Think of one question to ask your supervisor next shift.");
+ $("endNext").innerHTML=tips.map(t=>`<li>${t}</li>`).join("");
+ $("endT").setAttribute("tabindex","-1");$("endT").focus();const m="Shift complete! Great work today.";announce(m);speak(m)}
+
+/* ---------------- WIRING ---------------- */
+function tog(k){S[k]=!S[k];save();applySettings();announce((k==="speak"?"Read aloud ":k==="motion"?"Reduce motion ":"Instructions ")+(S[k]?"on":"off"));if(k==="speak"&&S[k])speak("Read aloud is on.")}
+$("tgSpeak").onclick=$("bSpeak").onclick=()=>tog("speak");$("tgMotion").onclick=$("bMotion").onclick=()=>tog("motion");$("tgHints").onclick=()=>tog("hints");
+$("ttsRep").onclick=()=>speak(lastSpeech,true);$("ttsStop").onclick=stopSpeak;
+$("startBtn").onclick=()=>{show("game");renderGame();const m=`${CHARS[S.char].name} arrives at FreshMart. ${S.done.clock?"Welcome back!":"First, find the time clock."}`;announce(m);speak(m);bubble(QUIPS[S.char].hi);setTimeout(()=>($("hots").querySelector(".hot.next")||$("goto")).focus(),50)};
+$("goBtn").onclick=()=>goTo($("goto").value);
+$("bMenu").onclick=()=>{show("select");renderCharList()};
+$("againBtn").onclick=()=>{S.done={};S.indep=[];S.loc="entrance";save();show("game");renderGame()};
+$("newCharBtn").onclick=()=>{S.done={};S.indep=[];S.loc="entrance";save();show("select");renderCharList()};
+if(matchMedia("(prefers-reduced-motion: reduce)").matches&&localStorage.getItem(KEY)===null)S.motion=true;
+buildWorld();renderCharList();applySettings();
+if(Object.keys(S.done).length)$("resumeNote").textContent="Your progress from last time is saved on this device.";
+</script>
+</body>
+</html>
