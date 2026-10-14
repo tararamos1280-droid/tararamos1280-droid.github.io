@@ -120,7 +120,10 @@ body.rm *{animation:none!important;transition:none!important}
     <button class="tog" id="tgMotion" aria-pressed="false">Reduce motion</button>
     <button class="tog" id="tgHints" aria-pressed="true">Show instructions</button>
   </div>
-  <button class="btn" id="startBtn" style="font-size:1.3rem;padding:14px 34px">Start my shift ▶</button>
+  <div class="opts" id="startRow">
+    <button class="btn" id="startBtn" style="font-size:1.3rem;padding:14px 34px">Start my shift ▶</button>
+    <button class="btn sec" id="startOverBtn" hidden>Start over</button>
+  </div>
   <p id="resumeNote" style="opacity:.85"></p>
 </main>
 
@@ -145,6 +148,10 @@ body.rm *{animation:none!important;transition:none!important}
       <select id="goto" aria-label="Choose a place to go"></select>
       <div class="row"><button class="btn" id="goBtn">Go there</button></div>
       <div class="hint" id="hintBox" role="note"></div>
+      <div class="row" id="doneRow" hidden style="margin-top:8px">
+        <button class="btn" id="seeEndBtn">See shift results</button>
+        <button class="btn sec" id="gameAgainBtn">Play another shift</button>
+      </div>
     </aside>
   </div>
 </div>
@@ -309,6 +316,15 @@ const ACTS=[{id:"clock",n:"Clock in at the time clock",place:"clock",skill:"Bein
  {id:"cust",n:"Help customers",place:"checkout",skill:"Friendly customer communication"},
  {id:"safety",n:"Fix safety hazards",place:"spill",skill:"Spotting hazards and reporting them"},
  {id:"endshift",n:"Finish up and clock out",place:"office",skill:"Talking with your supervisor and finishing tasks"}];
+function shiftComplete(){return ACTS.every(x=>S.done[x.id])}
+function resetShift(){S.done={};S.indep=[];S.retries={};S.loc="entrance";save()}
+function updateSelectButtons(){
+ const has=Object.keys(S.done).length>0, done=has&&shiftComplete();
+ $("startOverBtn").hidden=!has;
+ if(done){$("startBtn").textContent="See shift results";$("resumeNote").textContent="You already finished a shift on this device. Tap Start over to play again, or See shift results."}
+ else if(has){$("startBtn").textContent="Continue my shift ▶";$("resumeNote").textContent="Your progress from last time is saved on this device. Tap Start over if you want a fresh shift."}
+ else{$("startBtn").textContent="Start my shift ▶";$("resumeNote").textContent=""}
+}
 const QUIPS={gary:{hi:"HONK! Ready to work.",good:"Honk of approval!",oops:"*confused honk*"},pickles:{hi:"Let's get this dill done!",good:"Kind of a big dill.",oops:"Hmm, in a bit of a pickle."},frank:{hi:"Hands clean, hoodie on.",good:"Nice. No trash involved.",oops:"Wait… let me rethink."},tater:{hi:"Cool as a potato.",good:"Totally tot-ally right.",oops:"Mashed it. Again!"},kevin:{hi:"Greetings, coworkers!",good:"Human job: understood!",oops:"Error. Re-learning."}};
 
 /* ---------------- SPEECH ---------------- */
@@ -344,7 +360,8 @@ function renderGame(){
  $("checklist").innerHTML=ACTS.map((a,i)=>`<li><span class="ic" aria-hidden="true">${S.done[a.id]?"✔":locked(a.id)?"🔒":"☐"}</span><span>${a.n}<span class="sr">${S.done[a.id]?" – done":locked(a.id)?" – not yet available":" – to do"}</span></span></li>`).join("");
  $("goto").innerHTML=Object.entries(PLACES).map(([k,p])=>`<option value="${k}">${p.n}${p.act&&S.done[p.act]?" (done)":""}</option>`).join("");
  const nP=n?ACTS.find(a=>a.id===n):null;
- $("hintBox").innerHTML=nP?`<b>Next:</b> ${nP.n}. Tap the glowing spot on the map, or pick it in “Go to a place”.`:"All done! Great shift.";
+ $("hintBox").innerHTML=nP?`<b>Next:</b> ${nP.n}. Tap the glowing spot on the map, or pick it in “Go to a place”.`:"All done! Great shift. Use the buttons below to see your results or start a new shift.";
+ $("doneRow").hidden=!!nP;
  const p=PLACES[S.loc]||PLACES.entrance;$("player").style.left=(p.x>80?p.x-7:p.x+7)+"%";$("player").style.top=Math.min(p.y+14,99)+"%";
 }
 function goTo(k){const p=PLACES[k];const pl=$("player");pl.classList.add("walking");pl.style.left=(p.x>80?p.x-7:p.x+7)+"%";pl.style.top=Math.min(p.y+14,99)+"%";S.loc=k;save();
@@ -381,9 +398,10 @@ function runSteps(actId,title,steps,onDone){let i=0;
    $("nextRow").innerHTML=`<button class="btn" id="nx">${i<steps.length-1?"Next ▶":"Finish ✔"}</button>`;$("nx").onclick=()=>{i++;i<steps.length?draw():finish()};$("nx").focus()})}
  function finish(){S.done[actId]=true;save();if(onDone)onDone();else{celebrate(actId)}}
  draw()}
-function celebrate(actId){const a=ACTS.find(x=>x.id===actId);const m=`Task done: ${a.n}. Nice work!`;
- openDlg("✔ Task complete",`${scene("me",CHARS[S.char].name,QUIPS[S.char].good)}<p>${m}</p><p>You practiced: <b>${a.skill}</b>.</p><button class="btn" id="cont">Back to the store</button>`);
- announce(m);speak(m);$("cont").onclick=()=>{closeDlg();if(Object.keys(S.done).length===5&&ACTS.every(x=>S.done[x.id]))showEnd()};}
+function celebrate(actId){const a=ACTS.find(x=>x.id===actId);const m=`Task done: ${a.n}. Nice work!`;const last=shiftComplete();
+ openDlg("✔ Task complete",`${scene("me",CHARS[S.char].name,QUIPS[S.char].good)}<p>${m}</p><p>You practiced: <b>${a.skill}</b>.</p><button class="btn" id="cont">${last?"See your results ▶":"Back to the store"}</button>`);
+ announce(m);speak(m);$("cont").onclick=()=>{closeDlg();if(shiftComplete())showEnd()};
+ if(last){dlgOnClose=()=>{if(shiftComplete())showEnd()}}}
 function openAct(a){({clock:actClock,stock:actStock,cust:actCust,safety:actSafety,endshift:actEnd})[a]()}
 
 /* 1. CLOCK IN */
@@ -502,14 +520,20 @@ function showEnd(){show("end");
 function tog(k){S[k]=!S[k];save();applySettings();announce((k==="speak"?"Read aloud ":k==="motion"?"Reduce motion ":"Instructions ")+(S[k]?"on":"off"));if(k==="speak"&&S[k])speak("Read aloud is on.")}
 $("tgSpeak").onclick=$("bSpeak").onclick=()=>tog("speak");$("tgMotion").onclick=$("bMotion").onclick=()=>tog("motion");$("tgHints").onclick=()=>tog("hints");
 $("ttsRep").onclick=()=>speak(lastSpeech,true);$("ttsStop").onclick=stopSpeak;
-$("startBtn").onclick=()=>{show("game");renderGame();const m=`${CHARS[S.char].name} arrives at FreshMart. ${S.done.clock?"Welcome back!":"First, find the time clock."}`;announce(m);speak(m);bubble(QUIPS[S.char].hi);setTimeout(()=>($("hots").querySelector(".hot.next")||$("goto")).focus(),50)};
+function beginOrContinue(){
+ if(shiftComplete()){showEnd();return}
+ show("game");renderGame();const m=`${CHARS[S.char].name} arrives at FreshMart. ${S.done.clock?"Welcome back!":"First, find the time clock."}`;announce(m);speak(m);bubble(QUIPS[S.char].hi);setTimeout(()=>($("hots").querySelector(".hot.next")||$("goto")).focus(),50)}
+function startFresh(toGame){resetShift();updateSelectButtons();if(toGame){show("game");renderGame();const m=`${CHARS[S.char].name} arrives at FreshMart. First, find the time clock.`;announce(m);speak(m);bubble(QUIPS[S.char].hi);setTimeout(()=>($("hots").querySelector(".hot.next")||$("goto")).focus(),50)}else{show("select");renderCharList();announce("Ready for a new shift.")}}
+$("startBtn").onclick=beginOrContinue;
+$("startOverBtn").onclick=()=>startFresh(false);
 $("goBtn").onclick=()=>goTo($("goto").value);
-$("bMenu").onclick=()=>{show("select");renderCharList()};
-$("againBtn").onclick=()=>{S.done={};S.indep=[];S.loc="entrance";save();show("game");renderGame()};
-$("newCharBtn").onclick=()=>{S.done={};S.indep=[];S.loc="entrance";save();show("select");renderCharList()};
+$("bMenu").onclick=()=>{show("select");renderCharList();updateSelectButtons()};
+$("againBtn").onclick=()=>startFresh(true);
+$("newCharBtn").onclick=()=>startFresh(false);
+$("seeEndBtn").onclick=()=>showEnd();
+$("gameAgainBtn").onclick=()=>startFresh(true);
 if(matchMedia("(prefers-reduced-motion: reduce)").matches&&localStorage.getItem(KEY)===null)S.motion=true;
-buildWorld();renderCharList();applySettings();
-if(Object.keys(S.done).length)$("resumeNote").textContent="Your progress from last time is saved on this device.";
+buildWorld();renderCharList();applySettings();updateSelectButtons();
 </script>
 </body>
 </html>
