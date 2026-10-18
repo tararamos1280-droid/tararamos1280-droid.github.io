@@ -630,7 +630,7 @@ const P={
 };
 
 /* ===== Bus Adventure v3 — app ===== */
-const KEY='busAdventureV3';
+const KEY='busAdventureV4';const OLD_KEYS=['busAdventureV3'];
 const $=s=>document.querySelector(s);
 const fmt=t=>{if(t==null)return '—';t=Math.round(t);const h=Math.floor(t/60)%24,m=t%60;return ((h+11)%12+1)+':'+String(m).padStart(2,'0')+' '+(h<12?'AM':'PM')};
 const fmtS=t=>{if(t==null||typeof t!=='number')return '—';const h=Math.floor(t/60)%24,m=t%60;return ((h+11)%12+1)+':'+String(m).padStart(2,'0')+(h<12?'a':'p')};
@@ -640,7 +640,10 @@ const STEPS=['Plan','Stop','Bus','Pay','Ride','Arrive','Return','Done'];
 const STEPIDX={city:-1,dest:-1,brief:0,phone:0,leave:0,missed:0,nosvc:0,stop:1,wrongside:1,delay:1,bus:2,pay:3,ride:4,missedstop:4,transfer:4,exit:5,arrive:5,retstop:6,wrongback:6,offer:6,phoneBack:6,longwait:6,rideBack:6,finish:7};
 let S=load();
 function defState(){return {settings:{level:'guided',problems:true,day:'wk',autoRead:false},city:null,trip:null,step:'city',done:[],t:null,notes:[]}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.settings)return Object.assign(defState(),s)}catch(e){}return defState()}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.settings)return Object.assign(defState(),s)}catch(e){}
+ /* migrate from older versions: keep settings, finished trips and notes; drop any trip in progress */
+ for(const k of OLD_KEYS){try{const o=JSON.parse(localStorage.getItem(k));if(o&&o.settings){const d=defState();d.settings=Object.assign(d.settings,o.settings);d.done=Array.isArray(o.done)?o.done:[];d.notes=Array.isArray(o.notes)?o.notes:[];return d}}catch(e){}}
+ return defState()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const trip=()=>TRIPS.find(x=>x.id===S.trip);
 const city=()=>CITY[S.city];
@@ -896,10 +899,12 @@ SCR.wrongside=()=>{const t=trip();const p=S.t.plan[0];const toDown=S.t.wrongSide
  let h=`<p class="eyebrow">Problem · Wrong direction</p><h1 tabindex="-1">This bus is going the wrong way</h1>${fb('warn',`You waited at <b>Solomon Homes ${toDown?'Inbound':'Outbound'}</b>. A bus pulls up. The driver says it is going toward <b>${toDown?'downtown':'Walmart and the Galleria'}</b>. You need to go toward <b>${toDown?'Walmart and the Galleria':'downtown'}</b>.`,'↩️')}${fig(solomonScene(toDown?'out':'in'),ILL+'The highlighted stop is the one you need.')}${r.h}`;
  h+=`<div class="actions">${r.allDone?'<span class="sp"></span><button class="btn primary" data-act="afterWrongSide">Continue</button>':''}</div>`;
  return {h,qs}};
-SCR.delay=()=>{const t=trip(),c=city();const p=S.t.plan[S.t.plan.length-1];const d=t.delay;const at=p.arr+d+p.walk;const onT=at<=goalTime(t);
+SCR.delay=()=>{const t=trip(),c=city();const p=S.t.plan[S.t.plan.length-1];const d=t.delay;const at=p.arr+d+p.walk;const onT=at<=t.start;
+ const what=t.kind==='meet'?'you meet':'your shift starts';
+ const verdict=at<=goalTime(t)?'on time, '+dur(t.start-at)+' before '+what:at<t.start?'on time, but only '+dur(t.start-at)+' before '+what:at===t.start?'exactly on time, right when '+what:'after '+what+' at '+fmt(t.start)+', so I will be late';
  const qs=[{id:'d1',q:`If the bus is ${d} minutes late, when will you get to ${esc(t.short)}?`,a:[
   ['a',`At ${fmt(p.arr+p.walk)}`,0,'That is the time without the delay. Add the '+d+' minutes.'],
-  ['b',`At ${fmt(at)} — ${onT?'still before '+fmt(goalTime(t)):'after '+fmt(goalTime(t))+', so I will be late'}`,2,''],
+  ['b',`At ${fmt(at)} — ${verdict}`,2,'Right.'+(onT&&at>goalTime(t)?' Try to be 5 minutes early when you can.':'')],
   ['c',`I can't know, so I'll go home`,0,'You can figure it out: add the delay to the arrival time.']]},
   {id:'d2',q:'What do you do?',a:onT?[
    ['wait','Keep waiting at the stop where the driver can see me',2,'Right. You will still be on time.'],
@@ -912,20 +917,23 @@ SCR.delay=()=>{const t=trip(),c=city();const p=S.t.plan[S.t.plan.length-1];const
  let h=`<p class="eyebrow">Problem · Bus delay</p><h1 tabindex="-1">Your bus is late</h1>${fb('warn',`It is ${fmt(p.dep+d)}. Your bus was due at ${fmt(p.dep)}. It has not come yet. The schedule says it gets to your stop at ${fmt(p.arr)}.`,'⏱️')}${r.h}`;
  h+=`<div class="actions">${r.allDone?'<span class="sp"></span><button class="btn primary" data-act="afterDelay">Continue</button>':''}</div>`;
  return {h,qs}};
-function busChoices(p,atTC){const c=city();const others=c.id==='J'?['9','10','11'].filter(k=>k!==p.rk):['4','A9','1b','3b','5b','6','8'].filter(k=>k!==p.rk&&ROUTES[k].num!==ROUTES[p.rk].num);return others}
+function okRoutes(leg){return leg&&leg.opts?leg.opts.map(o=>o.r):[]}
+function busChoices(p,atTC,leg){const ok=okRoutes(leg);return busChoicesAll(p).filter(k=>!ok.includes(k))}
+function busChoicesAll(p){const c=city();const others=c.id==='J'?['9','10','11'].filter(k=>k!==p.rk):['4','A9','1b','3b','5b','6','8'].filter(k=>k!==p.rk&&ROUTES[k].num!==ROUTES[p.rk].num);return others}
 SCR.bus=()=>{const t=trip(),c=city();const p=S.t.plan[S.t.legIdx];let h='',qs=[];
  const atTC=c.id==='A'&&S.t.legIdx===0;
  h+=`<p class="eyebrow">Step 3 · Identify your bus</p><h1 tabindex="-1">${atTC?'Find your bus at the bays':'A bus is coming'}</h1><p class="lead">Check the route number and the name on the sign before you get on. You planned <b>${esc(rName(p.rk))}</b>.</p>`;
- if(atTC){const o=busChoices(p).slice(0,2);const set=[o[0],p.rk,o[1]];const order=S.t.legIdx%2?set.reverse():set;
+ const outLeg=outLegs(t)[S.t.legIdx];
+ if(atTC){const o=busChoices(p,true,outLeg).slice(0,2);const set=[o[0],p.rk,o[1]].filter(Boolean);const order=S.t.legIdx%2?set.reverse():set;
   h+=`<div class="lineup" role="group" aria-label="Buses at the Transit Center">`+order.map(k=>`<button class="busbtn${qa('bus:tap')&&qa('bus:tap').k===k?' sel':''}" data-ch="bus|tap|${k}" aria-label="Bus with sign ${ROUTES[k].num} ${ROUTES[k].sign.join(' ')}">${busFront('A',ROUTES[k].num,signText(k))}<span>${ROUTES[k].num} ${esc(ROUTES[k].name)}</span></button>`).join('')+`</div><p class="small muted">${ILL} Sign wording follows the AMTRAN pattern seen in photos: route number, then route name.</p>`;
   qs.push({id:'tap',q:'Tap the bus you will get on.',hideChoices:1,a:order.map(k=>[k,ROUTES[k].num+' '+ROUTES[k].name,k===p.rk?2:0,k===p.rk?'Right. Route '+ROUTES[k].num+' '+ROUTES[k].name+' is your bus.':'That is Route '+ROUTES[k].num+' '+ROUTES[k].name+'. Check the number again.'])});
   h+=photo('amtbus');
- } else {const dk=busChoices(p).find(k=>c.id!=='J'||!(t.out&&t.out.boardStop==='J_OUT'&&k==='10'))||busChoices(p)[0];
-  const st=qa('bus:first');const first=!(st&&st.k==='no');
+ } else {/* trick bus: never a route that also works for this trip; skip the trick if none */const dk=busChoices(p,false,outLeg)[0];
+  const st=qa('bus:first');const first=dk&&!(st&&st.k==='no');
   if(first){h+=fig(busFront(c.id,ROUTES[dk].num,signText(dk)),ILL+'Sign wording may differ on the real bus. The route number is shown first.');
    qs.push({id:'first',q:`This bus says <b>${ROUTES[dk].num} ${esc(signText(dk))}</b>. Do you get on?`,a:[['yes','Yes, get on',0,'This is not the bus you planned. Check the number: you need Route '+ROUTES[p.rk].num+'.'],['no','No — let it go and keep waiting',2,'Right. It is not your bus.']]});}
-  else{h+=fig(busFront(c.id,ROUTES[p.rk].num,signText(p.rk)),ILL+'Sign wording may differ on the real bus. The route number is shown first.');
-   qs.push({id:'second',q:`Another bus is stopping. It says <b>${ROUTES[p.rk].num} ${esc(signText(p.rk))}</b>. Do you get on?`,a:[['yes','Yes — this is my bus',2,'Right. Route '+ROUTES[p.rk].num+' is your bus.'],['no','No, let it go',0,'This is the bus you planned. If you let it go you would have to wait for the next one.']]});}
+  else{if(dk)h+=fb('good','Right. It is not your bus. You let the Route '+ROUTES[dk].num+' bus go.');h+=fig(busFront(c.id,ROUTES[p.rk].num,signText(p.rk)),ILL+'Sign wording may differ on the real bus. The route number is shown first.');
+   qs.push({id:'second',q:`${dk?'Another bus is stopping.':'A bus is stopping.'} It says <b>${ROUTES[p.rk].num} ${esc(signText(p.rk))}</b>. Do you get on?`,a:[['yes','Yes — this is my bus',2,'Right. Route '+ROUTES[p.rk].num+' is your bus.'],['no','No, let it go',0,'This is the bus you planned. If you let it go you would have to wait for the next one.']]});}
  }
  const r=renderQs('bus',qs);
  if(atTC)h+=r.h.replace(/<div class="choices"[\s\S]*?<\/div>/,'');else h+=r.h;
@@ -1017,7 +1025,8 @@ SCR.arrive=()=>{const t=trip(),c=city();const at=S.t.atWork;const late=at>t.star
    ['gal','Next to the Galleria',0,'The Galleria is in Richland Township, not downtown.']]});
   h+=photo('jpark')}
  const tq=late?[['late',`I am ${mins(at-t.start)} late. I go in right away and tell my ${t.kind==='meet'?'friend':'supervisor'} why`,2,'Right. Be honest and tell them right away.'],['ontime','I am on time',0,'Check the clock: it is '+fmt(at)+'.'],['leave','I am late, so I go home',0,'Going in and explaining is better than leaving.']]
-  :[['late','I am late',0,'Check the clock: it is '+fmt(at)+'. '+(t.kind==='meet'?'You meet':'Your shift starts')+' at '+fmt(t.start)+'.'],['early',`I am ${dur(early)} early — on time`,2,'Right.'],['exact','I am exactly on time with no minutes to spare',0,'Count again: '+fmt(at)+' to '+fmt(t.start)+' is '+dur(early)+'.']];
+  :early===0?[['late','I am late',0,'Check the clock: it is '+fmt(at)+', the same time as the start. You are not late.'],['early','I am a few minutes early',0,'Count again: it is exactly '+fmt(t.start)+'.'],['exact','I am exactly on time with no minutes to spare',2,'Right. Next time try to be 5 minutes early.']]
+  :[['late','I am late',0,'Check the clock: it is '+fmt(at)+'. '+(t.kind==='meet'?'You meet':'Your shift starts')+' at '+fmt(t.start)+'.'],['early',`I am ${dur(early)} early — on time`,2,'Right.'+(early<5?' Next time try to be 5 minutes early.':'')],['exact','I am exactly on time with no minutes to spare',0,'Count again: '+fmt(at)+' to '+fmt(t.start)+' is '+dur(early)+'.']];
  qs.push({id:'time',q:`It is ${fmt(at)}. ${t.kind==='meet'?'You meet your friend':'Your shift starts'} at ${fmt(t.start)}. Are you on time?`,a:tq});
  if(t.kind==='work')qs.push({id:'door',q:'Where do you go in?',a:[
   ['ask','On my first day, ask a manager where employees go in and sign in',2,'Right. Every workplace is different. Ask, then use the same door every day.'],
@@ -1076,9 +1085,9 @@ SCR.longwait=()=>{const t=trip(),c=city();const b=S.t.back[0];const wait=b.dep-S
  h+=`<div class="actions">${r.allDone?'<span class="sp"></span><button class="btn primary" data-act="go" data-v="rideBack">Continue</button>':''}</div>`;
  return {h,qs}};
 SCR.rideBack=()=>{const t=trip(),c=city();const qs=[];
- S.t.back.forEach((b,i)=>{const others=busChoices(b).slice(0,2);const opts=[[b.rk,ROUTES[b.rk].num+' '+signText(b.rk),2,'Right.'],...others.map(k=>[k,ROUTES[k].num+' '+signText(k),0,'Check the number. You planned Route '+ROUTES[b.rk].num+'.'])];if(i%2===0)opts.push(opts.shift());
+ S.t.back.forEach((b,i)=>{const others=busChoices(b,false,backLegs(t)[i]).slice(0,2);const opts=[[b.rk,ROUTES[b.rk].num+' '+signText(b.rk),2,'Right.'],...others.map(k=>[k,ROUTES[k].num+' '+signText(k),0,'Check the number. You planned Route '+ROUTES[b.rk].num+'.'])];if(i%2===0)opts.push(opts.shift());
   const at=stopLabel(b.rk,b.aKey);
-  qs.push({id:'bus'+i,q:`${i?'Next bus. ':''}A bus is coming at ${fmt(b.dep)}. Which sign tells you it is your bus?`,a:opts});
+  if(others.length)qs.push({id:'bus'+i,q:`${i?'Next bus. ':''}A bus is coming at ${fmt(b.dep)}. Which sign tells you it is your bus?`,a:opts});
   if(i===0||c.id==='J')qs.push({id:'pay'+i,q:'How do you pay?',a:i>0?[['tr','Show or use my transfer from the first bus',2,'Right. Walmart is a free transfer point.'],['five','Give a $5 bill and wait for change',0,'Drivers do not give change.']]:c.id==='J'?[['card','Tap my CamTran card',2,'Right.'],['five','Give a $5 bill and wait for change',0,'Drivers do not give change.'],['cash','Exact fare, $1.75',1,'Exact cash works too.']]:[['cash','Exact fare, $1.75, or EZfare',2,'Right.'],['five','Give a $5 bill and wait for change',0,'Drivers do not give change.'],...(t.backLegs?[['tr','Exact fare, and ask for a transfer for my next bus',2,'Right. Walmart is a free transfer point.']]:[])]});
   const lastLeg=i===S.t.back.length-1;
   if(lastLeg&&c.id==='J'&&b.aKey!=='TC2')qs.push({id:'off'+i,q:'When do you request your stop?',a:[['early','As soon as I sit down',0,'Wait until your stop is next.'],['next','When the next stop is Widman & Solomon (Solomon Homes)',2,'Right. '+c.signal],['after','After the bus passes Solomon Homes',0,'Then you would miss your stop.']]});
