@@ -1,49 +1,77 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Word Match Memory</title>
+<title>Word Match</title>
 <style>
-:root{--bg:#eef2f5;--ink:#141c28;--muted:#46505e;--line:#cfd7e2;--pri:#0f766e;--pri-d:#0a5550;--good:#146c35;--good-l:#e3f4e8;--back:#2f4858}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:22px/1.35 "Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
-button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-:focus-visible{outline:4px solid #f59e0b;outline-offset:3px}
+:root{--bg:#eef2f5;--ink:#141c28;--muted:#46505e;--line:#cfd7e2;--pri:#0f766e;--pri-d:#0a5550;--good:#146c35;--good-l:#e3f4e8;--bad:#a3221a;--back:#2f4858;--hh:76px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:20px/1.3 -apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;overscroll-behavior:none}
+button,[role=button]{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+:focus-visible{outline:4px solid #f59e0b;outline-offset:2px}
 .hidden{display:none!important}
-header{height:64px;display:flex;align-items:center;gap:14px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line)}
-header h1{font-size:26px;margin:0;color:var(--pri-d);flex:1}
-#count{font-size:24px;font-weight:700}
-#msg{font-size:24px;font-weight:800;color:var(--good);min-width:110px}
-.tb{height:48px;min-width:48px;padding:0 14px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:18px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
-.tb svg{width:24px;height:24px}.tb.on{background:var(--pri);border-color:var(--pri);color:#fff}
-main{height:calc(100vh - 64px);padding:16px 20px}
-.setup{max-width:900px;margin:0 auto}
-.setup h2{font-size:24px;margin:14px 0 10px}
-.row{display:flex;gap:14px;flex-wrap:wrap}
-.ch{min-width:200px;min-height:72px;padding:10px 22px;border-radius:16px;border:3px solid var(--line);background:#fff;font-size:24px;font-weight:700;text-align:left}
-.ch small{display:block;font-size:16px;color:var(--muted);font-weight:400}
+.wrap{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{flex:none;height:var(--hh);display:flex;align-items:center;gap:8px;padding:0 8px;background:#fff;border-bottom:1px solid var(--line)}
+header h1{font-size:22px;margin:0 0 0 6px;color:var(--pri-d);white-space:nowrap}
+#count{flex:1;text-align:center;font-size:21px;font-weight:800;white-space:nowrap}
+.sp{flex:1}
+.tb{flex:none;height:64px;min-width:64px;padding:0 12px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.tb svg{width:26px;height:26px}.tb.on{background:var(--pri);border-color:var(--pri);color:#fff}
+main{flex:1;min-height:0;padding:12px;overflow:auto;position:relative}
+/* setup */
+.setup{max-width:960px;margin:0 auto;display:grid;gap:12px}
+.sec h2{font-size:18px;margin:0 0 6px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+.r5{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}@media (min-width:900px) and (min-height:561px){.r5{grid-template-columns:repeat(5,1fr)}}
+.ch{min-height:64px;padding:6px 8px;border-radius:14px;border:3px solid var(--line);background:#fff;font-size:20px;font-weight:700;line-height:1.15}
+.ch small{display:block;font-size:14px;color:var(--muted);font-weight:400;margin-top:2px}
 .ch.sel{border-color:var(--pri);background:#e3f3f1}
-.go{margin-top:24px;min-height:76px;min-width:280px;border:0;border-radius:18px;background:var(--pri);color:#fff;font-size:28px;font-weight:800}
-.grid{display:grid;gap:14px;height:100%;width:100%}
-.card{position:relative;border:0;padding:0;background:none;perspective:900px;min-width:0;min-height:0}
-.in{position:absolute;inset:0;transition:transform .45s;transform-style:preserve-3d}
-.card.up .in,.card.done .in{transform:rotateY(180deg)}
-.f{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
-.bk{background:var(--back);box-shadow:0 3px 8px rgba(0,0,0,.18);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 10px,transparent 10px 20px)}
-.fr{background:#fff;border:3px solid var(--line);transform:rotateY(180deg);padding:8%}
+.go{min-height:68px;width:100%;border:0;border-radius:16px;background:var(--pri);color:#fff;font-size:26px;font-weight:800}
+.go.alt{background:#fff;color:var(--pri-d);border:3px solid var(--pri)}
+@media (max-height:760px){.ch small{display:none}}
+/* */.col{display:contents}
+@media (orientation:landscape) and (max-height:560px){:root{--hh:68px}.setup{grid-template-columns:1fr 1fr;align-items:start}.col{display:grid;gap:6px}.setup{gap:6px 12px}main{padding:6px 12px}.sec h2{font-size:14px;margin-bottom:2px}.go{min-height:64px}}
+/* pick mode */
+.pick{height:100%;display:flex;flex-direction:column;gap:12px;max-width:1000px;margin:0 auto}
+.wordcard{flex:0 0 30%;min-height:0;border-radius:20px;background:#fff;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:clamp(44px,min(18vw,11vh),120px);letter-spacing:1px}
+.wordcard.ok{border-color:var(--good);background:var(--good-l)}
+.choices{flex:1;min-height:0;display:grid;gap:12px}
+.n2{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.n3{grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+@media (min-aspect-ratio:3/4){.n2{grid-template-columns:1fr 1fr;grid-template-rows:1fr}.n3{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr}}
+@media (orientation:landscape){.pick{flex-direction:row}.wordcard{flex:0 0 36%;font-size:clamp(40px,min(8vw,20vh),120px)}.n4{grid-template-columns:1fr 1fr}}
+.choice{min-height:64px;min-width:64px;border-radius:18px;border:3px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;padding:8px;box-shadow:0 3px 0 var(--line)}
+.choice svg{width:100%;height:100%;max-width:240px;max-height:240px;pointer-events:none}
+.choice.ok{border-color:var(--good);background:var(--good-l);box-shadow:0 3px 0 var(--good)}
+.choice.no{border-color:var(--bad);animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:8px 22px;border-radius:30px;font-size:24px;font-weight:800;pointer-events:none;z-index:3;white-space:nowrap}
+.toast.ok{background:var(--good);color:#fff}.toast.no{background:#fff;color:var(--bad);border:2px solid var(--bad)}
+/* memory */
+.grid{display:grid;gap:10px;height:100%;width:100%}
+.card{min-width:0;min-height:0;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid transparent}
+.card .bk,.card .fr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.card .bk{background:var(--back);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 10px,transparent 10px 20px)}
+.card .fr{background:#fff;padding:8%;visibility:hidden}
+.card.up .fr,.card.done .fr{visibility:visible}.card.up .bk,.card.done .bk{visibility:hidden}
+.card.up,.card.done{border-color:var(--line);animation:flip .25s}
+.card.done{border-color:var(--good)}.card.done .fr{background:var(--good-l)}
+@keyframes flip{from{transform:scaleX(.2)}to{transform:none}}
 .fr svg{width:100%;height:100%;max-width:200px;max-height:200px}
-.fr .w{font-size:var(--wf,56px);font-weight:700;letter-spacing:1px;color:#000}
-.card.done .fr{border-color:var(--good);background:var(--good-l)}
-.end{max-width:900px;margin:0 auto;text-align:center}
-.end h2{font-size:38px;margin:10px 0}
-.words{font-size:56px;font-weight:700;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 40px;margin:10px 0}
-.sheet{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:16px;background:#fff}.sheet div{border:2px solid var(--line);border-radius:12px;text-align:center;font-size:26px;font-weight:700;padding:8px}.sheet svg{width:130px;height:130px;display:block;margin:0 auto}
+.fr .w{font-size:var(--wf,48px);font-weight:700;color:#000}
+/* end */
+.end{max-width:900px;margin:0 auto;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:100%;gap:8px}
+.end h2{font-size:clamp(26px,min(7vw,7vh),40px);margin:0}
+.end p{margin:0;font-size:20px}
+.words{font-size:clamp(30px,min(9vw,7vh),56px);font-weight:700;display:flex;flex-wrap:wrap;justify-content:center;gap:0 28px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px;background:#fff}.sheet div{border:2px solid var(--line);border-radius:12px;text-align:center;font-size:24px;font-weight:700;padding:8px}.sheet svg{width:120px;height:120px;display:block;margin:0 auto}
 </style></head><body>
-<header><h1>Word Match Memory</h1><span id="msg" aria-live="polite"></span><span id="count" aria-live="polite"></span>
-<button class="tb hidden" id="newset">New set</button>
-<button class="tb" id="snd" aria-pressed="false" aria-label="Sound off"></button></header>
+<div class="wrap">
+<header><h1 id="ttl">Word Match</h1><button class="tb hidden" id="newset" aria-label="Back to setup">Sets</button><span id="count" aria-live="polite"></span><button class="tb" id="snd" aria-pressed="false"></button></header>
 <main id="app"></main>
-<!-- Word audio is reused from ../jeremy-reading/audio/words/ (see ../jeremy-reading/audio/CREDITS.txt). Pictures: original SVG drawings. -->
+</div>
+<!-- New-word clips in audio/ were generated locally with Piper TTS (MIT), voice en_US-libritts_r-medium speaker 0 (LibriTTS-R, CC BY 4.0). Other word audio is reused from ../jeremy-reading/audio/words/ (see ../jeremy-reading/audio/CREDITS.txt). Pictures: original SVG drawings. -->
 <script>
 (function(){"use strict";
 var K='stroke="#1c2533" stroke-width="3" stroke-linejoin="round"';
@@ -69,56 +97,109 @@ plug:svg('<rect x="44" y="2" width="12" height="10" fill="#6b7280" '+K+'/><path 
 clamp:svg('<path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1c2533" stroke-width="16"/><path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1d4ed8" stroke-width="10"/><path d="M64 98 V40" stroke="#6b7280" stroke-width="7"/><path d="M64 46 V40" stroke="#1c2533" stroke-width="7"/><rect x="54" y="34" width="20" height="7" fill="#4b5563"/><path d="M50 98 H78" stroke="#1c2533" stroke-width="6" stroke-linecap="round"/>'),
 drill:svg('<path d="M84 41 H98" stroke="#4b5563" stroke-width="4"/><rect x="74" y="35" width="11" height="13" fill="#4b5563" '+K+'/><path d="M12 28 H66 Q76 28 76 38 V46 Q76 54 66 54 H52 L56 84 H32 L30 54 H16 Q12 54 12 50Z" fill="#f59e0b" '+K+'/><path d="M30 54 H52" stroke="#1c2533" stroke-width="2"/><rect x="24" y="84" width="40" height="12" rx="2" fill="#1c2533"/><rect x="40" y="58" width="8" height="8" rx="2" fill="#1c2533"/>'),
 float:svg('<path d="M50 30 V8" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><path d="M26 52 A24 24 0 0 1 74 52Z" fill="#dc2626" '+K+'/><path d="M26 52 A24 24 0 0 0 74 52Z" fill="#fff" '+K+'/><path d="M2 70 q8 -6 16 0 t16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="#2b7bb9" stroke-width="4"/>')};
-var SETS={fishing:{name:"Fishing",words:["fish","net","rod","hook","worm","boat","float","cap"]},
+var SETS={easy:{name:"Easy Words",words:["cat","bag","hat","dog","sun","cup","bed","pig","bus","box","map","pen"]},
+ signs:{name:"Sign Words",words:["exit","door","stop","in","out","open","push","pull","that","there"]},
+ fishing:{name:"Fishing",words:["fish","net","rod","hook","worm","boat","float","cap"]},
  fixit:{name:"Fix-It",words:["nut","bolt","saw","belt","gas","mower","wrench","drill"]},
  mixed:{name:"Mixed",words:null}};
+var TX='font-family="Arial,Helvetica,sans-serif" font-weight="700" text-anchor="middle"';
+var NEWPIC={
+cat:svg('<path d="M70 82 Q92 80 88 58" fill="none" stroke="#1c2533" stroke-width="7" stroke-linecap="round"/><path d="M70 82 Q92 80 88 58" fill="none" stroke="#6b7280" stroke-width="3.5" stroke-linecap="round"/><path d="M30 88 Q24 56 40 46 H60 Q76 56 70 88Z" fill="#6b7280" '+K+'/><path d="M32 22 L36 6 L46 16 H54 L64 6 L68 22 Q72 44 50 46 Q28 44 32 22Z" fill="#6b7280" '+K+'/><circle cx="42" cy="28" r="3" fill="#facc15" stroke="#1c2533" stroke-width="1.5"/><circle cx="58" cy="28" r="3" fill="#facc15" stroke="#1c2533" stroke-width="1.5"/><path d="M47 35 h6 l-3 3z" fill="#1c2533"/>'),
+bag:svg('<path d="M36 30 V22 A14 14 0 0 1 64 22 V30" fill="none" stroke="#1c2533" stroke-width="5"/><path d="M18 30 H82 L88 90 H12Z" fill="#b08150" '+K+'/><path d="M18 30 L24 40 H76 L82 30" fill="none" stroke="#8a6238" stroke-width="2"/>'),
+hat:svg('<ellipse cx="50" cy="66" rx="44" ry="11" fill="#5b4636" '+K+'/><path d="M26 64 C24 36 30 24 50 26 C70 24 76 36 74 64Z" fill="#7a5c45" '+K+'/><path d="M27 56 H73" stroke="#2b2118" stroke-width="7"/><path d="M42 30 Q50 36 58 30" fill="none" stroke="#5b4636" stroke-width="3"/>'),
+dog:svg('<path d="M22 48 L10 36" stroke="#1c2533" stroke-width="5" stroke-linecap="round"/><path d="M18 46 H64 Q70 46 70 54 V66 H18Z" fill="#a0673a" '+K+'/><path d="M22 66 V88 M34 66 V88 M54 66 V88 M64 66 V88" stroke="#1c2533" stroke-width="7" stroke-linecap="round"/><path d="M60 50 L64 22 Q72 16 80 22 L92 30 Q94 38 86 40 L74 42 L72 54Z" fill="#a0673a" '+K+'/><path d="M66 22 Q60 32 64 40" fill="#6b4224" stroke="#1c2533" stroke-width="2.5"/><circle cx="76" cy="28" r="2.5" fill="#1c2533"/><circle cx="92" cy="32" r="3" fill="#1c2533"/>'),
+sun:svg('<g stroke="#d97706" stroke-width="6" stroke-linecap="round"><path d="M50 4V16M50 84V96M4 50H16M84 50H96M17 17l9 9M74 74l9 9M17 83l9-9M74 26l9-9"/></g><circle cx="50" cy="50" r="24" fill="#fbbf24" stroke="#1c2533" stroke-width="3"/>'),
+cup:svg('<path d="M40 8 q-6 8 0 14 M54 8 q-6 8 0 14" fill="none" stroke="#9aa5b4" stroke-width="3" stroke-linecap="round"/><path d="M70 42 Q90 42 88 58 Q86 72 68 72" fill="none" stroke="#1c2533" stroke-width="7"/><path d="M70 42 Q90 42 88 58 Q86 72 68 72" fill="none" stroke="#1d4ed8" stroke-width="3"/><path d="M20 30 H74 V78 Q74 90 62 90 H32 Q20 90 20 78Z" fill="#1d4ed8" '+K+'/>'),
+bed:svg('<path d="M8 30 V88 M92 56 V88" stroke="#5b4636" stroke-width="7" stroke-linecap="round"/><rect x="8" y="56" width="84" height="16" fill="#7a5c45" '+K+'/><rect x="14" y="44" width="24" height="14" rx="6" fill="#fff" '+K+'/><path d="M38 46 H90 V60 H38Z" fill="#2b7bb9" '+K+'/>'),
+pig:svg('<path d="M16 50 q-10 -2 -6 -10" fill="none" stroke="#1c2533" stroke-width="3"/><ellipse cx="48" cy="54" rx="34" ry="22" fill="#e9a1a8" '+K+'/><path d="M30 74 V88 M42 74 V88 M58 74 V88 M68 74 V88" stroke="#1c2533" stroke-width="7" stroke-linecap="round"/><path d="M66 34 L72 22 L78 38" fill="#d98a92" '+K+'/><rect x="78" y="46" width="14" height="14" rx="5" fill="#d98a92" '+K+'/><circle cx="83" cy="53" r="1.5" fill="#1c2533"/><circle cx="88" cy="53" r="1.5" fill="#1c2533"/><circle cx="70" cy="44" r="2.5" fill="#1c2533"/>'),
+bus:svg('<rect x="6" y="22" width="88" height="54" rx="8" fill="#f2b705" '+K+'/><rect x="12" y="30" width="16" height="18" fill="#cfe3f0" stroke="#1c2533" stroke-width="2"/><rect x="32" y="30" width="16" height="18" fill="#cfe3f0" stroke="#1c2533" stroke-width="2"/><rect x="52" y="30" width="16" height="18" fill="#cfe3f0" stroke="#1c2533" stroke-width="2"/><rect x="74" y="30" width="14" height="36" fill="#cfe3f0" stroke="#1c2533" stroke-width="2"/><path d="M6 58 H72" stroke="#1c2533" stroke-width="2"/><circle cx="26" cy="78" r="9" fill="#1c2533"/><circle cx="74" cy="78" r="9" fill="#1c2533"/><circle cx="26" cy="78" r="3.5" fill="#9aa5b4"/><circle cx="74" cy="78" r="3.5" fill="#9aa5b4"/>'),
+box:svg('<path d="M14 36 L50 22 L86 36 L50 50Z" fill="#d6a86b" '+K+'/><path d="M14 36 V76 L50 92 V50Z" fill="#b8874c" '+K+'/><path d="M86 36 V76 L50 92 V50Z" fill="#c99a5c" '+K+'/><path d="M32 29 L68 43 V54" fill="none" stroke="#e8d3a8" stroke-width="5"/>'),
+map:svg('<path d="M8 22 L36 12 L64 22 L92 12 V78 L64 88 L36 78 L8 88Z" fill="#e8e0c8" '+K+'/><path d="M36 12 V78 M64 22 V88" stroke="#b5a984" stroke-width="2"/><path d="M16 70 Q30 50 46 58 T76 36" fill="none" stroke="#dc2626" stroke-width="3" stroke-dasharray="5 4"/><path d="M76 20 a8 8 0 0 1 8 8 c0 7 -8 14 -8 14 s-8 -7 -8 -14 a8 8 0 0 1 8 -8z" fill="#dc2626" stroke="#1c2533" stroke-width="2"/><circle cx="76" cy="28" r="3" fill="#fff"/>'),
+pen:svg('<g transform="rotate(-45 50 50)"><rect x="44" y="8" width="12" height="66" rx="3" fill="#1d4ed8" '+K+'/><path d="M44 74 L50 92 L56 74Z" fill="#c3cad4" '+K+'/><path d="M56 14 h5 v26" fill="none" stroke="#1c2533" stroke-width="3"/></g>'),
+exit:svg('<rect x="6" y="28" width="88" height="44" rx="5" fill="#c62828" '+K+'/><text x="50" y="62" '+TX+' font-size="30" fill="#fff">EXIT</text>'),
+door:svg('<rect x="22" y="6" width="56" height="90" fill="#5b4636" '+K+'/><rect x="28" y="10" width="44" height="86" fill="#a0673a" '+K+'/><rect x="34" y="18" width="32" height="28" fill="none" stroke="#7a4b24" stroke-width="3"/><rect x="34" y="54" width="32" height="34" fill="none" stroke="#7a4b24" stroke-width="3"/><circle cx="64" cy="52" r="3.5" fill="#d4a017" stroke="#1c2533" stroke-width="1.5"/>'),
+stop:svg('<polygon points="34,6 66,6 94,34 94,66 66,94 34,94 6,66 6,34" fill="#c62828" stroke="#1c2533" stroke-width="3"/><polygon points="36,12 64,12 88,36 88,64 64,88 36,88 12,64 12,36" fill="none" stroke="#fff" stroke-width="3"/><text x="50" y="60" '+TX+' font-size="27" fill="#fff">STOP</text>'),
+"in":svg('<rect x="56" y="10" width="38" height="84" fill="#3f4a5a" '+K+'/><rect x="60" y="14" width="30" height="80" fill="#1c2533"/><path d="M4 92 H96" stroke="#1c2533" stroke-width="3"/><path d="M8 52 H58" stroke="#15803d" stroke-width="10" stroke-linecap="round"/><path d="M50 36 L70 52 L50 68Z" fill="#15803d" stroke="#15803d" stroke-width="4" stroke-linejoin="round"/>'),
+out:svg('<rect x="6" y="10" width="38" height="84" fill="#3f4a5a" '+K+'/><rect x="10" y="14" width="30" height="80" fill="#1c2533"/><path d="M4 92 H96" stroke="#1c2533" stroke-width="3"/><path d="M30 52 H80" stroke="#c2410c" stroke-width="10" stroke-linecap="round"/><path d="M76 36 L96 52 L76 68Z" fill="#c2410c" stroke="#c2410c" stroke-width="4" stroke-linejoin="round"/>'),
+open:svg('<path d="M30 30 L50 8 L70 30" fill="none" stroke="#1c2533" stroke-width="3"/><circle cx="50" cy="8" r="3" fill="#1c2533"/><rect x="6" y="30" width="88" height="44" rx="6" fill="#15803d" '+K+'/><text x="50" y="63" '+TX+' font-size="28" fill="#fff">OPEN</text>'),
+push:svg('<rect x="18" y="4" width="64" height="92" fill="#cfd7e2" '+K+'/><rect x="24" y="10" width="52" height="86" fill="#e8eef4" stroke="#9aa5b4" stroke-width="2"/><rect x="28" y="38" width="44" height="22" rx="3" fill="#9aa5b4" stroke="#1c2533" stroke-width="2"/><text x="50" y="55" '+TX+' font-size="15" fill="#1c2533">PUSH</text>'),
+pull:svg('<rect x="18" y="4" width="64" height="92" fill="#cfd7e2" '+K+'/><rect x="24" y="10" width="52" height="86" fill="#e8eef4" stroke="#9aa5b4" stroke-width="2"/><path d="M62 34 h6 v36 h-6" fill="none" stroke="#1c2533" stroke-width="5" stroke-linejoin="round"/><text x="42" y="58" '+TX+' font-size="15" fill="#1c2533">PULL</text>')};
+for(var nk in NEWPIC)PIC[nk]=NEWPIC[nk];
+
+var NEWAUDIO={};["cat","bag","hat","dog","sun","cup","bed","pig","bus","box","map","pen","exit","door","stop","in","out","open","push","pull","that","there"].forEach(function(w){NEWAUDIO[w]=1});
+function hasPic(w){return !!PIC[w]}
 var SIZES={easy:{name:"Easy",n:4},medium:{name:"Medium",n:6},hard:{name:"Hard",n:8}};
-var ON='<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-var OFF='<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-var app=document.getElementById("app"),cnt=document.getElementById("count"),msg=document.getElementById("msg"),sndB=document.getElementById("snd"),newB=document.getElementById("newset");
-var cfg={set:"fishing",size:"medium",wordsOnly:false},sound=false,G=null;
-try{var c=JSON.parse(localStorage.getItem("wordMatch.v1"));if(c){cfg.set=c.set||cfg.set;cfg.size=c.size||cfg.size;cfg.wordsOnly=!!c.wordsOnly}}catch(e){}
-function saveCfg(){try{localStorage.setItem("wordMatch.v1",JSON.stringify(cfg))}catch(e){}}
-var player=document.createElement("audio");player.preload="auto";document.body.appendChild(player);
-function say(w){if(!sound)return;try{player.src="../jeremy-reading/audio/words/"+w+".mp3";var p=player.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
-function drawSnd(){sndB.innerHTML=(sound?ON:OFF)+(sound?"On":"Off");sndB.classList.toggle("on",sound);sndB.setAttribute("aria-pressed",sound);sndB.setAttribute("aria-label",sound?"Sound on":"Sound off")}
-sndB.onclick=function(){sound=!sound;drawSnd()};drawSnd();
-newB.onclick=setup;
+var ON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+var OFF='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+var $=function(id){return document.getElementById(id)};
+var app=$("app"),cnt=$("count"),sndB=$("snd"),newB=$("newset"),ttl=$("ttl");
+var cfg={mode:"pick",set:"easy",size:"medium",choices:3,wordsOnly:false},sound=false,G=null,gen=0;
+try{var c=JSON.parse(localStorage.getItem("wordMatch.v2"));if(c){for(var k in cfg)if(c[k]!==undefined)cfg[k]=c[k];if(cfg.mode!=="memory")cfg.mode="pick";if([2,3,4].indexOf(cfg.choices)<0)cfg.choices=3}}catch(e){}
+function saveCfg(){try{localStorage.setItem("wordMatch.v2",JSON.stringify(cfg))}catch(e){}}
+var player=document.createElement("audio");player.preload="auto";player.setAttribute("playsinline","");document.body.appendChild(player);
+function say(w){if(!sound)return;try{player.src=(NEWAUDIO[w]?"audio/":"../jeremy-reading/audio/words/")+w+".mp3";var p=player.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+function drawSnd(){sndB.innerHTML=(sound?ON:OFF)+'<span>'+(sound?"On":"Off")+'</span>';sndB.classList.toggle("on",sound);sndB.setAttribute("aria-pressed",String(sound));sndB.setAttribute("aria-label",sound?"Sound on":"Sound off")}
+sndB.addEventListener("click",function(){sound=!sound;drawSnd()});drawSnd();
+newB.addEventListener("click",setup);
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function setWords(){var p=SETS[cfg.set].words;if(p)return p.slice();var a=shuf(SETS.fishing.words),b=shuf(SETS.fixit.words),o=[];for(var i=0;i<8;i++)o.push(i%2?b[i>>1]:a[i>>1]);return o}
+function playing(on){newB.classList.toggle("hidden",!on);ttl.classList.toggle("hidden",on);if(!on)cnt.textContent=""}
+var toastT;function toast(t,cls){var e=$("toast");if(!e){e=document.createElement("div");e.id="toast";app.appendChild(e)}e.className="toast "+cls;e.textContent=t;clearTimeout(toastT);toastT=setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},1100)}
 
-function setup(){G=null;newB.classList.add("hidden");cnt.textContent="";msg.textContent="";
- function opts(obj,key,sub){return Object.keys(obj).map(function(k){return'<button class="ch'+(cfg[key]===k?' sel':'')+'" data-k="'+key+'" data-v="'+k+'">'+obj[k].name+'<small>'+sub(k)+'</small></button>'}).join("")}
- app.innerHTML='<div class="setup"><h2>Pick a word set</h2><div class="row">'+opts(SETS,"set",function(k){return SETS[k].words?SETS[k].words.slice(0,6).join(", ")+"…":"some of each"})+'</div>'+
- '<h2>Pick a size</h2><div class="row">'+opts(SIZES,"size",function(k){return SIZES[k].n+" pairs ("+SIZES[k].n*2+" cards)"})+'</div>'+
- '<h2>Cards</h2><div class="row"><button class="ch'+(!cfg.wordsOnly?' sel':'')+'" data-k="wordsOnly" data-v="0">Word + picture<small>match a word to its picture</small></button><button class="ch'+(cfg.wordsOnly?' sel':'')+'" data-k="wordsOnly" data-v="1">Words only<small>match a word to the same word</small></button></div>'+
- '<button class="go" id="go">Start</button></div>';
- app.querySelectorAll(".ch").forEach(function(b){b.onclick=function(){var k=b.dataset.k;cfg[k]=k==="wordsOnly"?b.dataset.v==="1":b.dataset.v;saveCfg();setup()}});
- document.getElementById("go").onclick=start}
+// ---- memory layout: pick columns that give the biggest cards; never rebuild DOM on resize
+function layout(n){var W=app.clientWidth-24,H=app.clientHeight-24,gap=10,best=null;
+ for(var cols=2;cols<=8;cols++){var rows=Math.ceil(n/cols);if(cols*rows-n>=cols)continue;var cw=(W-gap*(cols-1))/cols,ch=(H-gap*(rows-1))/rows;var sc=Math.min(cw,ch*0.85);if(!best||sc>best.sc)best={cols:cols,rows:rows,cw:cw,ch:ch,sc:sc}}return best}
+function hardPairs(){var L=layout(16),f=Math.min(L.ch*0.4,(L.cw-20)/(0.62*6));return f>=26?8:6}
+function fitGrid(){var g=$("grid");if(!g||!G)return;var L=layout(G.cards.length),ml=Math.max.apply(null,G.words.map(function(w){return w.length}));
+ g.style.gridTemplateColumns="repeat("+L.cols+",1fr)";g.style.gridTemplateRows="repeat("+L.rows+",1fr)";
+ g.style.setProperty("--wf",Math.floor(Math.max(18,Math.min(L.ch*0.42,(L.cw-20)/(0.62*ml),84)))+"px")}
+window.addEventListener("resize",fitGrid);
 
-function start(){var n=SIZES[cfg.size].n,pool=SETS[cfg.set].words;
- if(!pool){var a=shuf(SETS.fishing.words),b=shuf(SETS.fixit.words);pool=[];for(var i=0;i<8;i++)pool.push(i%2?b[i>>1]:a[i>>1])}
- var words=shuf(pool).slice(0,n),cards=[];
- words.forEach(function(w){cards.push({w:w,k:"word"});cards.push({w:w,k:cfg.wordsOnly?"word":"pic"})});
- G={words:words,cards:shuf(cards),open:[],lock:false,found:0,n:n};newB.classList.remove("hidden");render()}
-function render(){var n=G.cards.length,cols=n===8?4:n===12?6:8,rows=2;
- var cw=(window.innerWidth-40-(cols-1)*14)/cols,ch=(window.innerHeight-64-32-14)/rows;
- var wf=Math.floor(Math.min(cw/3.6,ch/2.6,84));
- app.innerHTML='<div class="grid" id="grid" style="grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);--wf:'+wf+'px">'+G.cards.map(function(c,i){
-  return'<button class="card" data-i="'+i+'" aria-label="Card '+(i+1)+', face down"><div class="in"><div class="f bk"></div><div class="f fr">'+(c.k==="pic"?PIC[c.w]:'<span class="w">'+c.w+'</span>')+'</div></div></button>'}).join("")+'</div>';
- app.querySelectorAll(".card").forEach(function(b){b.addEventListener("click",function(){tap(+b.dataset.i,b)})});upd()}
+function setup(){gen++;G=null;playing(false);
+ function btn(key,val,label,sub){var sel=String(cfg[key])===String(val);return'<button class="ch'+(sel?' sel':'')+'" data-k="'+key+'" data-v="'+val+'" aria-pressed="'+sel+'">'+label+(sub?'<small>'+sub+'</small>':'')+'</button>'}
+ var mode='<div class="sec"><h2>Game</h2><div class="row">'+btn("mode","pick","Pick the Picture","word, then pick its picture")+btn("mode","memory","Memory flip","turn over cards to find pairs")+'</div></div>';
+ var set='<div class="sec"><h2>Words</h2><div class="row r5">'+btn("set","easy","Easy Words","cat, dog, sun…")+btn("set","signs","Sign Words","exit, stop, push…")+btn("set","fishing","Fishing","fish, net, rod…")+btn("set","fixit","Fix-It","nut, bolt, saw…")+btn("set","mixed","Mixed","some of each")+'</div></div>';
+ var opt;
+ if(cfg.mode==="pick")opt='<div class="sec"><h2>Pictures to choose from</h2><div class="row">'+btn("choices",2,"2")+btn("choices",3,"3")+btn("choices",4,"4")+'</div></div>';
+ else{var hp=0;opt='<div class="sec"><h2>Size</h2><div class="row">'+btn("size","easy","Easy","4 pairs")+btn("size","medium","Medium","6 pairs")+btn("size","hard","Hard","8 pairs")+'</div></div><div class="sec"><h2>Cards</h2><div class="row">'+btn("wordsOnly",false,"Word + picture")+btn("wordsOnly",true,"Words only")+'</div></div>'}
+ app.innerHTML='<div class="setup"><div class="col">'+mode+set+'</div><div class="col">'+opt+'<button class="go" id="go">Start</button></div></div>';
+ app.querySelectorAll(".ch").forEach(function(b){b.addEventListener("click",function(){var k=b.dataset.k,v=b.dataset.v;cfg[k]=k==="wordsOnly"?v==="true":k==="choices"?+v:v;saveCfg();setup()})});
+ $("go").addEventListener("click",function(){cfg.mode==="pick"?startPick():startMem()})}
+
+// ---- Pick the Picture
+function startPick(){gen++;var pool=setWords().filter(hasPic);G={mode:"pick",pool:pool,order:shuf(pool),i:0,words:[],lock:false,n:pool.length};playing(true);nextPick()}
+function nextPick(){if(G.i>=G.order.length)return end();var w=G.order[G.i],n=Math.min(cfg.choices,G.pool.length);
+ var opts=shuf([w].concat(shuf(G.pool.filter(function(x){return x!==w})).slice(0,n-1)));G.cur=w;G.lock=false;
+ cnt.textContent=G.i+" of "+G.n+" matched";
+ app.innerHTML='<div class="pick"><div class="wordcard" id="wc" role="button" tabindex="0" aria-label="Word: '+w+'. Tap to hear it.">'+w+'</div><div class="choices n'+n+'">'+opts.map(function(x){return'<button class="choice" data-v="'+x+'" aria-label="Picture: '+x+'">'+PIC[x]+'</button>'}).join("")+'</div></div>';
+ $("wc").addEventListener("click",function(){say(w)});
+ var my=gen;
+ app.querySelectorAll(".choice").forEach(function(b){b.addEventListener("click",function(){if(G.lock||my!==gen)return;
+  if(b.dataset.v===w){G.lock=true;b.classList.add("ok");$("wc").classList.add("ok");G.words.push(w);G.i++;cnt.textContent=G.i+" of "+G.n+" matched";toast("Match!","ok");say(w);
+   setTimeout(function(){if(my===gen)nextPick()},1000)}
+  else{b.classList.remove("no");void b.offsetWidth;b.classList.add("no");toast("Try again","no")}})})}
+
+// ---- Memory flip
+function startMem(){gen++;var n=SIZES[cfg.size].n;if(cfg.size==="hard")n=hardPairs();
+ var src=setWords();if(!cfg.wordsOnly)src=src.filter(hasPic);n=Math.min(n,src.length);var words=shuf(src).slice(0,n),cards=[];words.forEach(function(w){cards.push({w:w,k:"word"});cards.push({w:w,k:cfg.wordsOnly?"word":"pic"})});
+ G={mode:"mem",words:words,cards:shuf(cards),open:[],lock:false,found:0,n:n};playing(true);
+ app.innerHTML='<div class="grid" id="grid">'+G.cards.map(function(c,i){return'<div class="card" role="button" tabindex="0" data-i="'+i+'" aria-label="Card '+(i+1)+', face down"><div class="bk"></div><div class="fr">'+(c.k==="pic"?PIC[c.w]:'<span class="w">'+c.w+'</span>')+'</div></div>'}).join("")+'</div>';
+ fitGrid();var my=gen;
+ app.querySelectorAll(".card").forEach(function(b){b.addEventListener("click",function(){if(my===gen)flip(+b.dataset.i,b)})});upd()}
 function upd(){cnt.textContent=G.found+" of "+G.n+" matched"}
-function tap(i,b){var c=G.cards[i];if(G.lock||c.done||c.up)return;
- c.up=true;b.classList.add("up");b.setAttribute("aria-label",c.k==="pic"?"Picture: "+c.w:"Word: "+c.w);if(c.k==="word")say(c.w);
- G.open.push(i);msg.textContent="";if(G.open.length<2)return;
- var a=G.cards[G.open[0]],z=G.cards[G.open[1]],ia=G.open[0],iz=G.open[1];G.open=[];
- if(a.w===z.w){a.done=z.done=true;G.found++;[ia,iz].forEach(function(k){app.querySelector('[data-i="'+k+'"]').classList.add("done")});msg.textContent="Match!";say(a.w);upd();
-  if(G.found===G.n){G.lock=true;setTimeout(end,1200)}}
- else{G.lock=true;setTimeout(function(){[ia,iz].forEach(function(k){G.cards[k].up=false;var e=app.querySelector('[data-i="'+k+'"]');if(e){e.classList.remove("up");e.setAttribute("aria-label","Card "+(k+1)+", face down")}});G.lock=false},1500)}}
-function end(){msg.textContent="";newB.classList.add("hidden");
- app.innerHTML='<div class="end"><h2>All matched, nice work Jeremy!</h2><p>Write these in your book:</p><div class="words">'+G.words.map(function(w){return'<span>'+w+'</span>'}).join("")+'</div><div class="row" style="justify-content:center"><button class="go" id="again">Play again</button><button class="go" id="ns" style="background:#fff;color:var(--pri-d);border:3px solid var(--pri)">New set</button></div></div>';
- document.getElementById("again").onclick=start;document.getElementById("ns").onclick=setup}
-window.addEventListener("resize",function(){if(G&&!G.lock&&app.querySelector("#grid")){var s=G;render();s.cards.forEach(function(c,i){var e=app.querySelector('[data-i="'+i+'"]');if(c.done)e.classList.add("done");else if(c.up)e.classList.add("up")})}});
-window.__wm={pics:PIC,sets:SETS,state:function(){return G}};
-if(/[?&]pics=1/.test(location.search)){var all=SETS.fishing.words.concat(SETS.fixit.words);app.style.height="auto";document.body.style.overflow="auto";app.innerHTML='<div class="sheet">'+all.map(function(w){return'<div>'+PIC[w]+w+'</div>'}).join("")+'</div>'}else setup();
+function el(i){return app.querySelector('[data-i="'+i+'"]')}
+function flip(i,b){var c=G.cards[i];if(G.lock||c.done||c.up)return;
+ c.up=true;b.classList.add("up");b.setAttribute("aria-label",(c.k==="pic"?"Picture: ":"Word: ")+c.w);if(c.k==="word")say(c.w);
+ G.open.push(i);if(G.open.length<2)return;
+ var ia=G.open[0],iz=G.open[1],a=G.cards[ia],z=G.cards[iz];G.open=[];
+ if(a.w===z.w){a.done=z.done=true;a.up=z.up=false;el(ia).classList.add("done");el(iz).classList.add("done");G.found++;toast("Match!","ok");say(a.w);upd();
+  if(G.found===G.n){G.lock=true;var my=gen;setTimeout(function(){if(my===gen)end()},1100)}}
+ else{G.lock=true;var my2=gen;setTimeout(function(){if(my2!==gen)return;[ia,iz].forEach(function(k){G.cards[k].up=false;var e=el(k);if(e){e.classList.remove("up");e.setAttribute("aria-label","Card "+(k+1)+", face down")}});G.lock=false},1500)}}
+
+function end(){gen++;var words=G.mode==="pick"?G.words:G.words;newB.classList.add("hidden");
+ app.innerHTML='<div class="end"><h2>All matched, nice work Jeremy!</h2><p>Write these in your book:</p><div class="words">'+words.map(function(w){return'<span>'+w+'</span>'}).join("")+'</div><div class="btns"><button class="go" id="again">Play again</button><button class="go alt" id="ns">New set</button></div></div>';
+ $("again").addEventListener("click",function(){cfg.mode==="pick"?startPick():startMem()});$("ns").addEventListener("click",setup)}
+window.__wm={pics:PIC,sets:SETS,state:function(){return G},cfg:cfg};
+if(/[?&]pics=1/.test(location.search)){document.querySelector('.wrap').style.height='auto';app.style.overflow='visible';app.innerHTML='<div class="sheet">'+SETS.easy.words.concat(SETS.signs.words.filter(hasPic),SETS.fishing.words,SETS.fixit.words).map(function(w){return'<div>'+PIC[w]+w+'</div>'}).join("")+'</div>'}else setup();
 })();
 </script></body></html>
