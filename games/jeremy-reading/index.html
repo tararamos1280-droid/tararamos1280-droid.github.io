@@ -56,43 +56,92 @@ h1{font-size:30px;line-height:1.2;margin:4px 0 10px}h2{font-size:25px;margin:0 0
 .result{text-align:center}.result .stars{font-size:52px}
 table{width:100%;border-collapse:collapse;font-size:17px}td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
 .danger{background:var(--bad);box-shadow:0 4px 0 #6f1510}
+.pic{display:flex;justify-content:center;margin:0 0 10px}.pic svg{width:120px;height:120px}
+.opt .pv svg,.opt svg{width:76px;height:76px}.opt{min-height:110px}
+.word .fl{color:var(--pri);text-decoration:underline}
+.spk svg{width:38px;height:38px}.spk.sm svg{width:28px;height:28px}
+.fbrow{display:flex;align-items:center;gap:10px}
+.lesson .ic svg{width:52px;height:52px}
+.sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.sheet div{background:#fff;border:2px solid var(--line);border-radius:14px;text-align:center;padding:8px;font-size:24px;font-weight:800}.sheet svg{width:110px;height:110px;display:block;margin:0 auto}
 </style></head><body>
 <div class="top"><div id="title" role="button" tabindex="0">Word Shop</div><div class="streak" id="streak"></div><button class="xbtn hidden" id="quit" aria-label="Quit lesson">✕</button></div>
 <div class="bar hidden" id="bar"><i id="barfill"></i></div>
 <main id="app" aria-live="polite"></main>
+<!--
+CREDITS / LICENSES (Word Shop audio)
+Letter sounds (audio/sounds/*.mp3): trimmed, length-adjusted and volume-normalized from the IPA phoneme
+recordings on Wikimedia Commons (https://commons.wikimedia.org). License: CC BY-SA 3.0, except
+j.mp3 (File:Voiced_palato-alveolar_affricate.ogg), which is public domain. These trimmed clips are shared under CC BY-SA 3.0.
+Sources: see audio/CREDITS.txt for the exact file page of each letter.
+Word clips (audio/words/*.mp3): generated offline with Piper TTS (MIT, https://github.com/rhasspy/piper),
+voice en_US-libritts_r-medium (speaker 0), trained on LibriTTS-R, CC BY 4.0 (http://www.openslr.org/141/).
+Pictures: original inline SVG drawings made for this page.
+-->
 <script>
 (function(){
 "use strict";
 var KEY="jeremyReading.v1";
+var K='stroke="#1c2533" stroke-width="3" stroke-linejoin="round"';
+function svg(b){return '<svg viewBox="0 0 100 100" aria-hidden="true">'+b+'</svg>'}
 var PIC={
-fish:"🐟",net:"🥅",rod:"🎣",bait:"🪱",hook:"🪝",wet:"💧",bug:"🐛",fin:"🦈",
-bolt:"🔩",gas:"⛽",oil:"🛢️",cut:"✂️",fix:"🔧",tool:"🧰",
-nut:'<svg viewBox="0 0 60 60" aria-hidden="true"><polygon points="30,4 53,17 53,43 30,56 7,43 7,17" fill="#8a96a8" stroke="#1c2533" stroke-width="3"/><circle cx="30" cy="30" r="10" fill="#fff" stroke="#1c2533" stroke-width="3"/></svg>',
-mow:'<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M40 8 L30 30" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><rect x="8" y="28" width="40" height="16" rx="5" fill="#15803d" stroke="#1c2533" stroke-width="3"/><circle cx="15" cy="48" r="7" fill="#1c2533"/><circle cx="42" cy="48" r="7" fill="#1c2533"/><path d="M2 58 h56" stroke="#65a30d" stroke-width="4"/></svg>',
-belt:'<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="2" y="22" width="56" height="16" rx="3" fill="#7c4a1e" stroke="#1c2533" stroke-width="3"/><rect x="20" y="17" width="18" height="26" rx="3" fill="none" stroke="#d4a017" stroke-width="5"/></svg>',
-fresh:"🥬",spark:"⚡",plug:"🔌",trim:"✂️"};
-var ALT={fresh:["🍞","🧱"],spark:["💧","🪨"],plug:["🔑","🧲"],trim:["🔨","🪣"]};
+fish:svg('<path d="M20 50 L4 34 L9 50 L4 66Z" fill="#3b6f96" '+K+'/><path d="M18 50 C30 28 64 28 84 50 C64 72 30 72 18 50Z" fill="#4f8fbf" '+K+'/><path d="M40 33 Q50 20 60 32" fill="#3b6f96" '+K+'/><path d="M62 40 Q57 50 62 60" fill="none" '+K+'/><circle cx="73" cy="46" r="4" fill="#1c2533"/>'),
+net:svg('<path d="M60 60 L94 94" stroke="#7c4a1e" stroke-width="8" stroke-linecap="round"/><path d="M12 38 Q30 96 64 38" fill="#dfe7ee" '+K+'/><path d="M20 46 L52 70 M30 40 L58 60 M56 44 L28 70 M44 40 L20 58 M24 60 L54 58" stroke="#6b7280" stroke-width="2"/><ellipse cx="38" cy="38" rx="27" ry="13" fill="none" stroke="#1c2533" stroke-width="5"/>'),
+rod:svg('<path d="M14 92 L88 10" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><path d="M14 92 L34 70" stroke="#7c4a1e" stroke-width="10" stroke-linecap="round"/><circle cx="38" cy="72" r="9" fill="#9aa5b4" '+K+'/><path d="M88 10 V62" stroke="#6b7280" stroke-width="1.5"/><path d="M88 62 v7 a5 5 0 0 1 -10 0" fill="none" stroke="#1c2533" stroke-width="3"/>'),
+hook:svg('<circle cx="58" cy="12" r="7" fill="none" stroke="#4b5563" stroke-width="5"/><path d="M58 19 V64 A18 18 0 0 1 22 64 V52" fill="none" stroke="#4b5563" stroke-width="8" stroke-linecap="round"/><path d="M22 50 L33 62" stroke="#4b5563" stroke-width="6" stroke-linecap="round"/>'),
+worm:svg('<path d="M10 62 C20 38 34 38 42 56 S62 74 70 52 S86 36 92 48" fill="none" stroke="#1c2533" stroke-width="17" stroke-linecap="round"/><path d="M10 62 C20 38 34 38 42 56 S62 74 70 52 S86 36 92 48" fill="none" stroke="#d77a8c" stroke-width="11" stroke-linecap="round"/><path d="M36 46 l-4 6 M56 64 l4 -6" stroke="#a24a5c" stroke-width="3"/><circle cx="89" cy="45" r="2" fill="#1c2533"/>'),
+boat:svg('<path d="M50 50 V14 L74 44Z" fill="#e5e7eb" '+K+'/><path d="M50 14 V52" stroke="#1c2533" stroke-width="3"/><path d="M8 54 H92 L78 76 H22Z" fill="#b45309" '+K+'/><path d="M14 62 H86" stroke="#7a3d00" stroke-width="3"/><path d="M4 86 q8 -6 16 0 t16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="#2b7bb9" stroke-width="4"/>'),
+bug:svg('<path d="M32 46 L14 38 M30 60 L12 60 M32 74 L14 84 M68 46 L86 38 M70 60 L88 60 M68 74 L86 84 M45 22 L36 8 M55 22 L64 8" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><ellipse cx="50" cy="60" rx="21" ry="28" fill="#2f5d3a" '+K+'/><circle cx="50" cy="28" r="10" fill="#1c2533"/><path d="M50 36 V88" stroke="#1c2533" stroke-width="3"/>'),
+cap:svg('<path d="M18 64 C18 26 82 26 82 64Z" fill="#1d4ed8" '+K+'/><path d="M66 64 H97 Q94 76 72 74 Q64 72 66 64Z" fill="#1e3a8a" '+K+'/><path d="M50 30 V64 M30 40 Q36 52 34 64 M70 40 Q64 52 66 64" stroke="#1e3a8a" stroke-width="2" fill="none"/><circle cx="50" cy="30" r="4" fill="#1e3a8a"/>'),
+nut:svg('<polygon points="50,8 86,29 86,71 50,92 14,71 14,29" fill="#9aa5b4" stroke="#1c2533" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="50" r="18" fill="#fff" stroke="#1c2533" stroke-width="4"/><circle cx="50" cy="50" r="13" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4 3"/>'),
+bolt:svg('<path d="M28 8 H72 V28 H28Z" fill="#9aa5b4" '+K+'/><path d="M42 8 V28 M58 8 V28" stroke="#1c2533" stroke-width="2"/><rect x="40" y="28" width="20" height="64" fill="#c3cad4" '+K+'/><path d="M40 40 L60 36 M40 48 L60 44 M40 56 L60 52 M40 64 L60 60 M40 72 L60 68 M40 80 L60 76 M40 88 L60 84" stroke="#4b5563" stroke-width="2.5"/>'),
+gas:svg('<path d="M68 34 L90 12" stroke="#1c2533" stroke-width="8" stroke-linecap="round"/><path d="M18 30 H66 L76 40 V90 H18Z" fill="#c62828" '+K+'/><path d="M26 30 V16 H56 V30 M34 30 V22 H48 V30" fill="none" stroke="#1c2533" stroke-width="3"/><path d="M28 46 L66 80 M66 46 L28 80" stroke="#8e1b1b" stroke-width="4"/>'),
+oil:svg('<path d="M56 60 L90 28" stroke="#6b7280" stroke-width="6" stroke-linecap="round"/><path d="M14 90 H66 V64 Q40 42 14 64Z" fill="#d4a017" '+K+'/><path d="M14 72 H66" stroke="#1c2533" stroke-width="2"/><path d="M90 38 Q83 50 90 55 Q97 50 90 38Z" fill="#7a4b00" stroke="#1c2533" stroke-width="2"/>'),
+saw:svg('<path d="M6 30 H68 V62 L6 48Z" fill="#c9d0d9" '+K+'/><path d="M6 48 l4 6 l4 -4 l4 6 l4 -4 l4 6 l4 -4 l4 6 l4 -4 l4 6 l4 -4 l4 6 l4 -4 l4 6 l4 -4 l4 4" fill="none" stroke="#1c2533" stroke-width="2"/><path d="M66 22 H92 Q98 46 92 72 H66Z" fill="#8b4513" '+K+'/><ellipse cx="80" cy="47" rx="6" ry="12" fill="#fff" '+K+'/>'),
+belt:svg('<rect x="2" y="40" width="96" height="20" rx="3" fill="#6b3f1d" '+K+'/><circle cx="16" cy="50" r="2.5" fill="#1c2533"/><circle cx="26" cy="50" r="2.5" fill="#1c2533"/><circle cx="36" cy="50" r="2.5" fill="#1c2533"/><rect x="58" y="31" width="22" height="38" rx="4" fill="none" stroke="#c9a227" stroke-width="6"/><path d="M60 50 H80" stroke="#c9a227" stroke-width="4"/>'),
+mower:svg('<path d="M70 8 L54 54" stroke="#1c2533" stroke-width="5" stroke-linecap="round"/><path d="M62 10 H80" stroke="#1c2533" stroke-width="6" stroke-linecap="round"/><rect x="28" y="40" width="26" height="14" rx="3" fill="#9aa5b4" '+K+'/><path d="M10 54 H74 Q84 54 84 64 V70 H10Z" fill="#15803d" '+K+'/><circle cx="22" cy="76" r="10" fill="#1c2533"/><circle cx="22" cy="76" r="4" fill="#9aa5b4"/><circle cx="72" cy="76" r="10" fill="#1c2533"/><circle cx="72" cy="76" r="4" fill="#9aa5b4"/><path d="M2 94 H98" stroke="#65a30d" stroke-width="4"/>'),
+wrench:svg('<g transform="rotate(45 50 50)"><path d="M34 20 A16 16 0 0 1 43 6 V18 H57 V6 A16 16 0 0 1 66 20 A16 16 0 0 1 57 34 V84 A7 7 0 0 1 43 84 V34 A16 16 0 0 1 34 20Z" fill="#9aa5b4" '+K+'/></g>'),
+plug:svg('<rect x="44" y="2" width="12" height="10" fill="#6b7280" '+K+'/><path d="M40 12 H60 L58 44 H42Z" fill="#f4f1e8" '+K+'/><path d="M41 20 H59 M41 28 H59 M42 36 H58" stroke="#b8b2a0" stroke-width="2"/><path d="M30 44 H70 V60 H30Z" fill="#9aa5b4" '+K+'/><path d="M44 44 V60 M56 44 V60" stroke="#1c2533" stroke-width="2"/><rect x="40" y="60" width="20" height="24" fill="#c3cad4" '+K+'/><path d="M40 66 L60 63 M40 72 L60 69 M40 78 L60 75" stroke="#4b5563" stroke-width="2"/><path d="M50 84 V92 H60 V86" fill="none" stroke="#1c2533" stroke-width="3"/>'),
+clamp:svg('<path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1c2533" stroke-width="16"/><path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1d4ed8" stroke-width="10"/><path d="M64 98 V40" stroke="#6b7280" stroke-width="7"/><path d="M64 46 V40" stroke="#1c2533" stroke-width="7"/><rect x="54" y="34" width="20" height="7" fill="#4b5563"/><path d="M50 98 H78" stroke="#1c2533" stroke-width="6" stroke-linecap="round"/>'),
+drill:svg('<path d="M84 41 H98" stroke="#4b5563" stroke-width="4"/><rect x="74" y="35" width="11" height="13" fill="#4b5563" '+K+'/><path d="M12 28 H66 Q76 28 76 38 V46 Q76 54 66 54 H52 L56 84 H32 L30 54 H16 Q12 54 12 50Z" fill="#f59e0b" '+K+'/><path d="M30 54 H52" stroke="#1c2533" stroke-width="2"/><rect x="24" y="84" width="40" height="12" rx="2" fill="#1c2533"/><rect x="40" y="58" width="8" height="8" rx="2" fill="#1c2533"/>'),
+float:svg('<path d="M50 30 V8" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><path d="M26 52 A24 24 0 0 1 74 52Z" fill="#dc2626" '+K+'/><path d="M26 52 A24 24 0 0 0 74 52Z" fill="#fff" '+K+'/><path d="M2 70 q8 -6 16 0 t16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="#2b7bb9" stroke-width="4"/>')};
+var SPK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 var LESSONS=[
-{id:"fish",name:"Fishing",icon:"🎣",words:["fish","net","rod","bait","hook","wet","bug","fin"],plan:["sound","sound","sound","pic","pic","pic","catch","catch","catch"]},
-{id:"fix",name:"Fix-It Shop",icon:"🔧",words:["nut","bolt","gas","oil","cut","fix","mow","tool","belt"],plan:["build","build","build","sound","sound","sound","pic","pic","pic"]}];
-var BONUS=["fresh","spark","plug","trim"];
+{id:"fish",name:"Fishing",icon:"rod",words:["fish","net","rod","hook","worm","boat","bug","cap"],plan:["sound","sound","sound","pic","pic","pic","catch","catch","catch"]},
+{id:"fix",name:"Fix-It Shop",icon:"wrench",words:["nut","bolt","gas","oil","saw","belt","mower","wrench"],plan:["build","build","build","sound","sound","sound","pic","pic","pic"]}];
+var BONUS=["plug","clamp","drill","float"];
+var NO_SOUND={oil:1,wrench:1};           // first letter does not match a simple first sound
+var BUILD_OK=function(w){return w.length<=4};
+var LETTERS="abcdefghijlmnoprstuvwyz".split(""); // every letter with a sound clip
+var EXAMPLE={a:"apple",b:"bug",c:"cap",d:"dog",e:"egg",f:"fish",g:"gas",h:"hook",i:"in",j:"jug",l:"lid",m:"mower",n:"net",o:"oil",p:"pot",r:"rod",s:"saw",t:"top",u:"up",v:"van",w:"worm",y:"yes",z:"zip"};
 var PRAISE=["Nice job, Jeremy!","That's it!","Right on!","Good work, Jeremy!","You got it!"];
 var app=document.getElementById("app"),bar=document.getElementById("bar"),barfill=document.getElementById("barfill"),quitB=document.getElementById("quit");
+window.__ws={words:LESSONS[0].words.concat(LESSONS[1].words,BONUS),letters:LETTERS,pics:Object.keys(PIC)};
 
-function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1)return s}catch(e){}return{v:1,stars:{},words:{},bonus:[],days:[],booked:{}}}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1){s.stars=s.stars||{};s.words=s.words||{};s.bonus=s.bonus||[];s.days=s.days||[];s.booked=s.booked||{};return s}}catch(e){}return{v:1,stars:{},words:{},bonus:[],days:[],booked:{}}}
 var S=load();function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function ymd(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function today(){return ymd(new Date())}
 function markDay(){var t=today();if(S.days.indexOf(t)<0){S.days.push(t);save()}}
-function streak(){var set={},n=0,d=new Date();S.days.forEach(function(x){set[x]=1});
- function k(dt){return dt.getFullYear()+"-"+("0"+(dt.getMonth()+1)).slice(-2)+"-"+("0"+dt.getDate()).slice(-2)}
- if(!set[k(d)])d.setDate(d.getDate()-1);while(set[k(d)]){n++;d.setDate(d.getDate()-1)}return n}
-function showStreak(){var n=streak();document.getElementById("streak").textContent=n?"🔥 "+n+" day"+(n>1?"s":""):""}
+function streak(){var set={},n=0,d=new Date();S.days.forEach(function(x){set[x]=1});if(!set[ymd(d)])d.setDate(d.getDate()-1);while(set[ymd(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function showStreak(){var n=streak();document.getElementById("streak").textContent=n?"Streak: "+n+" day"+(n>1?"s":""):""}
+function mastered(w){var r=S.words[w];return !!(r&&r.first>=2)}
 
-// speech
-var voice=null;function pickVoice(){try{var v=speechSynthesis.getVoices().filter(function(x){return/^en[-_]US/i.test(x.lang)});voice=v.filter(function(x){return x.localService})[0]||v[0]||null}catch(e){}}
-if("speechSynthesis" in window){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice}catch(e){}}
-function say(t){if(!("speechSynthesis" in window))return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=0.75;if(voice)u.voice=voice;speechSynthesis.speak(u)}catch(e){}}
-function letterSay(l,w){return l+", as in "+w}
+// ---- audio: one <audio> element, unlocked on first tap; speechSynthesis only as fallback
+var player=document.createElement("audio");player.preload="auto";player.setAttribute("playsinline","");document.body.appendChild(player);
+var unlocked=false,queue=[],qid=0;
+function unlock(){if(unlocked)return;unlocked=true;try{player.src="audio/silence.mp3";var p=player.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+document.addEventListener("pointerdown",unlock,true);document.addEventListener("touchend",unlock,true);document.addEventListener("click",unlock,true);
+function ttsFallback(t){if(!("speechSynthesis" in window))return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=0.8;speechSynthesis.speak(u)}catch(e){}}
+function clip(kind,x){return{src:"audio/"+kind+"/"+x+".mp3",alt:kind==="sounds"?x+", as in "+(EXAMPLE[x]||x):x}}
+function play(list){var id=++qid;queue=list.slice();try{player.pause()}catch(e){}step(id)}
+function step(id){if(id!==qid||!queue.length)return;var c=queue.shift(),done=false;
+ function next(){if(done)return;done=true;player.onended=player.onerror=null;setTimeout(function(){step(id)},250)}
+ function fail(){if(done)return;done=true;player.onended=player.onerror=null;ttsFallback(c.alt);setTimeout(function(){step(id)},1200)}
+ player.onended=next;player.onerror=fail;
+ try{player.src=c.src;player.currentTime=0;var p=player.play();if(p&&p.catch)p.catch(function(e){if(e&&e.name==="AbortError")return;fail()})}catch(e){fail()}}
+function sayWord(w){play([clip("words",w)])}
+function saySound(l){play([clip("sounds",l)])}
+function soundThenWord(l,w){play([clip("sounds",l),clip("sounds",l),clip("words",w)])}
 
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -100,89 +149,99 @@ function el(h){app.innerHTML=h;window.scrollTo(0,0)}
 function rec(w,ok){var r=S.words[w]||(S.words[w]={tries:0,first:0});r.tries++;if(ok)r.first++;save()}
 
 // ---- home
-function home(){quitB.classList.add("hidden");bar.classList.add("hidden");showStreak();
- var h='<div class="card"><h1>Hi, Jeremy.</h1><p class="muted">Pick a lesson. Tap 🔊 any time to hear it again. Turn your sound on.</p></div>';
+function home(){qid++;quitB.classList.add("hidden");bar.classList.add("hidden");showStreak();
+ var h='<div class="card"><h1>Hi, Jeremy.</h1><p class="muted">Pick a lesson. Sound on.</p></div>';
  LESSONS.forEach(function(L,i){var st=S.stars[L.id]||0;
-  h+='<button class="lesson" data-l="'+i+'"><span class="ic" aria-hidden="true">'+L.icon+'</span><span style="flex:1"><b>'+L.name+'</b><small>'+L.words.length+' words</small></span><span class="stars" aria-label="'+st+' of 3 stars">'+"★".repeat(st)+"☆".repeat(3-st)+'</span></button>'});
- el(h);app.querySelectorAll(".lesson").forEach(function(b){b.onclick=function(){say("");startLesson(+b.dataset.l)}})}
+  h+='<button class="lesson" data-l="'+i+'"><span class="ic">'+PIC[L.icon]+'</span><span style="flex:1"><b>'+L.name+'</b><small>'+L.words.length+' words</small></span><span class="stars" aria-label="'+st+' of 3 stars">'+"★".repeat(st)+"☆".repeat(3-st)+'</span></button>'});
+ el(h);app.querySelectorAll(".lesson").forEach(function(b){b.onclick=function(){startLesson(+b.dataset.l)}})}
 
 // ---- lesson engine
 var R=null;
+function pickFor(t,L){var ws=L.words;if(t==="sound")ws=ws.filter(function(w){return !NO_SOUND[w]});if(t==="build")ws=ws.filter(BUILD_OK);return ws}
 function startLesson(i){var L=LESSONS[i];markDay();showStreak();
- var qs=[],pool={};L.plan.forEach(function(t){var p=pool[t]||(pool[t]=shuf(L.words));qs.push({type:t,word:p.shift()||L.words[0]})});
- R={L:L,qs:qs,i:0,miss:0,bonus:false};quitB.classList.remove("hidden");bar.classList.remove("hidden");nextQ()}
-function startBonus(){markDay();R={L:R.L,qs:shuf(BONUS).map(function(w){return{type:"bpic",word:w}}),i:0,miss:0,bonus:true,res:{}};
+ var qs=[],pool={};L.plan.forEach(function(t){var p=pool[t]||(pool[t]=shuf(pickFor(t,L)));qs.push({type:t,word:p.shift()||pickFor(t,L)[0]})});
+ R={L:L,qs:qs,i:0,bonus:false};quitB.classList.remove("hidden");bar.classList.remove("hidden");nextQ()}
+function startBonus(){markDay();R={L:R.L,qs:shuf(BONUS).map(function(w){return{type:"bpic",word:w}}),i:0,bonus:true,res:{}};
  quitB.classList.remove("hidden");bar.classList.remove("hidden");nextQ()}
 function prog(){barfill.style.width=Math.round(100*R.i/R.qs.length)+"%"}
-function nextQ(){prog();if(R.i>=R.qs.length)return R.bonus?bonusDone():lessonDone();var q=R.qs[R.i];app.dataset.w=q.word;
+function nextQ(){prog();if(R.i>=R.qs.length)return R.bonus?bonusDone():lessonDone();var q=R.qs[R.i];app.dataset.w=q.word;app.dataset.t=q.type;
  ({sound:qSound,pic:qPic,bpic:qPic,catch:qCatch,build:qBuild})[q.type](q)}
-function advance(){R.i++;setTimeout(nextQ,1100)}
+function advance(){R.i++;setTimeout(nextQ,1500)}
+function spkRow(ask){return '<div class="prompt"><button class="spk" id="spk" aria-label="Play again">'+SPK+'</button><div class="ask">'+ask+'</div></div>'}
+function support(w){return mastered(w)?'':'<div class="pic" id="sup">'+PIC[w]+'</div>'}
+function fbSet(cls,txt,sndLetter){var fb=document.getElementById("fb");fb.className="fb "+cls;
+ fb.innerHTML='<div class="fbrow">'+(sndLetter?'<button class="spk sm" id="sndbtn" aria-label="Hear the sound">'+SPK+'</button>':'')+'<span>'+txt+'</span></div>';
+ if(sndLetter)document.getElementById("sndbtn").onclick=function(){saySound(sndLetter)}}
 
-// generic choice handler: misses then reveal
-function choices(q,correctVal,onRight){var misses=0,done=false;
- app.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){if(done||b.classList.contains("no"))return;var fb=document.getElementById("fb");
+// graded hints: miss 1 replay + hint, miss 2 clue (skipped once mastered), miss 3+ show answer
+function choices(q,correctVal,h){var misses=0,done=false,m=mastered(q.word)&&q.type!=="bpic";
+ app.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){if(done||b.classList.contains("no"))return;
   if(b.dataset.v===correctVal){done=true;b.classList.add("ok");
-   if(q.type==="bpic")R.res[q.word]=misses===0;else if(misses===0)rec(q.word,true);
-   fb.className="fb ok";fb.textContent=misses===0?PRAISE[Math.floor(Math.random()*PRAISE.length)]:"Got it. Keep going.";
-   onRight&&onRight();advance()}
-  else{misses++;R.miss++;b.classList.add("no");if(misses===1&&q.type!=="bpic")rec(q.word,false);
-   fb.className="fb no";
-   if(misses>=2){var c=app.querySelector('[data-v="'+correctVal+'"]');c.classList.add("hint");fb.textContent="Try again. It's the one with the dashed line.";}
-   else fb.textContent="Try again.";}
+   if(q.type==="bpic")R.res[q.word]=misses===0;else rec(q.word,misses===0);
+   fbSet("ok",misses===0?PRAISE[Math.floor(Math.random()*PRAISE.length)]:"Got it. Keep going.",h.letter);
+   h.right();advance()}
+  else{misses++;b.classList.add("no");
+   if(misses===1){fbSet("no",h.t1);h.replay()}
+   else if(misses===2&&!m){fbSet("no",h.t2,h.letter);h.clue()}
+   else if(misses>=3||m&&misses>=2){var c=app.querySelector('[data-v="'+correctVal+'"]');c.classList.add("hint");fbSet("no","Try the one with the dashed line.");h.replay()}
+   else{fbSet("no","Try again.");h.replay()}}
  }})}
-function spkBtn(text,ask){return '<div class="prompt"><button class="spk" id="spk" aria-label="Play sound">🔊</button><div class="ask">'+ask+'</div></div>'}
-function wireSpk(t){document.getElementById("spk").onclick=function(){say(t)};setTimeout(function(){say(t)},250)}
 
-function qSound(q){var w=q.word,first=w[0],letters="abcdefghijklmnoprstuw".split("").filter(function(c){return c!==first});
- var opts=shuf([first].concat(shuf(letters).slice(0,2)));var t=w+". What sound does "+w+" start with?";
- el('<div class="card">'+spkBtn(t,"Tap the first sound you hear.")+'<div class="grid">'+opts.map(function(c){return'<button class="opt" data-v="'+c+'" aria-label="letter '+c+'">'+c+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
- wireSpk(t);choices(q,first,function(){say(letterSay(first,w))})}
+function qSound(q){var w=q.word,first=w[0],others=LETTERS.filter(function(c){return c!==first&&"aeiou".indexOf(c)<0});
+ var opts=shuf([first].concat(shuf(others).slice(0,2)));
+ el('<div class="card">'+spkRow("Tap the first sound.")+support(w)+'<div class="grid">'+opts.map(function(c){return'<button class="opt" data-v="'+c+'" aria-label="letter '+c+'">'+c+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
+ document.getElementById("spk").onclick=function(){sayWord(w)};setTimeout(function(){sayWord(w)},300);
+ choices(q,first,{letter:null,t1:"Try again. Listen to the start.",t2:"Listen. "+esc(w)+" starts like this.",
+  replay:function(){sayWord(w)},clue:function(){soundThenWord(first,w)},right:function(){fbLetter(first);saySound(first)}})}
+function fbLetter(l){var fb=document.getElementById("fb");var s=fb.querySelector("span");fbSet("ok",(s?s.textContent:"")+' “'+l+'” sound.',l)}
 
-function qPic(q){var w=q.word,opts;
- if(q.type==="bpic")opts=shuf([{v:w,p:PIC[w]}].concat(ALT[w].map(function(p,i){return{v:"x"+i,p:p}})));
- else{var others=shuf(R.L.words.filter(function(x){return x!==w&&PIC[x]!==PIC[w]})).slice(0,2);opts=shuf([w].concat(others)).map(function(x){return{v:x,p:PIC[x]}})}
- el('<div class="card">'+(q.type==="bpic"?'<p class="ask">⭐ Bonus. Read the word. Tap the picture.</p>':'<p class="ask">Read the word. Tap the picture.</p>')+'<div class="word">'+esc(w)+'</div><div class="grid">'+opts.map(function(o){return'<button class="opt" data-v="'+o.v+'" aria-label="picture '+(o.v===w?"":"other ")+'">'+o.p+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
- choices(q,w,function(){say(w)})}
+function qPic(q){var w=q.word,pool=(q.type==="bpic"?BONUS.concat(LESSONS[1].words,LESSONS[0].words):R.L.words).filter(function(x){return x!==w});
+ var opts=shuf([w].concat(shuf(pool).slice(0,2)));
+ el('<div class="card"><p class="ask">'+(q.type==="bpic"?'Bonus. ':'')+'Read it. Tap the picture.</p><div class="word" id="wd">'+esc(w)+'</div><div class="grid">'+opts.map(function(x){return'<button class="opt" data-v="'+x+'" aria-label="picture choice">'+PIC[x]+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
+ choices(q,w,{t1:"Try again. Read it slowly.",t2:"Listen to the word.",replay:function(){},
+  clue:function(){document.getElementById("wd").innerHTML='<span class="fl">'+esc(w[0])+'</span>'+esc(w.slice(1));sayWord(w)},right:function(){sayWord(w)}})}
 
-function qCatch(q){var w=q.word,others=shuf(R.L.words.filter(function(x){return x!==w})).slice(0,2),opts=shuf([w].concat(others));var t="Catch the fish that says: "+w;
- el('<div class="card">'+spkBtn(t,"Catch the fish that says the word.")+'<div class="pond">'+opts.map(function(x){return'<button class="fish" data-v="'+x+'"><span>🐟 '+esc(x)+'</span></button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
- wireSpk(t);choices(q,w)}
+function qCatch(q){var w=q.word,others=shuf(R.L.words.filter(function(x){return x!==w})).slice(0,2),opts=shuf([w].concat(others));
+ el('<div class="card">'+spkRow("Catch the fish with this word.")+'<div id="supw"></div><div class="pond">'+opts.map(function(x){return'<button class="fish" data-v="'+x+'"><span>'+esc(x)+'</span></button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
+ document.getElementById("spk").onclick=function(){sayWord(w)};setTimeout(function(){sayWord(w)},300);
+ choices(q,w,{t1:"Try again. Listen.",t2:"Here is a clue.",replay:function(){sayWord(w)},
+  clue:function(){document.getElementById("supw").innerHTML=support(w);soundThenWord(w[0],w)},right:function(){}})}
 
-function qBuild(q){var w=q.word,L=w.split(""),pos=0,missAt=0,firstOk=true;
+function qBuild(q){var w=q.word,L=w.split(""),pos=0,missAt=0,firstOk=true,m=mastered(w);
  var extra=shuf("abdegiklmnprstu".split("").filter(function(c){return L.indexOf(c)<0})).slice(0,2);
- var tiles=shuf(L.concat(extra).map(function(c,i){return{c:c,i:i}}));var t="Spell "+w+". "+w;
+ var tiles=shuf(L.concat(extra));
  var parts='<rect class="part" id="p0" x="40" y="55" width="120" height="35" rx="8"/><circle class="part" id="p1" cx="60" cy="98" r="16"/><circle class="part" id="p2" cx="140" cy="98" r="16"/><rect class="part" id="p3" x="150" y="10" width="10" height="50" rx="4"/><rect class="part" id="p4" x="80" y="38" width="40" height="18" rx="4"/>';
- el('<div class="card">'+spkBtn(t,"Fix the mower. Tap the letters in order.")+'<div class="mower"><svg viewBox="0 0 200 120" aria-hidden="true">'+parts+'</svg></div><div class="slots">'+L.map(function(_,i){return'<div class="slot" id="s'+i+'"></div>'}).join("")+'</div><div class="tiles">'+tiles.map(function(o){return'<button class="opt" data-c="'+o.c+'" aria-label="letter '+o.c+'">'+o.c+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
- wireSpk(t);
- app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){if(pos>=L.length||b.disabled)return;var fb=document.getElementById("fb");
-  if(b.dataset.c===L[pos]){b.disabled=true;b.classList.add("ok");b.style.visibility="hidden";document.getElementById("s"+pos).textContent=L[pos];
+ el('<div class="card">'+spkRow("Fix the mower. Spell the word.")+'<div class="mower"><svg viewBox="0 0 200 120" aria-hidden="true">'+parts+'</svg></div><div id="supw"></div><div class="slots">'+L.map(function(_,i){return'<div class="slot" id="s'+i+'"></div>'}).join("")+'</div><div class="tiles">'+tiles.map(function(c){return'<button class="opt" data-c="'+c+'" aria-label="letter '+c+'">'+c+'</button>'}).join("")+'</div><div class="fb" id="fb"></div></div>');
+ document.getElementById("spk").onclick=function(){sayWord(w)};setTimeout(function(){sayWord(w)},300);
+ app.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){if(pos>=L.length||b.disabled)return;
+  if(b.dataset.c===L[pos]){b.disabled=true;b.style.visibility="hidden";document.getElementById("s"+pos).textContent=L[pos];
    var np=Math.ceil(5*(pos+1)/L.length);for(var k=0;k<np;k++)document.getElementById("p"+k).classList.add("fixed");
-   app.querySelectorAll(".opt.no,.opt.hint").forEach(function(x){x.classList.remove("no","hint")});missAt=0;pos++;fb.className="fb ok";
-   if(pos===L.length){rec(w,firstOk);fb.textContent=firstOk?"Mower fixed! Nice job, Jeremy!":"Mower fixed. Keep going.";say(w);advance()}else fb.textContent="Good. Next letter.";}
-  else{firstOk=false;missAt++;R.miss++;b.classList.add("no");fb.className="fb no";
-   if(missAt>=2){var c=[].filter.call(app.querySelectorAll("[data-c]"),function(x){return x.dataset.c===L[pos]&&!x.disabled})[0];c.classList.add("hint");fb.textContent="Try again. Next letter is "+L[pos]+" (dashed).";}
-   else fb.textContent="Try again.";}
+   app.querySelectorAll(".opt.no,.opt.hint").forEach(function(x){x.classList.remove("no","hint")});missAt=0;pos++;
+   if(pos===L.length){rec(w,firstOk);fbSet("ok",firstOk?"Mower fixed! Nice job, Jeremy!":"Mower fixed. Keep going.");sayWord(w);advance()}else{fbSet("ok","Good. Next letter.");}}
+  else{firstOk=false;missAt++;b.classList.add("no");
+   if(missAt===1){fbSet("no","Try again. Listen.");sayWord(w)}
+   else if(missAt===2&&!m){fbSet("no","Listen for the next sound.",L[pos]);if(!document.getElementById("sup"))document.getElementById("supw").innerHTML=support(w);saySound(L[pos])}
+   else{var c=[].filter.call(app.querySelectorAll("[data-c]"),function(x){return x.dataset.c===L[pos]&&!x.disabled})[0];c.classList.add("hint");fbSet("no","Try the one with the dashed line.",L[pos]);saySound(L[pos])}}
  }})}
 
-function lessonDone(){barfill.style.width="100%";var st=R.miss<=1?3:R.miss<=3?2:1;if(st>(S.stars[R.L.id]||0))S.stars[R.L.id]=st;save();quitB.classList.add("hidden");
- var words=R.L.words;
- el('<div class="card result"><h1>Nice job, Jeremy!</h1><div class="stars">'+"★".repeat(st)+"☆".repeat(3-st)+'</div><p>'+R.L.name+' done.</p></div><div class="card"><h2>📓 Write these in your book</h2><div class="book">'+words.map(function(w){return'<div>'+esc(w)+'</div>'}).join("")+'</div><button class="big" id="wrote">I wrote them</button></div>');
+function lessonDone(){barfill.style.width="100%";var st=3;S.stars[R.L.id]=Math.max(st,S.stars[R.L.id]||0);save();quitB.classList.add("hidden");
+ el('<div class="card result"><h1>Nice job, Jeremy!</h1><div class="stars">★★★</div><p>'+R.L.name+' done.</p></div><div class="card"><h2>Write these in your book</h2><div class="book">'+R.L.words.map(function(w){return'<div>'+esc(w)+'</div>'}).join("")+'</div><button class="big" id="wrote">I wrote them</button></div>');
  document.getElementById("wrote").onclick=function(){S.booked[R.L.id]=today();save();offerBonus()}}
-function offerBonus(){el('<div class="card"><h2>⭐ Want a bonus?</h2><p>4 harder words. Just for fun. No pressure.</p><button class="big" id="by">Try the bonus</button><button class="big alt" id="bn">Not now</button></div>');
+function offerBonus(){el('<div class="card"><h2>Want a bonus?</h2><p>4 harder words. Just for fun.</p><button class="big" id="by">Try the bonus</button><button class="big alt" id="bn">Not now</button></div>');
  document.getElementById("by").onclick=startBonus;document.getElementById("bn").onclick=home}
 function bonusDone(){S.bonus.push({date:today(),after:R.L.name,res:R.res});save();quitB.classList.add("hidden");barfill.style.width="100%";
  el('<div class="card result"><h1>Bonus done!</h1><p>Strong work, Jeremy.</p><button class="big" id="hm">Back to lessons</button></div>');document.getElementById("hm").onclick=home}
 quitB.onclick=function(){home()};
 
 // ---- coach view
-function coach(){quitB.classList.add("hidden");bar.classList.add("hidden");
- var rows=Object.keys(S.words).map(function(w){var r=S.words[w];return'<tr><td>'+esc(w)+'</td><td>'+r.first+' / '+r.tries+'</td><td>'+Math.round(100*r.first/r.tries)+'%</td></tr>'}).join("")||'<tr><td colspan="3">No data yet</td></tr>';
+function coach(){qid++;quitB.classList.add("hidden");bar.classList.add("hidden");
+ var rows=Object.keys(S.words).map(function(w){var r=S.words[w];return'<tr><td>'+esc(w)+'</td><td>'+r.first+' / '+r.tries+'</td><td>'+Math.round(100*r.first/r.tries)+'%</td><td>'+(r.first>=2?"Yes":"")+'</td></tr>'}).join("")||'<tr><td colspan="4">No data yet</td></tr>';
  var b=S.bonus.map(function(x){return'<tr><td>'+x.date+'<br><small>after '+esc(x.after)+'</small></td><td>'+Object.keys(x.res).map(function(w){return esc(w)+(x.res[w]?" ✔":" ✘")}).join(", ")+'</td></tr>'}).join("")||'<tr><td colspan="2">Not tried yet</td></tr>';
- el('<div class="card"><h2>Coach view</h2><p class="muted">First-try correct / times asked. Saved on this phone only.</p><table><tr><th>Word</th><th>First try</th><th>%</th></tr>'+rows+'</table></div><div class="card"><h2>Level Up Check</h2><p class="muted">✔ = right on first try</p><table>'+b+'</table></div><div class="card"><h2>Days played</h2><p>'+(S.days.join(", ")||"None yet")+'</p><p>Stars: '+LESSONS.map(function(L){return L.name+" "+(S.stars[L.id]||0)}).join(" · ")+'</p></div><button class="big alt" id="back">Back</button><button class="big danger" id="reset">Reset all progress</button>');
- document.getElementById("back").onclick=home;
+ el('<div class="card"><h2>Coach view</h2><p class="muted">First-try correct / times asked. "Known" = right on first try 2+ times; picture and clue hints are then hidden for that word. Saved on this phone only.</p><table><tr><th>Word</th><th>First try</th><th>%</th><th>Known</th></tr>'+rows+'</table></div><div class="card"><h2>Level Up Check</h2><p class="muted">✔ = right on first try</p><table>'+b+'</table></div><div class="card"><h2>Days played</h2><p>'+(S.days.join(", ")||"None yet")+'</p><p>Stars: '+LESSONS.map(function(L){return L.name+" "+(S.stars[L.id]||0)}).join(" · ")+'</p></div><button class="big alt" id="pics">See all pictures</button><button class="big alt" id="back">Back</button><button class="big danger" id="reset">Reset all progress</button>');
+ document.getElementById("back").onclick=home;document.getElementById("pics").onclick=sheet;
  document.getElementById("reset").onclick=function(){if(confirm("Erase all of Jeremy's progress on this phone?")){localStorage.removeItem(KEY);S=load();home()}}}
-var taps=0,tt;var title=document.getElementById("title");
-title.addEventListener("click",function(){taps++;clearTimeout(tt);tt=setTimeout(function(){taps=0},2000);if(taps>=5){taps=0;coach()}});
-if(/[?&]coach=1/.test(location.search))coach();else home();
+function sheet(){el('<div class="sheet">'+window.__ws.words.map(function(w){return'<div>'+PIC[w]+esc(w)+'</div>'}).join("")+'</div><button class="big alt" id="back">Back</button>');document.getElementById("back").onclick=coach}
+var taps=0,tt;document.getElementById("title").addEventListener("click",function(){taps++;clearTimeout(tt);tt=setTimeout(function(){taps=0},2000);if(taps>=5){taps=0;coach()}});
+if(/[?&]pics=1/.test(location.search))sheet();else if(/[?&]coach=1/.test(location.search))coach();else home();
 })();
 </script></body></html>
