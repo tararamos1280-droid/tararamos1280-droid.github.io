@@ -102,13 +102,12 @@ mower:svg('<path d="M70 8 L54 54" stroke="#1c2533" stroke-width="5" stroke-linec
 wrench:svg('<g transform="rotate(45 50 50)"><path d="M34 20 A16 16 0 0 1 43 6 V18 H57 V6 A16 16 0 0 1 66 20 A16 16 0 0 1 57 34 V84 A7 7 0 0 1 43 84 V34 A16 16 0 0 1 34 20Z" fill="#9aa5b4" '+K+'/></g>'),
 plug:svg('<rect x="44" y="2" width="12" height="10" fill="#6b7280" '+K+'/><path d="M40 12 H60 L58 44 H42Z" fill="#f4f1e8" '+K+'/><path d="M41 20 H59 M41 28 H59 M42 36 H58" stroke="#b8b2a0" stroke-width="2"/><path d="M30 44 H70 V60 H30Z" fill="#9aa5b4" '+K+'/><path d="M44 44 V60 M56 44 V60" stroke="#1c2533" stroke-width="2"/><rect x="40" y="60" width="20" height="24" fill="#c3cad4" '+K+'/><path d="M40 66 L60 63 M40 72 L60 69 M40 78 L60 75" stroke="#4b5563" stroke-width="2"/><path d="M50 84 V92 H60 V86" fill="none" stroke="#1c2533" stroke-width="3"/>'),
 clamp:svg('<path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1c2533" stroke-width="16"/><path d="M74 18 H36 Q20 18 20 34 V66 Q20 82 36 82 H74" fill="none" stroke="#1d4ed8" stroke-width="10"/><path d="M64 98 V40" stroke="#6b7280" stroke-width="7"/><path d="M64 46 V40" stroke="#1c2533" stroke-width="7"/><rect x="54" y="34" width="20" height="7" fill="#4b5563"/><path d="M50 98 H78" stroke="#1c2533" stroke-width="6" stroke-linecap="round"/>'),
-drill:svg('<path d="M84 41 H98" stroke="#4b5563" stroke-width="4"/><rect x="74" y="35" width="11" height="13" fill="#4b5563" '+K+'/><path d="M12 28 H66 Q76 28 76 38 V46 Q76 54 66 54 H52 L56 84 H32 L30 54 H16 Q12 54 12 50Z" fill="#f59e0b" '+K+'/><path d="M30 54 H52" stroke="#1c2533" stroke-width="2"/><rect x="24" y="84" width="40" height="12" rx="2" fill="#1c2533"/><rect x="40" y="58" width="8" height="8" rx="2" fill="#1c2533"/>'),
-float:svg('<path d="M50 30 V8" stroke="#1c2533" stroke-width="4" stroke-linecap="round"/><path d="M26 52 A24 24 0 0 1 74 52Z" fill="#dc2626" '+K+'/><path d="M26 52 A24 24 0 0 0 74 52Z" fill="#fff" '+K+'/><path d="M2 70 q8 -6 16 0 t16 0 t16 0 t16 0 t16 0 t16 0" fill="none" stroke="#2b7bb9" stroke-width="4"/>')};
+drill:svg('<path d="M84 41 H98" stroke="#4b5563" stroke-width="4"/><rect x="74" y="35" width="11" height="13" fill="#4b5563" '+K+'/><path d="M12 28 H66 Q76 28 76 38 V46 Q76 54 66 54 H52 L56 84 H32 L30 54 H16 Q12 54 12 50Z" fill="#f59e0b" '+K+'/><path d="M30 54 H52" stroke="#1c2533" stroke-width="2"/><rect x="24" y="84" width="40" height="12" rx="2" fill="#1c2533"/><rect x="40" y="58" width="8" height="8" rx="2" fill="#1c2533"/>')};
 var SPK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 var LESSONS=[
 {id:"fish",name:"Fishing",icon:"rod",words:["fish","net","rod","hook","worm","boat","bug","cap"],plan:["sound","sound","sound","pic","pic","pic","catch","catch","catch"]},
 {id:"fix",name:"Fix-It Shop",icon:"wrench",words:["nut","bolt","gas","oil","saw","belt","mower","wrench"],plan:["build","build","build","sound","sound","sound","pic","pic","pic"]}];
-var BONUS=["plug","clamp","drill","float"];
+var BONUS=["plug","clamp","drill"];
 var NO_SOUND={oil:1,wrench:1};           // first letter does not match a simple first sound
 var BUILD_OK=function(w){return w.length<=4};
 var LETTERS="abcdefghijlmnoprstuvwyz".split(""); // every letter with a sound clip
@@ -227,7 +226,7 @@ function qBuild(q){var w=q.word,L=w.split(""),pos=0,missAt=0,firstOk=true,m=mast
 function lessonDone(){barfill.style.width="100%";var st=3;S.stars[R.L.id]=Math.max(st,S.stars[R.L.id]||0);save();quitB.classList.add("hidden");
  el('<div class="card result"><h1>Nice job, Jeremy!</h1><div class="stars">★★★</div><p>'+R.L.name+' done.</p></div><div class="card"><h2>Write these in your book</h2><div class="book">'+R.L.words.map(function(w){return'<div>'+esc(w)+'</div>'}).join("")+'</div><button class="big" id="wrote">I wrote them</button></div>');
  document.getElementById("wrote").onclick=function(){S.booked[R.L.id]=today();save();offerBonus()}}
-function offerBonus(){el('<div class="card"><h2>Want a bonus?</h2><p>4 harder words. Just for fun.</p><button class="big" id="by">Try the bonus</button><button class="big alt" id="bn">Not now</button></div>');
+function offerBonus(){el('<div class="card"><h2>Want a bonus?</h2><p>3 harder words. Just for fun.</p><button class="big" id="by">Try the bonus</button><button class="big alt" id="bn">Not now</button></div>');
  document.getElementById("by").onclick=startBonus;document.getElementById("bn").onclick=home}
 function bonusDone(){S.bonus.push({date:today(),after:R.L.name,res:R.res});save();quitB.classList.add("hidden");barfill.style.width="100%";
  el('<div class="card result"><h1>Bonus done!</h1><p>Strong work, Jeremy.</p><button class="big" id="hm">Back to lessons</button></div>');document.getElementById("hm").onclick=home}
