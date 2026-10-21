@@ -1,6 +1,6 @@
 Word Match - photo credits
 
-Photos from Wikimedia Commons, cropped/resized to 400x400 for this game. Each is used under the license shown.
+Photos from Wikimedia Commons and Openverse (Flickr and other sources), cropped/resized to 400x400 for this game. Each is used under the license shown.
 
 bag: "Brown Bag (with staple).jpg" by Jeffrey Beall - CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0
     source: https://commons.wikimedia.org/wiki/File:Brown_Bag_(with_staple).jpg
@@ -8,6 +8,8 @@ bed: "44 Made bed with richly decorated pillows and ornate bedspread.jpg" by Mar
     source: https://commons.wikimedia.org/wiki/File:44_Made_bed_with_richly_decorated_pillows_and_ornate_bedspread.jpg
 belt: "Belt-clothing.jpg" by Evan-Amos - Public domain 
     source: https://commons.wikimedia.org/wiki/File:Belt-clothing.jpg
+boat: "Three Girls Singing in a Rowboat - SO Cute!!" by chumlee10 - BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0/
+    source: https://www.flickr.com/photos/39819915@N05/19271193985
 bolt: "Late 1900s zinc plated M12 8 G hex head machine bolt and nut by ESKA GmbH Automotive Germany view 2.jpg" by R. Henrik Nilsson - CC BY 4.0 https://creativecommons.org/licenses/by/4.0
     source: https://commons.wikimedia.org/wiki/File:Late_1900s_zinc_plated_M12_8_G_hex_head_machine_bolt_and_nut_by_ESKA_GmbH_Automotive_Germany_view_2.jpg
 box: "Small Cardboard Moving Box Taped Closed (47303025881).jpg" by HireAHelper - CC BY 2.0 https://creativecommons.org/licenses/by/2.0
@@ -38,20 +40,26 @@ hat: "Indiana Jones fedora hat.jpg" by Clément Bucco-Lechat - CC BY-SA 3.0 http
     source: https://commons.wikimedia.org/wiki/File:Indiana_Jones_fedora_hat.jpg
 hook: "NCL-6AEEA2, A bronze fishhook, probably of the Medieval period. (FindID 141237).jpg" by Museum of Antiquities of the University and Society of Antiquaries of Newcastle upon Tyne, Robert Collins, 2006-10-24 15 - CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0
     source: https://commons.wikimedia.org/wiki/File:NCL-6AEEA2,_A_bronze_fishhook,_probably_of_the_Medieval_period._(FindID_141237).jpg
-map: "1730 Homann Map of Scandinavia, Norway, Sweden, Denmark, Finland and the Baltics - Geographicus - Scandinavia-homann-1730.jpg" by Johann Homann - Public domain 
-    source: https://commons.wikimedia.org/wiki/File:1730_Homann_Map_of_Scandinavia,_Norway,_Sweden,_Denmark,_Finland_and_the_Baltics_-_Geographicus_-_Scandinavia-homann-1730.jpg
+in: "Arrow Entrance Sign Former Grand Union, West Miami Florida.jpg" by Phillip Pessar - CC BY 2.0 https://creativecommons.org/licenses/by/2.0
+    source: https://commons.wikimedia.org/wiki/File:Arrow_Entrance_Sign_Former_Grand_Union,_West_Miami_Florida.jpg
+map: "Mapa rutas argentinas (Pcia Buenos Aires); Argentina road map (Buenos Aires Province)." by thejourney1972 (South America addicted) - BY 2.0 https://creativecommons.org/licenses/by/2.0/
+    source: https://www.flickr.com/photos/50694521@N00/1036352024
 mower: "Toro 22 Inch Recycler Walk Behind Lawn Mower.jpg" by Garylittlewood - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
     source: https://commons.wikimedia.org/wiki/File:Toro_22_Inch_Recycler_Walk_Behind_Lawn_Mower.jpg
-nut: "Modern Nut (FindID 958174).jpg" by North Lincolnshire Museum, Martin Foreman, 2019-06-13 11:50:56 - CC BY 2.0 https://creativecommons.org/licenses/by/2.0
-    source: https://commons.wikimedia.org/wiki/File:Modern_Nut_(FindID_958174).jpg
+net: "Landing net 2.jpg" by Huangdan2060 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+    source: https://commons.wikimedia.org/wiki/File:Landing_net_2.jpg
+nut: "Hexagon nut.jpg" by Wasiul Bahar - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+    source: https://commons.wikimedia.org/wiki/File:Hexagon_nut.jpg
+open: "Open Sign" by chipgriffin - BY 2.0 https://creativecommons.org/licenses/by/2.0/
+    source: https://www.flickr.com/photos/79336580@N00/2210297177
 out: "Way out sign, Post Office Road Car Park, Harlow, Essex.jpg" by Mutney - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
     source: https://commons.wikimedia.org/wiki/File:Way_out_sign,_Post_Office_Road_Car_Park,_Harlow,_Essex.jpg
 pen: "Parker Vector Stainless Steel Ballpoint Pen.jpg" by Kevin Brown - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
     source: https://commons.wikimedia.org/wiki/File:Parker_Vector_Stainless_Steel_Ballpoint_Pen.jpg
 pig: "Saitama Domestic Pigs In Pasture 1.jpg" by 京浜にけ at Japanese Wikipedia - CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
     source: https://commons.wikimedia.org/wiki/File:Saitama_Domestic_Pigs_In_Pasture_1.jpg
-pull: "Jerusalem George Washington street Pull sign.jpg" by Utilisateur:Djampa - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
-    source: https://commons.wikimedia.org/wiki/File:Jerusalem_George_Washington_street_Pull_sign.jpg
+pull: "Pull sign red door" by unknown - CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/
+    source: https://www.rawpixel.com/image/3286807/free-photo-image-brown-window-background-door
 push: "Push Sign, Greyhound Bus Station, Chester Avenue, Cleveland, OH.jpg" by w_lemay - CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0
     source: https://commons.wikimedia.org/wiki/File:Push_Sign,_Greyhound_Bus_Station,_Chester_Avenue,_Cleveland,_OH.jpg
 rod: "Fishing rod & reel, Mahamaya Lake (01).jpg" by Moheen Reeyad - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
@@ -60,12 +68,11 @@ saw: "Pily rozne 01.jpg" by Mnemosine - Public domain
     source: https://commons.wikimedia.org/wiki/File:Pily_rozne_01.jpg
 stop: "Blacksburg apartment stop sign 2010.jpg" by Vineet Doshi - CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
     source: https://commons.wikimedia.org/wiki/File:Blacksburg_apartment_stop_sign_2010.jpg
-sun: "SDO 20130714 000007 4096 4500 (AIA).jpg" by Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams. - Public domain 
-    source: https://commons.wikimedia.org/wiki/File:SDO_20130714_000007_4096_4500_(AIA).jpg
+sun: "bright sun blue sky vert" by carp_jc - BY 2.0 https://creativecommons.org/licenses/by/2.0/
+    source: https://www.flickr.com/photos/96090690@N08/9077742650
 worm: "Aporrectodea longa (Zuid-Holland, Netherlands).jpg" by Anne Krediet - CC BY 4.0 https://creativecommons.org/licenses/by/4.0
     source: https://commons.wikimedia.org/wiki/File:Aporrectodea_longa_(Zuid-Holland,_Netherlands).jpg
 wrench: "Combination wrenches.jpg" by Ocdp - CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
     source: https://commons.wikimedia.org/wiki/File:Combination_wrenches.jpg
 
-Words still shown as drawings (original SVGs in index.html): net, boat, open, in.
-SVG drawings are also kept as a fallback if a photo fails to load.
+All words use photos. The SVG drawings in index.html are kept only as a fallback if a photo fails to load.

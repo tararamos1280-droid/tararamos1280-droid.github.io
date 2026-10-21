@@ -131,7 +131,7 @@ for(var nk in NEWPIC)PIC[nk]=NEWPIC[nk];
 
 var NEWAUDIO={};["cat","bag","hat","dog","sun","cup","bed","pig","bus","box","map","pen","exit","door","stop","in","out","open","push","pull","that","there"].forEach(function(w){NEWAUDIO[w]=1});
 function hasPic(w){return !!PIC[w]}
-var PHOTO={};["bag", "bed", "belt", "bolt", "box", "bug", "bus", "cap", "cat", "cup", "dog", "door", "drill", "exit", "fish", "gas", "hat", "hook", "map", "mower", "nut", "out", "pen", "pig", "pull", "push", "rod", "saw", "stop", "sun", "worm", "wrench"].forEach(function(w){PHOTO[w]=1});
+var PHOTO={};["bag", "bed", "belt", "boat", "bolt", "box", "bug", "bus", "cap", "cat", "cup", "dog", "door", "drill", "exit", "fish", "gas", "hat", "hook", "in", "map", "mower", "net", "nut", "open", "out", "pen", "pig", "pull", "push", "rod", "saw", "stop", "sun", "worm", "wrench"].forEach(function(w){PHOTO[w]=1});
 function pic(w){if(!PHOTO[w])return PIC[w];return '<span class="ph"><img src="img/'+w+'.jpg" alt="" draggable="false" onerror="this.parentNode.classList.add(\'fail\')"><span class="svgfb">'+PIC[w]+'</span></span>'}
 var SIZES={easy:{name:"Easy",n:4},medium:{name:"Medium",n:6},hard:{name:"Hard",n:8}};
 var ON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
