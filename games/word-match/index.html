@@ -52,13 +52,15 @@ h1{margin:0;font-size:1px}
 <div id="live" class="sr" aria-live="polite"></div>
 <div id="fb" class="fb" aria-hidden="true"></div>
 <script>
-var KEY="wordMatch.v3";
+var KEY="wordMatch.v4"; /* settings come from URL; localStorage not read */
 var SETS=[["bag","cat","sun","dog"],["hat","cup","pig","bed"],["bus","map","pen","box"]];
 var ALL=[].concat.apply([],SETS);
 var VOW="aeiou",SOUNDS="abcdeghimnopstu";
+var Q=new URLSearchParams(location.search);
 var cfg={set:0,choices:3};
-try{var c=JSON.parse(localStorage.getItem(KEY));if(c){if(c.set>=0&&c.set<3)cfg.set=c.set;if(c.choices==2||c.choices==3)cfg.choices=c.choices}}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(cfg))}catch(e){}}
+var qs=parseInt(Q.get("set"),10);if(qs>=1&&qs<=3)cfg.set=qs-1;
+var qc=parseInt(Q.get("choices"),10);if(qc==2||qc==3)cfg.choices=qc;
+var COACH=Q.get("coach")==="1";
 var app=document.getElementById("app"),live=document.getElementById("live"),fbEl=document.getElementById("fb");
 var aud=new Audio();
 function play(src){try{aud.pause();aud.src=src;aud.currentTime=0;var p=aud.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
@@ -73,12 +75,18 @@ function startScreen(){
   var h=el("h1",{tabindex:"-1",cls:"sr",text:"Word Match. Press play."});
   var p=el("button",{cls:"play","aria-label":"Play",text:"▶"});
   p.addEventListener("click",begin);
-  var sel=el("select",{id:"setSel"});["Set 1: bag cat sun dog","Set 2: hat cup pig bed","Set 3: bus map pen box"].forEach(function(n,i){var o=el("option",{value:i,text:n});if(i==cfg.set)o.selected=true;sel.appendChild(o)});
-  sel.addEventListener("change",function(){cfg.set=+sel.value;save()});
-  var cs=el("select",{id:"chSel"});[2,3].forEach(function(n){var o=el("option",{value:n,text:n+" pictures"});if(n==cfg.choices)o.selected=true;cs.appendChild(o)});
-  cs.addEventListener("change",function(){cfg.choices=+cs.value;save()});
-  var d=el("details",{cls:"coach"},[el("summary",{text:"Coach settings"}),el("label",{for:"setSel",text:"Words "}),sel,el("label",{for:"chSel",text:"Choices "}),cs]);
-  app.appendChild(el("div",{cls:"start"},[h,p,d]));
+  var kids=[h,p];
+  if(COACH){
+    var sel=el("select",{id:"setSel"});["Set 1: bag cat sun dog","Set 2: hat cup pig bed","Set 3: bus map pen box"].forEach(function(n,i){var o=el("option",{value:i,text:n});if(i==cfg.set)o.selected=true;sel.appendChild(o)});
+    sel.addEventListener("change",function(){cfg.set=+sel.value});
+    var cs=el("select",{id:"chSel"});[2,3].forEach(function(n){var o=el("option",{value:n,text:n+" pictures"});if(n==cfg.choices)o.selected=true;cs.appendChild(o)});
+    cs.addEventListener("change",function(){cfg.choices=+cs.value});
+    var out=el("p",{id:"linkOut",style:"word-break:break-all;font-size:16px"});
+    var cp=el("button",{cls:"icon",style:"padding:0 14px;font-size:18px",text:"Copy link for Jeremy"});
+    cp.addEventListener("click",function(){var u=location.origin+location.pathname+"?set="+(cfg.set+1)+"&choices="+cfg.choices;out.textContent=u;var ok=function(){say("Link copied")};try{navigator.clipboard.writeText(u).then(ok,function(){})}catch(e){}});
+    kids.push(el("details",{cls:"coach",open:""},[el("summary",{text:"Coach settings"}),el("label",{for:"setSel",text:"Words "}),sel,el("label",{for:"chSel",text:"Choices "}),cs,el("p",{},[cp]),out]));
+  }
+  app.appendChild(el("div",{cls:"start"},kids));
   h.focus();
 }
 function begin(){st={part:1,i:0,words:shuffle(SETS[cfg.set])};round()}
