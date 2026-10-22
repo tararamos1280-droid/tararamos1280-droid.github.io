@@ -1,0 +1,34 @@
+Word Shop audio credits
+
+LETTER SOUNDS (audio/sounds/) - from Wikimedia Commons IPA recordings; trimmed to the sound, length-adjusted, volume-normalized.
+
+a.mp3  <- https://commons.wikimedia.org/wiki/File:Near-open_front_unrounded_vowel.ogg  License: CC BY-SA 3.0
+e.mp3  <- https://commons.wikimedia.org/wiki/File:Open-mid_front_unrounded_vowel.ogg  License: CC BY-SA 3.0
+i.mp3  <- https://commons.wikimedia.org/wiki/File:Near-close_near-front_unrounded_vowel.ogg  License: CC BY-SA 3.0
+o.mp3  <- https://commons.wikimedia.org/wiki/File:Open_back_unrounded_vowel.ogg  License: CC BY-SA 3.0
+u.mp3  <- https://commons.wikimedia.org/wiki/File:Open-mid_back_unrounded_vowel.ogg  License: CC BY-SA 3.0
+b.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_bilabial_plosive.ogg  License: CC BY-SA 3.0
+c.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_velar_plosive.ogg  License: CC BY-SA 3.0
+d.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_alveolar_plosive.ogg  License: CC BY-SA 3.0
+f.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_labiodental_fricative.ogg  License: CC BY-SA 3.0
+g.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_velar_plosive.ogg  License: CC BY-SA 3.0
+h.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_glottal_fricative.ogg  License: CC BY-SA 3.0
+j.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_palato-alveolar_affricate.ogg  License: Public domain
+l.mp3  <- https://commons.wikimedia.org/wiki/File:Alveolar_lateral_approximant.ogg  License: CC BY-SA 3.0
+m.mp3  <- https://commons.wikimedia.org/wiki/File:Bilabial_nasal.ogg  License: CC BY-SA 3.0
+n.mp3  <- https://commons.wikimedia.org/wiki/File:Alveolar_nasal.ogg  License: CC BY-SA 3.0
+p.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_bilabial_plosive.ogg  License: CC BY-SA 3.0
+r.mp3  <- https://commons.wikimedia.org/wiki/File:Alveolar_approximant.ogg  License: CC BY-SA 3.0
+s.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_alveolar_sibilant.ogg  License: CC BY-SA 3.0
+t.mp3  <- https://commons.wikimedia.org/wiki/File:Voiceless_alveolar_plosive.ogg  License: CC BY-SA 3.0
+v.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_labiodental_fricative.ogg  License: CC BY-SA 3.0
+w.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_labio-velar_approximant.ogg  License: CC BY-SA 3.0
+y.mp3  <- https://commons.wikimedia.org/wiki/File:Palatal_approximant.ogg  License: CC BY-SA 3.0
+z.mp3  <- https://commons.wikimedia.org/wiki/File:Voiced_alveolar_sibilant.ogg  License: CC BY-SA 3.0
+
+Trimmed clips derived from CC BY-SA 3.0 files are shared under CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+
+WORD CLIPS (audio/words/) - generated locally with Piper TTS (MIT license, https://github.com/rhasspy/piper),
+voice en_US-libritts_r-medium speaker 0 (https://huggingface.co/rhasspy/piper-voices), trained on LibriTTS-R (CC BY 4.0, http://www.openslr.org/141/).
+
+PICTURES - original inline SVG drawings in index.html.

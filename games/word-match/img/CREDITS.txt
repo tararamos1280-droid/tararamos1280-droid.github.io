@@ -56,8 +56,8 @@ out: "Way out sign, Post Office Road Car Park, Harlow, Essex.jpg" by Mutney - CC
     source: https://commons.wikimedia.org/wiki/File:Way_out_sign,_Post_Office_Road_Car_Park,_Harlow,_Essex.jpg
 pen: "Parker Vector Stainless Steel Ballpoint Pen.jpg" by Kevin Brown - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
     source: https://commons.wikimedia.org/wiki/File:Parker_Vector_Stainless_Steel_Ballpoint_Pen.jpg
-pig: "Saitama Domestic Pigs In Pasture 1.jpg" by 京浜にけ at Japanese Wikipedia - CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
-    source: https://commons.wikimedia.org/wiki/File:Saitama_Domestic_Pigs_In_Pasture_1.jpg
+pig: "Pig farm Vampula 9.jpg" by kallerna - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+    source: https://commons.wikimedia.org/wiki/File:Pig_farm_Vampula_9.jpg
 pull: "Pull sign red door" by unknown - CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/
     source: https://www.rawpixel.com/image/3286807/free-photo-image-brown-window-background-door
 push: "Push Sign, Greyhound Bus Station, Chester Avenue, Cleveland, OH.jpg" by w_lemay - CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0
@@ -76,3 +76,5 @@ wrench: "Combination wrenches.jpg" by Ocdp - CC BY-SA 3.0 https://creativecommon
     source: https://commons.wikimedia.org/wiki/File:Combination_wrenches.jpg
 
 All words use photos. The SVG drawings in index.html are kept only as a fallback if a photo fails to load.
+
+Letter sounds in audio/sounds/ are copied from games/jeremy-reading/audio/sounds (Wikimedia Commons IPA recordings); see audio/sounds/CREDITS.txt.
