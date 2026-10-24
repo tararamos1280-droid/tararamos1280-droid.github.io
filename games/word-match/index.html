@@ -44,6 +44,14 @@ h1{margin:0;font-size:1px}
 .coach summary{min-height:48px;padding:12px;cursor:pointer}
 .coach label{display:block;margin:6px 0;font-size:18px}
 .coach select{font-size:18px;min-height:44px}
+.pickh{margin:0;font-size:min(14vw,64px);font-weight:900;color:#1a2f7a;font-family:"Comic Sans MS","Century Gothic",Arial,sans-serif;display:flex;align-items:center;gap:12px}
+.pickh span{font-size:1.1em;animation:bob 1s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(10px)}}
+.ch.pk{border:8px solid #f08a1c;border-radius:24px;box-shadow:0 8px 0 #b55f05,0 10px 18px #0004;transition:transform .08s,box-shadow .08s;cursor:pointer}
+.ch.pk:nth-child(2){border-color:#2e7bd6;box-shadow:0 8px 0 #1a4f8f,0 10px 18px #0004}
+.ch.pk:nth-child(3){border-color:#2e9b3e;box-shadow:0 8px 0 #1c6a28,0 10px 18px #0004}
+.ch.pk:active{transform:translateY(6px);box-shadow:0 2px 0 #0006}
+.ch.pk:focus-visible{outline:5px solid #ffd84d;outline-offset:3px}
 .big{font-size:min(30vw,140px)}
 </style>
 </head>
@@ -91,13 +99,14 @@ function startScreen(){
 }
 function picker(){
   app.innerHTML="";
-  var h=el("h1",{tabindex:"-1",cls:"sr",text:"Pick words."});
+  var h=el("h1",{tabindex:"-1",cls:"pickh","aria-label":"Pick one"},[el("span",{"aria-hidden":"true",text:"👇"}),el("b",{text:"Pick one"})]);
   var row=el("div",{cls:"choices"});
-  SETS.forEach(function(ws,i){var b=el("button",{cls:"ch","aria-label":"Words: "+ws.join(", ")},[el("img",{src:"img/"+ws[0]+".jpg",alt:""})]);b.addEventListener("click",function(){cfg.set=i;begin()});row.appendChild(b)});
+  SETS.forEach(function(ws,i){var b=el("button",{cls:"ch pk","aria-label":"Pick one: "+ws.join(", ")},[el("img",{src:"img/"+ws[0]+".jpg",alt:""})]);b.addEventListener("click",function(){cfg.set=i;begin()});row.appendChild(b)});
   var home=el("button",{cls:"icon","aria-label":"Home",text:"⌂"});home.addEventListener("click",startScreen);
   app.appendChild(el("div",{cls:"top"},[home]));app.appendChild(h);
-  app.appendChild(el("div",{cls:"start"},[row]));h.focus();
+  app.appendChild(el("div",{cls:"start"},[row]));h.focus();say("Pick one");speakText("Pick one");
 }
+function speakText(t){try{var u=new SpeechSynthesisUtterance(t);u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 function begin(){st={part:1,i:0,words:shuffle(SETS[cfg.set])};round()}
 function round(){
   if(st.i>=st.words.length){if(st.part==1){st.part=2;st.i=0;st.words=shuffle(st.words);partBreak();return}return finish()}
