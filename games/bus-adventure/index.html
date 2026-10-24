@@ -251,18 +251,18 @@ const ROUTES={
  '1a':{city:'A',num:'1',name:'Crosstown',part:'25th Avenue trip',sign:['Crosstown'],tbl:{wk:'A1a',sat:'A1a',sun:null},
   cols:[['TC','Transit Center'],['DEV','Devorris Center (15th St)'],['4TH22','22nd Ave & 4th St'],['PSU','Penn State Altoona'],['13TH20','13th St & 20th Ave'],['DEV2','Devorris Center (12th Ave)'],['TC2','Transit Center']],
   note:'Route 1 Crosstown, 25th Avenue trip. The bus goes out 4th Street and 25th Avenue to Penn State Altoona, then down Ivyside Drive to 25th Avenue and 13th Street, then back downtown.'},
- '1b':{city:'A',num:'1',name:'Crosstown',part:'Walmart trip',sign:['Crosstown'],tbl:{wk:'A1b',sat:'A1b',sun:null},
+ '1b':{city:'A',num:'1',name:'Crosstown',chip:'Walmart/Mall',sign:['Crosstown'],tbl:{wk:'A1b',sat:'A1b',sun:null},
   cols:[['TC','Transit Center'],['AMT','AMTRAN Office'],['58CAL','58th St & California Ave'],['WM','Walmart'],['TGT','Target'],['LVM','Logan Valley Mall'],['AMT2','AMTRAN Office'],['TC2','Transit Center']],
-  note:'Route 1 Crosstown, Walmart trip. Goes out 6th Avenue and 58th Street to Walmart, Target and Logan Valley Mall, then back downtown.'},
+  note:'Route 1 Crosstown (via Walmart, Target and Logan Valley Mall). Goes out 6th Avenue and 58th Street to Walmart, Target and Logan Valley Mall, then back downtown.'},
  '3b':{city:'A',num:'3',name:'Flash',part:'Logan Town Centre trip',sign:['Flash'],tbl:{wk:'A3b',sat:'A3b',sun:null},
   cols:[['TC','Transit Center'],['SMC','Station Medical Center'],['17_1','17th St & 1st Ave'],['ALDI','ALDI Foods'],['LTC','Logan Town Centre (Barnes & Noble)'],['17_1B','17th St & 1st Ave'],['TC2','Transit Center']],
   note:'Route 3 Flash, downtown to Logan Town Centre. Logan Town Centre is not the same place as Logan Valley Mall.'},
  '4':{city:'A',num:'4',name:'Plank Road',sign:['Plank Road'],tbl:{wk:'A4',sat:'A4',sun:null},
   cols:[['TC','Transit Center'],['AMT','AMTRAN Office'],['MPR',"Martin's Plank Road"],['LVM','Logan Valley Mall'],['PHP','Park Hills Plaza (Weis)'],['MPR2',"Martin's Plank Road"],['AMT2','AMTRAN Office'],['TC2','Transit Center']],
   note:'Route 4 Plank Road goes out 7th Avenue and Logan Boulevard to Martin\'s Plank Road and Logan Valley Mall, then back the same way.'},
- '5b':{city:'A',num:'5',name:'Pleasant Valley',part:'Walmart trip',sign:['Pleasant Valley'],tbl:{wk:'A5b',sat:'A5b',sun:null},
+ '5b':{city:'A',num:'5',name:'Pleasant Valley',chip:'Mall/Walmart',sign:['Pleasant Valley'],tbl:{wk:'A5b',sat:'A5b',sun:null},
   cols:[['TC','Transit Center'],['PVSC','Pleasant Valley Shopping Center'],['LVM','Logan Valley Mall'],['WM','Walmart'],['TGT','Target'],['PVSC2','Pleasant Valley Shopping Center'],['22_1','22nd St & 1st Ave'],['TC2','Transit Center']],
-  note:'Route 5 Pleasant Valley, Walmart trip. Goes out Pleasant Valley Boulevard and East Plank Road to Logan Valley Mall, Walmart and Target, then back.'},
+  note:'Route 5 Pleasant Valley (via Logan Valley Mall, Walmart and Target). Goes out Pleasant Valley Boulevard and East Plank Road to Logan Valley Mall, Walmart and Target, then back.'},
  '6':{city:'A',num:'6',name:'Greenwood',sign:['Greenwood'],tbl:{wk:'A6',sat:'A6',sun:null},
   cols:[['TC','Transit Center'],['SMC','Station Medical Center'],['LLOYD','Lloyd St & 2nd Ave'],['VV','Valley View Shopping Ctr (Weis)'],['BELL',"Martin's Bellmeade"],['WALTON','Walton Ave & Kettle St'],['SMC2','Station Medical Center'],['TC2','Transit Center']],
   note:'Route 6 Greenwood goes to Valley View Shopping Center and Martin\'s Bellmeade on East Pleasant Valley Boulevard, then back downtown.'},
@@ -758,7 +758,7 @@ function phoneHTML(mode){const t=trip(),c=city();S.t.ph=S.t.ph||{};const ph=S.t.
  if(!ph.rk||ROUTES[ph.rk].city!==c.id)ph.rk=c.routes[0];
  const day=ph.day||S.t.day;const rk=ph.rk;const R=ROUTES[rk];const T=tbl(rk,day);const leg=curLeg(mode);const now=phoneNow(mode);
  const hlKeys=new Set();if(guided()){leg.opts.forEach(o=>{if(o.r===rk){o.b.forEach(k=>hlKeys.add(k));o.a.forEach(k=>hlKeys.add(k))}})}
- let h=`<div class="phone" role="region" aria-label="Phone: ${c.agency} schedule"><div class="pscreen"><div class="pbar"><span>${fmt(now)}</span><span>${c.agency}</span><span>▮▮▮ 🔋</span></div><div class="papp">
+ let h=`<div class="phone" role="region" aria-label="Phone: ${c.agency} schedule"><div class="pscreen"><div class="pbar"><span>${fmt(mode==='out'?S.t.clock:S.t.backNow)}</span><span>${c.agency}</span><span>▮▮▮ 🔋</span></div><div class="papp">
  <h2>${c.agency} Schedules</h2><span class="practice">Practice schedule — verify current times before traveling.</span>
  <div class="pchips" role="group" aria-label="Choose a route">${c.routes.map(k=>`<button class="pchip${k===rk?' on':''}" data-act="prt" data-v="${k}" aria-pressed="${k===rk}">${ROUTES[k].num}${ROUTES[k].part?' '+ROUTES[k].part.split(' ')[0]:''}</button>`).join('')}</div>
  <div class="pchips" role="group" aria-label="Choose the day">${(c.id==='A'?[['wk','Mon–Sat'],['sun','Sunday']]:[['wk','Weekdays'],['sat','Saturday'],['sun','Sunday']]).map(([d,l])=>`<button class="pchip day${(day===d||(c.id==='A'&&d==='wk'&&day==='sat'))?' on':''}" data-act="pday" data-v="${d}" aria-pressed="${day===d}">${l}</button>`).join('')}</div>
@@ -781,7 +781,8 @@ function phoneScreen(mode){const t=trip(),c=city();const leg=curLeg(mode);const 
  let h=`<p class="eyebrow">${mode==='out'?'Step 1 · Plan':'Step 7 · Return'}</p><h1 tabindex="-1">${mode==='out'?'Plan your bus':'Plan your trip back'}${multi?': '+esc(leg.title):''}</h1>`;
  const from=mode==='out'?(S.t.legIdx>0?'Logan Valley Mall':c.start):(leg.boardName||(t.back&&STOPS[t.back.boardStop]?STOPS[t.back.boardStop].name:t.short));
  const to=mode==='out'?(leg.destLabel):(c.id==='J'?'Solomon Homes':'the Transit Center');
- if(mode==='out'&&S.t.legIdx===S.t.legsN-1)h+=`<p class="lead" data-say="It is ${fmt(now)}. You need to be at ${t.short} by ${fmt(goalTime(t))}.">It is <b>${fmt(now)}</b>. Be at ${esc(t.short)} by <b>${fmt(goalTime(t))}</b>. The walk from the bus stop takes about ${mins(t.walk)}.</p>`;
+ if(mode==='out'&&S.t.legIdx===S.t.legsN-1)h+=`<p class="lead" data-say="${S.t.legIdx>0?'Your first bus gets to '+esc(from)+' at '+fmt(now):'It is '+fmt(now)}. You need to be at ${t.short} by ${fmt(goalTime(t))}.">${S.t.legIdx>0?'It is <b>'+fmt(S.t.clock)+'</b>. Your first bus gets to '+esc(from)+' at <b>'+fmt(now)+'</b>':'It is <b>'+fmt(now)+'</b>'}. Be at ${esc(t.short)} by <b>${fmt(goalTime(t))}</b>. The walk from the bus stop takes about ${mins(t.walk)}.</p>`;
+ else if(mode==='back'&&S.t.backIdx>0)h+=`<p class="lead">It is <b>${fmt(S.t.backNow)}</b>. Your first bus back gets to ${esc(stopLabel(S.t.back[S.t.backIdx-1].rk,S.t.back[S.t.backIdx-1].aKey))} at <b>${fmt(now)}</b>. Find a bus from there to ${esc(to)}.</p>`;
  else h+=`<p class="lead">It is <b>${fmt(now)}</b>. ${mode==='out'?'Find a bus from '+esc(from)+' to '+esc(to)+'.':'You are ready at the stop at '+fmt(now)+'. Find a bus back to '+esc(to)+'.'}</p>`;
  h+=`<p data-say="Choose a route. Tap the time you get on. Then tap the time you get off.">1. Choose a route. 2. Tap the time you get <b>on</b>. 3. Tap the time you get <b>off</b> (same row).</p>`;
  let hn='';
@@ -826,7 +827,7 @@ function useTrip(mode){const t=trip(),c=city();const ph=S.t.ph,sel=ph.sel||{};co
  arr[idx]=entry;arr.length=idx+1;ph.sel={};
  if(!last){if(mode==='out')S.t.legIdx++;else S.t.backIdx++;S.t.pfb=fb('good',`Planned: ${rName(r.rk)}, ${fmt(r.dep)} → ${fmt(r.arr)}. Now plan the next bus.`);return render()}
  S.t.pfb=fb('good','<b>Plan saved.</b> '+msg);S.t.pdone=mode;
- if(mode==='out')S.t.log.push([r.dep,'Planned '+rName(r.rk)+' leaving '+stopLabel(r.rk,r.bKey)+' at '+fmt(r.dep)]);
+ if(mode==='out')arr.forEach(e=>S.t.log.push([e.dep,'Planned '+rName(e.rk)+' leaving '+stopLabel(e.rk,e.bKey)+' at '+fmt(e.dep)]));
  render()}
 function noBus(mode){const t=trip();const now=phoneNow(mode);const legs=(mode==='out'?outLegs(t):backLegs(t)).slice(mode==='out'?S.t.legIdx:S.t.backIdx);
  const ok=mode==='out'?(acc=>S.t.lateOK||atWorkOf(t,acc)<=goalTime(t)):(()=>true);
@@ -972,7 +973,7 @@ SCR.ride=()=>{const t=trip(),c=city();const p=S.t.plan[S.t.legIdx];const leg=out
  }
  return {h,qs}};
 function requestStop(){const t=trip(),c=city();const p=S.t.plan[S.t.legIdx];const L=rideStops(p,outLegs(t)[S.t.legIdx]);const x=L[S.t.rp];
- if(x&&x.mine){S.t.reqOK=true;S.t.ridefb=fb('good','You requested your stop in time. The driver will stop at '+esc(x.name)+'.');S.t.log.push([lastPlanArr(),'Got off at '+x.name]);live('Stop requested');}
+ if(x&&x.mine){S.t.reqOK=true;S.t.ridefb=fb('good','You requested your stop in time. The driver will stop at '+esc(x.name)+'.');S.t.log.push([legArr(S.t.legIdx),'Got off at '+x.name]);live('Stop requested');}
  else S.t.ridefb=fb('warn','The next stop is '+esc(x?x.name:'')+' — that is not your stop yet. If you press by mistake, tell the driver: "Sorry, I pressed it by mistake," and stay seated.');
  render()}
 function keepRiding(){const t=trip();const p=S.t.plan[S.t.legIdx];const L=rideStops(p,outLegs(t)[S.t.legIdx]);const x=L[S.t.rp];
@@ -980,7 +981,8 @@ function keepRiding(){const t=trip();const p=S.t.plan[S.t.legIdx];const L=rideSt
   if(S.settings.problems&&S.t.legIdx===S.t.legsN-1){S.t.probs.push('Missed stop');S.t.missedAt={mine:x,next:nx,mineT:x.t!=null?x.t:L[S.t.rp+1].t};go('missedstop');return}
   S.t.ridefb=fb('warn','Wait — the next stop is yours! Request it now.');return render()}
  S.t.rp++;S.t.ridefb='';render()}
-const lastPlanArr=()=>{const p=S.t.plan[S.t.plan.length-1];return p.arr+(S.t.delay||0)+(S.t.extra||0)};
+const legArr=i=>{const p=S.t.plan[i];return p.arr+(S.t.delay||0)+(i===S.t.plan.length-1?(S.t.extra||0):0)};
+const lastPlanArr=()=>legArr(S.t.plan.length-1);
 SCR.missedstop=()=>{const t=trip(),c=city();const m=S.t.missedAt;
  const qs=[{id:'m1',q:'What do you do?',a:[
   ['next',`Request the next stop, get off, and ask the driver or call ${c.agency} (${c.phone}) for the best way back`,2,'Right. Getting off at the next stop is safe.'],
@@ -1099,10 +1101,10 @@ SCR.rideBack=()=>{const t=trip(),c=city();const qs=[];
  h+=`<div class="actions">${r.allDone?'<span class="sp"></span><button class="btn primary" data-act="finish">Finish the trip</button>':''}</div>`;
  return {h,qs}};
 SCR.finish=()=>{const t=trip(),c=city();const home=S.t.homeAt;
- let h=`<p class="eyebrow">Step 8 · Done</p><h1 tabindex="-1">Trip complete</h1><p class="lead">${S.t.ended?'You practiced planning this trip and what to do when no bus works.':'You went from '+esc(c.start)+' to '+esc(t.name)+' and back.'}</p>`;
+ let h=`<p class="eyebrow">Step 8 · Done</p><h1 tabindex="-1">${S.t.ended?'Practice complete':'Trip complete'}</h1><p class="lead">${S.t.ended?'You practiced planning this trip and what to do when no bus works.':'You went from '+esc(c.start)+' to '+esc(t.name)+' and back.'}</p>`;
  if(!S.t.ended){h+=`<div class="card"><h2>Your day</h2><ul class="timeline">`+S.t.log.sort((a,b)=>a[0]-b[0]).map(([tm,x])=>`<li><span class="tm">${fmt(tm)}</span><span>${esc(x)}</span></li>`).join('')+`</ul></div>`}
  if(S.t.probs.length)h+=`<div class="card"><h2>Problems you handled</h2><ul>${[...new Set(S.t.probs)].map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`;
- h+=`<div class="card"><h2>Skills you practiced</h2><ul>${['Read the schedule and chose a bus','Found the right stop and waited safely','Checked the bus sign','Paid the fare','Requested the stop','Planned the trip back'].map(s=>`<li>${s}</li>`).join('')}</ul><p class="small muted">Remember: times in this game are a practice snapshot. Check the current schedule before you travel.</p></div>`;
+ h+=`<div class="card"><h2>Skills you practiced</h2><ul>${(S.t.ended&&S.t.nosvcMode!=='back'?['Read the schedule and checked the day of your trip','Saw that no bus works and chose what to do instead']:S.t.ended?['Read the schedule and chose a bus','Found the right stop and waited safely','Checked the bus sign','Paid the fare','Requested the stop','Checked the schedule for a bus back and chose what to do when none works']:['Read the schedule and chose a bus','Found the right stop and waited safely','Checked the bus sign','Paid the fare','Requested the stop','Planned the trip back']).map(s=>`<li>${s}</li>`).join('')}</ul><p class="small muted">Remember: times in this game are a practice snapshot. Check the current schedule before you travel.</p></div>`;
  h+=`<div class="actions"><button class="btn secondary" data-act="repeat">Repeat this trip</button><button class="btn secondary" data-act="go" data-v="city">Change city</button><span class="sp"></span><button class="btn primary" data-act="go" data-v="dest">Choose another place</button></div>`;
  return {h}};
 
@@ -1113,7 +1115,8 @@ function clockNow(){const t=trip();const st=S.step;const d=S.t.delay||0;const P=
  if(['retstop','offer','wrongback'].includes(st))return t.end;
  if(['phoneBack','longwait'].includes(st))return S.t.backNow;
  if(st==='rideBack')return S.t.back[0]?S.t.back[0].dep:S.t.backNow;
- if(st==='finish')return S.t.homeAt||null;
+ if(st==='finish')return S.t.homeAt||(S.t.ended&&S.t.nosvcMode==='back'?S.t.backNow:S.t.clock);
+ if(st==='nosvc'&&S.t.nosvcMode==='back')return S.t.backNow;
  if(st==='arrive')return S.t.atWork;
  if(p&&['bus','pay','ride'].includes(st))return Math.max(S.t.clock,p.dep+(S.t.legIdx===0?d:0));
  if(p&&st==='missedstop')return (S.t.missedAt&&S.t.missedAt.next.t)||p.arr+d;
@@ -1122,7 +1125,7 @@ function clockNow(){const t=trip();const st=S.step;const d=S.t.delay||0;const P=
  if(st==='delay'&&P.length)return P[0].dep+trip().delay;
  return S.t.clock}
 function statusHTML(){if(!S.t||!S.trip||['city','dest'].includes(S.step))return '';const t=trip();const clk=clockNow();
- return `<span class="chip clock">🕒 ${clk!=null?fmt(clk):'—'}</span><span class="chip">${esc(dayLabel(S.t.day).replace(/^w/,'W'))}</span><span class="chip goal">🎯 ${esc(t.short)} by ${fmt(goalTime(t))}</span><span class="chip">${guided()?'Guided practice':'Independent practice'}</span>`}
+ return `<span class="chip clock">🕒 ${clk!=null?fmt(clk):'—'}</span><span class="chip">${esc(dayLabel(S.t.day).replace(/^w/,'W'))}</span><span class="chip goal">🎯 ${['retstop','offer','wrongback','phoneBack','longwait','rideBack','finish','nosvc'].includes(S.step)&&!((S.step==='nosvc'||(S.step==='finish'&&S.t.ended))&&S.t.nosvcMode!=='back')?'Back to '+esc(city().start):esc(t.short)+' by '+fmt(goalTime(t))}</span><span class="chip">${guided()?'Guided practice':'Independent practice'}</span>`}
 function render(nav){const m=$('#main');const f=SCR[S.step]||SCR.city;if(!SCR[S.step])S.step='city';
  if(['city','dest'].includes(S.step)===false&&!S.t){S.step='city'}
  const out=(SCR[S.step])();CUR=out;
@@ -1153,7 +1156,7 @@ const ACT={
  replanHere:()=>{const mode=S.step==='phone'?'out':'back';S.t.pdone=null;S.t.pfb='';S.t.ph.sel={};if(mode==='out'){S.t.plan=[];S.t.legIdx=0}else{S.t.back=[];S.t.backIdx=0}render()},
  planContinue:()=>{const mode=S.step==='phone'?'out':'back';S.t.pdone=null;S.t.pfb='';
   if(mode==='out'){S.t.legIdx=0;resetQ('leave');go('leave')}
-  else{const t=trip();S.t.backIdx=0;const b=S.t.back[0];S.t.log.push([b.dep,'Caught '+rName(b.rk)+' back at '+fmt(b.dep)]);const last=S.t.back[S.t.back.length-1];S.t.homeAt=last.arr;S.t.log.push([last.arr,'Back at '+(city().id==='J'?'Solomon Homes':'the Transit Center')]);
+  else{const t=trip();S.t.backIdx=0;const b=S.t.back[0];S.t.back.forEach((e,i)=>S.t.log.push([e.dep,'Caught '+rName(e.rk)+(i?' at '+stopLabel(e.rk,e.bKey):' back')+' at '+fmt(e.dep)]));const last=S.t.back[S.t.back.length-1];S.t.homeAt=last.arr;S.t.log.push([last.arr,'Back at '+(city().id==='J'?'Solomon Homes':'the Transit Center')]);
    if(S.settings.problems&&b.dep-S.t.backNow>=30){S.t.probs.push('Long wait for the bus home');go('longwait')}else go('rideBack')}},
  weekday:()=>{S.t.day='wk';S.t.plan=[];S.t.back=[];S.t.legIdx=0;S.t.backIdx=0;S.t.ph={};S.t.pfb='';S.t.pdone=null;go(S.t.nosvcMode==='back'?'phoneBack':'phone')},
  endtrip:()=>{S.t.ended=true;if(!S.done.includes(S.trip))S.done.push(S.trip);go('finish')},
@@ -1167,7 +1170,7 @@ const ACT={
  keepriding:()=>{keepRiding();const f=$('#ridefb');if(f&&f.textContent)live(f.textContent)},
  afterMissedStop:()=>{const m=S.t.missedAt;const add=(m.next.t!=null&&m.mine.t!=null)?2*(m.next.t-m.mine.t):10;S.t.extra=(S.t.extra||0)+add;S.t.reqOK=true;S.t.log.push([lastPlanArr(),'Missed the stop — got off at '+m.next.name+' and came back (practice estimate: +'+add+' min)']);go('exit')},
  arrive:()=>{const t=trip();const p=S.t.plan[S.t.plan.length-1];
-  if(S.t.legIdx<S.t.legsN-1){S.t.legIdx++;S.t.rp=0;S.t.reqOK=false;S.t.ridefb='';resetQ('pay');resetQ('ride');resetQ('exit');S.t.clock=p.arr;go('transfer');return}
+  if(S.t.legIdx<S.t.legsN-1){S.t.clock=legArr(S.t.legIdx);S.t.legIdx++;S.t.rp=0;S.t.reqOK=false;S.t.ridefb='';resetQ('pay');resetQ('ride');resetQ('exit');go('transfer');return}
   S.t.atWork=lastPlanArr()+p.walk;S.t.log.push([S.t.atWork,'Arrived at '+t.short]);resetQ('arrive');go('arrive')},
  shiftOver:()=>{const t=trip();S.t.log.push([t.start,t.kind==='meet'?'Met friend at Central Park':'Shift started']);S.t.log.push([t.end,t.kind==='meet'?'Left Central Park':'Shift ended']);go('retstop')},
  afterRetStop:()=>{const t=trip();if(S.settings.problems&&t.offer){S.t.probs.push('Shift that may not match bus times');go('offer')}else ACT.toPhoneBack()},
