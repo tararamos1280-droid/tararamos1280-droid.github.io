@@ -53,6 +53,13 @@ h1{margin:0;font-size:1px}
 .ch.pk:active{transform:translateY(6px);box-shadow:0 2px 0 #0006}
 .ch.pk:focus-visible{outline:5px solid #ffd84d;outline-offset:3px}
 .big{font-size:min(30vw,140px)}
+.let{box-shadow:0 5px 0 #f08a1c,0 6px 10px #0003;transition:transform .08s,box-shadow .08s}
+.let:active,.let.on{transform:translateY(4px);box-shadow:0 1px 0 #f08a1c;background:#fff4c2}
+.let .ear{position:absolute;right:3px;bottom:2px;font-size:calc(var(--c)*.14);line-height:1}
+.tip{margin:0;display:flex;align-items:center;gap:8px;font-size:20px;font-weight:700;color:#1a2f7a;background:#fff;border:3px dashed #f08a1c;border-radius:14px;padding:6px 12px}
+.tip b{font-size:28px}
+.row2{display:flex;gap:14px;justify-content:center;align-items:center}
+.sio{min-height:72px;border-radius:36px;background:#fff;border:3px solid #333;font-size:20px;font-weight:700;padding:0 16px;display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -63,7 +70,7 @@ h1{margin:0;font-size:1px}
 var KEY="wordMatch.v4"; /* choices: URL > coach-saved > 3 */
 var SETS=[["bag","cat","sun","dog"],["hat","cup","pig","bed"],["bus","map","pen","box"]];
 var ALL=[].concat.apply([],SETS);
-var VOW="aeiou",SOUNDS="abcdeghimnopstu";
+var VOW="aeiou",SOUNDS="abcdeghimnopstux"; /* every letter in all 12 words has a verified clip; c=/k/, x=/ks/ */
 var Q=new URLSearchParams(location.search);
 var cfg={set:0,choices:3};
 var qs=parseInt(Q.get("set"),10);if(qs>=1&&qs<=3)cfg.set=qs-1;
@@ -72,15 +79,34 @@ var qc=parseInt(Q.get("choices"),10);if(qc==2||qc==3)cfg.choices=qc;
 var URLSET=qs>=1&&qs<=3;
 var COACH=Q.get("coach")==="1";
 var app=document.getElementById("app"),live=document.getElementById("live"),fbEl=document.getElementById("fb");
-var aud=new Audio();
-function play(src){try{aud.pause();aud.src=src;aud.currentTime=0;var p=aud.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
-function sayWord(w){play("audio/"+w+".mp3")}
+/* Audio: ONE player. Every new sound cancels whatever is playing (no stacking). */
+var aud=new Audio(),tok=0,tmr=null,lastTap={k:"",t:0};
+function stopAll(){tok++;clearTimeout(tmr);try{aud.pause()}catch(e){};try{speechSynthesis.cancel()}catch(e){}}
+function playSeq(items,done){ /* items: [{src,gap}] played in order, gap ms after each */
+  stopAll();var my=tok,i=0;
+  function next(){if(my!==tok)return;if(i>=items.length){if(done)done();return}
+    var it=items[i++],fin=false;function end(){if(fin||my!==tok)return;fin=true;clearTimeout(tmr);tmr=setTimeout(next,it.gap||0)}
+    aud.onended=end;aud.onerror=end;aud.src=it.src;try{var p=aud.play();if(p&&p.catch)p.catch(end)}catch(e){end()}
+    tmr=setTimeout(end,4000)} /* safety if 'ended' never fires */
+  next()}
+function play(src,done){playSeq([{src:src}],done)}
+function sayWord(w,done){play("audio/"+w+".mp3",done)}
+function snd(L){return "audio/sounds/"+L+".mp3"}
+/* Sound it out: each sound clearly (gaps), then a quick smooth pass, then the whole word */
+function soundOut(w,done){var a=[];w.split("").forEach(function(L){a.push({src:snd(L),gap:450})});
+  w.split("").forEach(function(L,k){a.push({src:snd(L),gap:k==w.length-1?500:40})});
+  a.push({src:"audio/"+w+".mp3"});playSeq(a,done)}
+function tapOK(k){var n=Date.now();if(lastTap.k===k&&n-lastTap.t<350)return false;lastTap={k:k,t:n};return true}
+/* Screen reader heuristic: TalkBack/keyboard activation arrives without a recent finger/mouse press */
+var SR=false,lastPtr=0;document.addEventListener("pointerdown",function(){lastPtr=Date.now()},true);
+document.addEventListener("click",function(e){if(e.isTrusted&&Date.now()-lastPtr>800)SR=true},true);
+var tipSaid=false;
 var ac;function tone(ok){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var t=ac.currentTime;(ok?[660,880]:[220,180]).forEach(function(f,i){var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type=ok?"sine":"square";g.gain.setValueAtTime(.15,t+i*.15);g.gain.exponentialRampToValueAtTime(.001,t+i*.15+.3);o.connect(g);g.connect(ac.destination);o.start(t+i*.15);o.stop(t+i*.15+.3)})}catch(e){}}
 function say(m){live.textContent="";setTimeout(function(){live.textContent=m},50)}
 function el(t,a,k){var e=document.createElement(t);for(var x in a){if(x=="text")e.textContent=a[x];else if(x=="cls")e.className=a[x];else e.setAttribute(x,a[x])}(k||[]).forEach(function(c){e.appendChild(c)});return e}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 var st;
-function startScreen(){
+function startScreen(){stopAll();
   app.innerHTML="";
   var h=el("h1",{tabindex:"-1",cls:"sr",text:"Word Match. Press play."});
   var p=el("button",{cls:"play","aria-label":"Play",text:"▶"});
@@ -92,7 +118,7 @@ function startScreen(){
     var out=el("p",{id:"linkOut",style:"word-break:break-all;font-size:16px"});
     var cp=el("button",{cls:"icon",style:"padding:0 14px;font-size:18px",text:"Copy link for Jeremy","aria-label":"Copy link for Jeremy"});
     cp.addEventListener("click",function(){var u=location.origin+location.pathname;out.textContent=u;var ok=function(){say("Link copied")};try{navigator.clipboard.writeText(u).then(ok,function(){})}catch(e){}});
-    kids.push(el("details",{cls:"coach",open:""},[el("summary",{text:"Coach settings"}),el("label",{for:"chSel",text:"Choices "}),cs,el("p",{},[cp]),out]));
+    kids.push(el("details",{cls:"coach",open:""},[el("summary",{text:"Coach settings"}),el("label",{for:"chSel",text:"Choices "}),cs,el("p",{},[cp]),out,el("p",{style:"font-size:14px"},[el("a",{href:"audio/sounds/CREDITS.txt",text:"Audio credits (CC BY-SA 3.0, Wikimedia Commons)"})])]));
   }
   app.appendChild(el("div",{cls:"start"},kids));
   h.focus();
@@ -104,51 +130,56 @@ function picker(){
   SETS.forEach(function(ws,i){var b=el("button",{cls:"ch pk","aria-label":"Pick one: "+ws.join(", ")},[el("img",{src:"img/"+ws[0]+".jpg",alt:""})]);b.addEventListener("click",function(){cfg.set=i;begin()});row.appendChild(b)});
   var home=el("button",{cls:"icon","aria-label":"Home",text:"⌂"});home.addEventListener("click",startScreen);
   app.appendChild(el("div",{cls:"top"},[home]));app.appendChild(h);
-  app.appendChild(el("div",{cls:"start"},[row]));h.focus();say("Pick one");speakText("Pick one");
+  app.appendChild(el("div",{cls:"start"},[row]));h.focus();if(!SR)speakText("Pick one");
 }
-function speakText(t){try{var u=new SpeechSynthesisUtterance(t);u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function speakText(t){stopAll();try{var u=new SpeechSynthesisUtterance(t);u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
 function begin(){st={part:1,i:0,words:shuffle(SETS[cfg.set])};round()}
 function round(){
   if(st.i>=st.words.length){if(st.part==1){st.part=2;st.i=0;st.words=shuffle(st.words);partBreak();return}return finish()}
   var w=st.words[st.i];st.missed=false;st.locked=false;
   app.innerHTML="";
-  var home=el("button",{cls:"icon","aria-label":"Home",text:"⌂"});home.addEventListener("click",startScreen);
+  var home=el("button",{cls:"icon","aria-label":"Home",text:"⌂"});home.addEventListener("click",function(){stopAll();startScreen()});
   var dots=el("div",{cls:"dots","aria-hidden":"true"});st.words.forEach(function(_,k){dots.appendChild(el("span",{cls:"dot"+(k<st.i?" done":"")}))});
   var badge=el("span",{"aria-hidden":"true",cls:"icon",style:"display:flex;align-items:center;justify-content:center;border-style:dashed",text:st.part==1?"🖼":"🔤"});
   app.appendChild(el("div",{cls:"top"},[home,dots,badge]));
-  var h=el("h1",{tabindex:"-1",cls:"sr",text:(st.part==1?"":"No picture. ")+"Find "+w+". "+(st.i+1)+" of "+st.words.length});
+  var h=el("h1",{tabindex:"-1",cls:"sr",text:(st.part==1?"":"No picture. ")+"Find "+w+". "+(st.i+1)+" of "+st.words.length+". Tap each letter to hear its sound."});
   app.appendChild(h);
   var cards=el("div",{cls:"cards"});
   if(st.part==1){var pc=el("button",{cls:"card pic","aria-label":"Picture of "+w},[el("img",{src:"img/"+w+".jpg",alt:""})]);pc.addEventListener("click",function(){sayWord(w)});cards.appendChild(pc)}
-  w.split("").forEach(function(L){var b=el("button",{cls:"card let "+(VOW.indexOf(L)>=0?"vow":"cons"),"aria-label":L,text:L});b.addEventListener("click",function(){if(SOUNDS.indexOf(L)>=0)play("audio/sounds/"+L+".mp3")});cards.appendChild(b)});
+  w.split("").forEach(function(L,k){var b=el("button",{cls:"card let "+(VOW.indexOf(L)>=0?"vow":"cons"),"aria-label":"Letter "+L.toUpperCase()+". Plays its sound."},[document.createTextNode(L),el("span",{cls:"ear","aria-hidden":"true",text:"🔊"})]);b.addEventListener("click",function(){if(SOUNDS.indexOf(L)<0||!tapOK("L"+k))return;b.classList.add("on");setTimeout(function(){b.classList.remove("on")},250);play(snd(L))});cards.appendChild(b)});
+  app.appendChild(el("p",{cls:"tip","aria-hidden":"true"},[el("b",{text:"👆🔊"}),el("span",{text:"Tap each letter to hear its sound."})]));
   app.appendChild(el("div",{cls:"stand"},[cards,el("div",{cls:"base","aria-hidden":"true"})]));
-  var sp=el("button",{cls:"speak","aria-label":"Hear the word",text:"🔊"});sp.addEventListener("click",function(){sayWord(w)});
-  app.appendChild(sp);
+  var sp=el("button",{cls:"speak","aria-label":"Hear the word",text:"🔊"});sp.addEventListener("click",function(){if(tapOK("w"))sayWord(w)});
+  var so=el("button",{cls:"sio","aria-label":"Sound it out"},[el("span",{"aria-hidden":"true",text:"🔤🔊"}),el("span",{text:"Sound it out"})]);so.addEventListener("click",function(){if(tapOK("so"))soundOut(w)});
+  app.appendChild(el("div",{cls:"row2"},[sp,so]));
   var others=shuffle(ALL.filter(function(x){return x!=w})).slice(0,cfg.choices-1);
   var row=el("div",{cls:"choices"});
   shuffle(others.concat([w])).forEach(function(x){var b=el("button",{cls:"ch","aria-label":x},[el("img",{src:"img/"+x+".jpg",alt:""})]);b.addEventListener("click",function(){pick(b,x,w)});row.appendChild(b)});
   app.appendChild(row);
-  h.focus();
-  setTimeout(function(){sayWord(w)},700);
+  h.focus();var my=tok;
+  /* With a screen reader, wait longer so TalkBack can read the focused heading first */
+  tmr=setTimeout(function(){if(my!==tok)return;sayWord(w,function(){if(!tipSaid&&!SR){tipSaid=true;setTimeout(function(){if(my===tok)speakText("Tap each letter to hear its sound.")},300)}})},SR?2500:700);
 }
 function flash(ok){fbEl.className="fb on "+(ok?"good":"bad");fbEl.textContent=ok?"✓":"✗";setTimeout(function(){fbEl.className="fb"},ok?900:700)}
 function pick(b,x,w){
   if(st.locked||b.disabled)return;
-  if(x==w){st.locked=true;b.classList.add("yes");flash(true);tone(true);say("Right! "+w);setTimeout(function(){sayWord(w)},350);setTimeout(function(){st.i++;round()},1800)}
-  else{b.classList.add("no");b.setAttribute("aria-disabled","true");b.setAttribute("aria-label",x+", not it");flash(false);tone(false);say("Try again");}
+  if(x==w){st.locked=true;b.classList.add("yes");stopAll();flash(true);tone(true);say("Right! "+w);var my=tok;
+    /* sounds, smooth blend, whole word; advance only after the audio ends (+ buffer) */
+    tmr=setTimeout(function(){if(my===tok)soundOut(w,function(){tmr=setTimeout(function(){st.i++;round()},900)})},450)}
+  else{if(!tapOK("x"+x))return;stopAll();b.classList.add("no");b.setAttribute("aria-disabled","true");b.setAttribute("aria-label",x+", not it");flash(false);tone(false);say("Try again");}
 }
 function partBreak(){
   app.innerHTML="";
   var h=el("h1",{tabindex:"-1",cls:"sr",text:"Great! Part 2. No pictures. Press play."});
-  var p=el("button",{cls:"play","aria-label":"Play part 2",text:"▶"});p.addEventListener("click",round);
+  var p=el("button",{cls:"play","aria-label":"Play part 2",text:"▶"});p.addEventListener("click",function(){stopAll();round()});
   app.appendChild(el("div",{cls:"start"},[h,el("div",{cls:"big","aria-hidden":"true",text:"⭐"}),p]));
   tone(true);h.focus();
 }
 function finish(){
   app.innerHTML="";
   var h=el("h1",{tabindex:"-1",cls:"sr",text:"All done! Great job."});
-  var a=el("button",{cls:"play","aria-label":"Play again",text:"↻"});a.addEventListener("click",begin);
-  var pk=el("button",{cls:"icon",style:"width:96px;height:96px;font-size:48px","aria-label":"Pick other words",text:"▦"});pk.addEventListener("click",picker);
+  var a=el("button",{cls:"play","aria-label":"Play again",text:"↻"});a.addEventListener("click",function(){stopAll();begin()});
+  var pk=el("button",{cls:"icon",style:"width:96px;height:96px;font-size:48px","aria-label":"Pick other words",text:"▦"});pk.addEventListener("click",function(){stopAll();picker()});
   app.appendChild(el("div",{cls:"start"},[h,el("div",{cls:"big","aria-hidden":"true",text:"🏆"}),a,pk]));
   tone(true);h.focus();
 }

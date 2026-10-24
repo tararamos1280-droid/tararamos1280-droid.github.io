@@ -1,3 +1,36 @@
+Word Match audio credits  (updated 2026-10-24)
+
+LETTER SOUNDS used by Word Match (audio/sounds/*.mp3)
+All cut from American English word recordings by Wikimedia Commons user Dvortygirl
+(https://commons.wikimedia.org/wiki/User:Dvortygirl), License: CC BY-SA 3.0
+(En-us-tap.ogg is Public domain but is not used). Each clip = the single sound only:
+silence trimmed, stops cut to burst (+ <=30 ms voicing for b/d/g; aspiration only for p/t/k, no vowel),
+vowels taken from the steady middle and gently lengthened (Praat overlap-add), peak-normalized, 64 kbps mono mp3.
+
+b.mp3 /b/  <- https://commons.wikimedia.org/wiki/File:En-us-box.ogg
+c.mp3 /k/  <- https://commons.wikimedia.org/wiki/File:En-us-cat.ogg
+d.mp3 /d/  <- https://commons.wikimedia.org/wiki/File:En-us-dog.ogg
+g.mp3 /g/  <- https://commons.wikimedia.org/wiki/File:En-us-got.ogg
+h.mp3 /h/  <- https://commons.wikimedia.org/wiki/File:En-us-hat.ogg
+p.mp3 /p/  <- https://commons.wikimedia.org/wiki/File:En-us-pat.ogg
+t.mp3 /t/  <- https://commons.wikimedia.org/wiki/File:En-us-top.ogg
+m.mp3 /m/  <- https://commons.wikimedia.org/wiki/File:En-us-mom.ogg
+n.mp3 /n/  <- https://commons.wikimedia.org/wiki/File:En-us-nut.ogg
+a.mp3 /ae/ <- https://commons.wikimedia.org/wiki/File:En-us-dad.ogg
+e.mp3 /E/  <- https://commons.wikimedia.org/wiki/File:En-us-bed.ogg
+i.mp3 /I/  <- https://commons.wikimedia.org/wiki/File:En-us-bit.ogg
+o.mp3 /A/  <- https://commons.wikimedia.org/wiki/File:En-us-hot.ogg
+u.mp3 /V/  <- https://commons.wikimedia.org/wiki/File:En-us-cup.ogg
+x.mp3 /ks/ <- c.mp3 above + s.mp3 below
+s.mp3 /s/  <- https://commons.wikimedia.org/wiki/File:Voiceless_alveolar_sibilant.ogg (Peter Isotalo, CC BY-SA 3.0) - unchanged
+
+WHOLE WORDS (audio/*.mp3): bag.mp3, pig.mp3, bus.mp3 replaced 2026-10-24 with Dvortygirl recordings
+(En-us-bag.ogg, En-us-pig.ogg, En-us-bus.ogg, CC BY-SA 3.0), silence-trimmed and loudness-normalized,
+because the previous TTS clips were transcribed as "tag", "pick", "thus". Other word clips: Piper TTS (see below).
+
+Trimmed clips derived from CC BY-SA 3.0 files are shared under CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+
+---- previous notes ----
 Word Shop audio credits
 
 LETTER SOUNDS (audio/sounds/) - from Wikimedia Commons IPA recordings; trimmed to the sound, length-adjusted, volume-normalized.
