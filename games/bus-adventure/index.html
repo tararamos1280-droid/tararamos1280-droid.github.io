@@ -197,6 +197,17 @@ p{margin:0 0 10px}
 
 /* bottom bar: let taps pass through its transparent area to the content behind; only its buttons catch taps */
 .actions{pointer-events:none}.actions>*{pointer-events:auto}.actions>.sp{pointer-events:none}
+
+/* phone fix: every option list / button row wraps; nothing scrolls sideways */
+.dests,.choices,.grid2,.scene-btns,.lineup,.cgrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--colmin,150px)),1fr))}
+.dests,.choices,.grid2{--colmin:280px}.scene-btns,.cgrid{--colmin:200px}
+.choices{grid-template-columns:1fr}
+.btnrow,.modal-actions,.actions,.status,.pchips{flex-wrap:wrap}
+.dest{flex-wrap:wrap;min-width:0}.dest .dt{flex:1 1 140px}
+.dest .dt,.choice .ct,.busbtn span{overflow-wrap:anywhere}
+.tscroll{overflow-x:hidden}.stbl{table-layout:fixed;width:100%;min-width:0}
+.stbl th,.stbl td{min-width:0 !important;max-width:none;overflow-wrap:anywhere}
+.btn,.choice,.dest,.busbtn{max-width:100%}
 </style></head>
 <body>
 <a class="skip" href="#main">Skip to the game</a>
