@@ -81,6 +81,7 @@ var COACH=Q.get("coach")==="1";
 var app=document.getElementById("app"),live=document.getElementById("live"),fbEl=document.getElementById("fb");
 /* Audio: ONE player. Every new sound cancels whatever is playing (no stacking). */
 var aud=new Audio(),tok=0,tmr=null,lastTap={k:"",t:0};
+var advT=null;function clearAdv(){clearTimeout(advT);advT=null}
 function stopAll(){tok++;clearTimeout(tmr);try{aud.pause()}catch(e){};try{speechSynthesis.cancel()}catch(e){}}
 function playSeq(items,done){ /* items: [{src,gap}] played in order, gap ms after each */
   stopAll();var my=tok,i=0;
@@ -92,9 +93,8 @@ function playSeq(items,done){ /* items: [{src,gap}] played in order, gap ms afte
 function play(src,done){playSeq([{src:src}],done)}
 function sayWord(w,done){play("audio/"+w+".mp3",done)}
 function snd(L){return "audio/sounds/"+L+".mp3"}
-/* Sound it out: each sound clearly (gaps), then a quick smooth pass, then the whole word */
-function soundOut(w,done){var a=[];w.split("").forEach(function(L){a.push({src:snd(L),gap:450})});
-  w.split("").forEach(function(L,k){a.push({src:snd(L),gap:k==w.length-1?500:40})});
+/* Sound it out: each sound once, in order, with comfortable gaps, then the whole word */
+function soundOut(w,done){var a=[];w.split("").forEach(function(L){a.push({src:snd(L),gap:400})});
   a.push({src:"audio/"+w+".mp3"});playSeq(a,done)}
 function tapOK(k){var n=Date.now();if(lastTap.k===k&&n-lastTap.t<350)return false;lastTap={k:k,t:n};return true}
 /* Screen reader heuristic: TalkBack/keyboard activation arrives without a recent finger/mouse press */
@@ -106,7 +106,7 @@ function say(m){live.textContent="";setTimeout(function(){live.textContent=m},50
 function el(t,a,k){var e=document.createElement(t);for(var x in a){if(x=="text")e.textContent=a[x];else if(x=="cls")e.className=a[x];else e.setAttribute(x,a[x])}(k||[]).forEach(function(c){e.appendChild(c)});return e}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 var st;
-function startScreen(){stopAll();
+function startScreen(){stopAll();clearAdv();
   app.innerHTML="";
   var h=el("h1",{tabindex:"-1",cls:"sr",text:"Word Match. Press play."});
   var p=el("button",{cls:"play","aria-label":"Play",text:"▶"});
@@ -134,7 +134,7 @@ function picker(){
 }
 function speakText(t){stopAll();try{var u=new SpeechSynthesisUtterance(t);u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
 function begin(){st={part:1,i:0,words:shuffle(SETS[cfg.set])};round()}
-function round(){
+function round(){clearAdv();
   if(st.i>=st.words.length){if(st.part==1){st.part=2;st.i=0;st.words=shuffle(st.words);partBreak();return}return finish()}
   var w=st.words[st.i];st.missed=false;st.locked=false;
   app.innerHTML="";
@@ -165,7 +165,11 @@ function pick(b,x,w){
   if(st.locked||b.disabled)return;
   if(x==w){st.locked=true;b.classList.add("yes");stopAll();flash(true);tone(true);say("Right! "+w);var my=tok;
     /* sounds, smooth blend, whole word; advance only after the audio ends (+ buffer) */
-    tmr=setTimeout(function(){if(my===tok)soundOut(w,function(){tmr=setTimeout(function(){st.i++;round()},900)})},450)}
+    /* Advance never depends on audio: it runs after the blend ends (+900ms) OR after a fallback
+       timeout (expected length + 1.5s) if 'ended'/'error' never fire, play() rejects, or a tap cancels it. */
+    var gone=false,cur=st;function adv(){if(gone||st!==cur)return;gone=true;clearAdv();st.i++;round()}
+    clearAdv();advT=setTimeout(adv,450+w.length*(600+400)+1200+1500);
+    tmr=setTimeout(function(){if(my===tok)soundOut(w,function(){clearAdv();advT=setTimeout(adv,900)})},450)}
   else{if(!tapOK("x"+x))return;stopAll();b.classList.add("no");b.setAttribute("aria-disabled","true");b.setAttribute("aria-label",x+", not it");flash(false);tone(false);say("Try again");}
 }
 function partBreak(){
